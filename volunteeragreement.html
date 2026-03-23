@@ -1,0 +1,610 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Volunteer Agreement – ES/EN (Demo)</title>
+
+  
+
+  <link rel="stylesheet" href="site-style.css"/>
+  <script src="config.js"></script>
+  <script src="site-components.js" defer></script>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="card">
+
+      <div class="topbar">
+        <div class="brand">
+          <div class="logo">MH</div>
+          <div class="meta">
+            <b id="titleTop">CONTRATO DE COLABORACIÓN VOLUNTARIA</b>
+            <small id="subTop">ES/EN • 2 firmas • Annexes + NDA • Demo</small>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn" type="button" onclick="window.print()">Imprimir / PDF</button>
+          <button class="btn" type="button" onclick="downloadPDF()">Descargar PDF / Download PDF</button>
+          
+          <button class="btn primary" type="button" onclick="toggleLang()">ES / EN</button>
+          <button class="btn" type="button" onclick="saveDemo()">Guardar (Demo)</button>
+          <button class="btn" type="button" onclick="loadDemo()">Cargar</button>
+          <button class="btn" type="button" onclick="clearDemo()">Borrar</button>
+        </div>
+      </div>
+
+      <header>
+        <h1 id="h1">Contrato de Colaboración Voluntaria</h1>
+        <p class="subtitle" id="subtitle">
+          Incluye: Identificación + fotos de documento (demo), anexos A–F, NDA y 2 firmas (Hostel + Voluntario).
+        </p>
+
+        <div class="row print-hide">
+          <span class="pill" id="langPill">Idioma: ES</span>
+          <span class="pill">No email • No base de datos (demo)</span>
+        </div>
+
+        <p class="note print-hide" style="margin-top:10px;">
+          Demo: imágenes y firmas se guardan solo localmente en el navegador.
+        </p>
+      </header>
+
+      <div class="content">
+
+        <!-- Identificación + Fotos -->
+        <div class="box upload">
+          <div class="section-title" id="secId">Identificación + Fotos de Documento</div>
+
+          <div class="grid">
+            <div>
+              <label id="docTypeLbl">Tipo de documento</label>
+              <select id="docType">
+                <option value="passport">Pasaporte</option>
+                <option value="id">Cédula / DNI</option>
+                <option value="license">Licencia de conducir</option>
+                <option value="other">Otro</option>
+              </select>
+            </div>
+            <div>
+              <label id="docNumberLbl">Número de documento</label>
+              <input id="docNumber" placeholder="__________________" />
+            </div>
+          </div>
+
+          <div class="grid" style="margin-top:12px;">
+            <div>
+              <label id="frontLbl">Foto del documento – Frente *</label>
+              <input id="docFront" type="file" accept="image/*" capture="environment" />
+            </div>
+            <div>
+              <label id="backLbl">Foto del documento – Dorso (si aplica)</label>
+              <input id="docBack" type="file" accept="image/*" capture="environment" />
+            </div>
+          </div>
+
+          <div class="grid" style="margin-top:12px;">
+            <div>
+              <label id="selfieLbl">Selfie con documento (opcional)</label>
+              <input id="selfie" type="file" accept="image/*" capture="user" />
+            </div>
+            <div>
+              <label id="fullNameLbl">Nombre completo (voluntario/a)</label>
+              <input id="fullName" placeholder="__________________" />
+            </div>
+          </div>
+
+          <div class="preview" style="margin-top:12px;">
+            <div class="imgbox">
+              <div class="note" id="prevFrontLbl">Vista previa – Frente</div>
+              <img id="prevFront" alt="Front preview" />
+            </div>
+            <div class="imgbox">
+              <div class="note" id="prevBackLbl">Vista previa – Dorso</div>
+              <img id="prevBack" alt="Back preview" />
+            </div>
+            <div class="imgbox">
+              <div class="note" id="prevSelfieLbl">Vista previa – Selfie</div>
+              <img id="prevSelfie" alt="Selfie preview" />
+            </div>
+          </div>
+
+          <p class="note" style="margin-top:10px;" id="privacyNote">
+            Recomendación (producción): no almacenar fotos permanentemente; extraer datos y eliminar la imagen.
+          </p>
+        </div>
+
+        <!-- Annexes A-F (same as guests) -->
+        <div class="box">
+          <div class="section-title" id="secAnnex">Anexos (A–F) – Reglas del Hostel</div>
+          <p class="note" id="annexNote">
+            Estos son los mismos anexos aplicables a huéspedes. El voluntario confirma su lectura y aceptación.
+          </p>
+
+          <!-- Update these paths to your hosted routes if needed -->
+          <div class="links">
+            <a href="ANEXOA.html" target="_blank">ANEXO A – Normas de la Casa</a>
+            <a href="ANEXOB.html" target="_blank">ANEXO B – Cocina y Áreas Comunes</a>
+            <a href="ANNEXOC.html" target="_blank">ANEXO C – Piscina y Seguridad</a>
+            <a href="ANEXOD.html" target="_blank">ANEXO D – Seguridad y CCTV</a>
+            <a href="ANEXOE.html" target="_blank">ANEXO E – Higiene y Operación</a>
+            <a href="ANNEXF.html" target="_blank">ANEXO F – Términos y Responsabilidad</a>
+            <a href="ANNEXOI.html" target="_blank">ANEXO I – Área de Coworking</a>
+          </div>
+
+          <div class="checkbox" style="margin-top:12px;">
+            <input id="acceptAnnex" type="checkbox" />
+            <div>
+              <label for="acceptAnnex" style="margin:0; color:var(--ink); font-size:13px;" id="acceptAnnexText">
+                Acepto y me comprometo a cumplir todos los Anexos A–F (Reglas del Hostel).
+              </label>
+              <div class="note" id="acceptAnnexNote" style="margin-top:6px;">
+                (Demo) En producción: esto se registra con timestamp.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- NDA (embedded text + acceptance) -->
+        <div class="box">
+          <div class="section-title" id="secNda">NDA – Confidencialidad</div>
+
+          <p class="note" id="ndaIntro">
+            Esta sección funciona como NDA básico para el voluntario. (Si quieres, luego lo hacemos como documento separado “NDA.html”.)
+          </p>
+
+          <textarea id="ndaText">
+NDA (Resumen – Demo)
+
+1) Confidencialidad:
+El Voluntario se compromete a no divulgar información interna del Hostel, incluyendo operaciones, procedimientos, acceso, llaves/códigos, datos de huéspedes, precios, incidencias, proveedores, y cualquier información no pública.
+
+2) Datos personales:
+El Voluntario no copiará, compartirá ni difundirá datos personales de huéspedes o personal. El tratamiento se limita a lo estrictamente necesario para la operación interna.
+
+3) Duración:
+La obligación de confidencialidad se mantiene durante la colaboración y por 2 años después de su finalización.
+
+4) Incumplimiento:
+El Hostel podrá terminar inmediatamente la colaboración y podrá ejercer acciones legales conforme a la legislación aplicable.
+
+(Producción: reemplazar por NDA completo.)
+          </textarea>
+
+          <div class="checkbox" style="margin-top:12px;">
+            <input id="acceptNda" type="checkbox" />
+            <div>
+              <label for="acceptNda" style="margin:0; color:var(--ink); font-size:13px;" id="acceptNdaText">
+                Acepto la cláusula de confidencialidad (NDA) y entiendo sus obligaciones.
+              </label>
+              <div class="note" id="acceptNdaNote" style="margin-top:6px;">
+                (Demo) En producción: esto se registra con timestamp.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Agreement text (readable) -->
+        <div class="box">
+          <div class="section-title" id="secAgreement">Texto del acuerdo</div>
+
+          <!-- ES -->
+          <div id="esBlock" class="paper">
+            <div class="paper-head">
+              <h2 class="paper-title">CONTRATO DE COLABORACIÓN VOLUNTARIA</h2>
+              <p class="paper-sub">(Volunteer Agreement)</p>
+            </div>
+            <div class="paper-body">
+              <div class="party-grid">
+                <div class="party-block">
+                  <b>Operador del Hostel</b>
+                  <div>[Nombre del Hostel]</div>
+                  <div>[Dirección]</div>
+                  <div>[RUC]</div>
+                  <div>Representado por: [Nombre]</div>
+                  <div>En adelante: “el Hostel”</div>
+                </div>
+
+                <div class="party-block">
+                  <b>Voluntario/a</b>
+                  <div>Nombre completo: __________________</div>
+                  <div>Fecha de nacimiento: __________________</div>
+                  <div>Pasaporte / ID: __________________</div>
+                  <div>Dirección actual: __________________</div>
+                  <div>En adelante: “el Voluntario”</div>
+                </div>
+              </div>
+
+              <!-- Articles (as you already have) -->
+              <div class="article">
+                <h3>Artículo 1 – Objeto de la colaboración</h3>
+                <p>El Voluntario presta apoyo en las actividades del Hostel, incluyendo especialmente:</p>
+                <ul>
+                  <li>Recepción / atención al huésped</li>
+                  <li>Limpieza de habitaciones y áreas comunes</li>
+                  <li>Apoyo en cocina y tareas operativas básicas</li>
+                  <li>Otras tareas acordadas verbalmente con el Hostel</li>
+                </ul>
+                <p>La colaboración tiene carácter voluntario y no constituye relación laboral.</p>
+              </div>
+
+              <div class="article"><h3>Artículo 2 – Duración</h3><p>La colaboración será desde: ____________ hasta: ____________</p><p>Cualquiera de las partes podrá terminarla con aviso previo de 7 días.</p></div>
+              <div class="article"><h3>Artículo 3 – Horario</h3><p>El Voluntario colaborará un promedio de ____ horas por día, ____ días por semana, según acuerdo interno.</p></div>
+              <div class="article">
+                <h3>Artículo 4 – Beneficios</h3>
+                <p>Como compensación no salarial, el Hostel ofrece al Voluntario:</p>
+                <ul>
+                  <li>Alojamiento gratuito</li>
+                  <li>Comidas (si corresponde) o acceso a cocina</li>
+                  <li>Otros beneficios internos según disponibilidad</li>
+                </ul>
+                <p>No existe pago monetario, salvo acuerdo excepcional por escrito.</p>
+              </div>
+              <div class="article"><h3>Artículo 5 – Normas internas</h3><p>El Voluntario se compromete a cumplir todas las reglas internas del Hostel, incluyendo anexos de convivencia, higiene y seguridad.</p></div>
+              <div class="article"><h3>Artículo 6 – Higiene y seguridad alimentaria (HACCP)</h3><p>En caso de trabajar con alimentos, el Voluntario deberá cumplir normas de higiene y manipulación segura conforme al Art. 6 bis del Código Sanitario.</p></div>
+              <div class="article"><h3>Artículo 7 – Responsabilidad</h3><p>El Voluntario es responsable por sus pertenencias personales. El Hostel no se responsabiliza por pérdidas o robos, salvo negligencia comprobada.</p><p>El Voluntario deberá cubrir daños causados por negligencia o uso indebido.</p></div>
+              <div class="article"><h3>Artículo 8 – Conducta y convivencia</h3><p>Se prohíbe conducta agresiva, acoso, discriminación o alteraciones graves al ambiente del Hostel. El incumplimiento podrá dar lugar a terminación inmediata.</p></div>
+              <div class="article"><h3>Artículo 9 – Consumo de alcohol y sustancias</h3><p>Se prohíbe el consumo de drogas ilegales. El consumo excesivo de alcohol que afecte la convivencia o seguridad será motivo de sanción o expulsión.</p></div>
+              <div class="article"><h3>Artículo 10 – Confidencialidad</h3><p>El Voluntario se compromete a no divulgar información interna del Hostel, huéspedes, datos personales o procedimientos internos.</p></div>
+              <div class="article"><h3>Artículo 11 – Protección de datos y CCTV</h3><p>El Hostel utiliza CCTV en áreas comunes con fines de seguridad. El tratamiento de datos se realiza conforme a la Ley 1682/2001 y Ley 1969/2002.</p></div>
+              <div class="article"><h3>Artículo 12 – Protección y seguridad del Hostel</h3><p>El Voluntario deberá respetar medidas de seguridad, accesos, llaves y protocolos. La pérdida de llaves o accesos podrá generar cargos.</p></div>
+              <div class="article"><h3>Artículo 13 – Terminación inmediata</h3><p>El Hostel podrá terminar la colaboración de forma inmediata ante incumplimiento grave, incluyendo:</p><ul><li>Robo o daño intencional</li><li>Violación grave de reglas internas</li><li>Conducta peligrosa o agresiva</li><li>Violación de confidencialidad o protección de datos</li></ul></div>
+              <div class="article"><h3>Artículo 14 – Ley aplicable</h3><p>El presente acuerdo se rige por las leyes de la República del Paraguay. Para cualquier conflicto, las partes se someten a la jurisdicción local competente.</p></div>
+            </div>
+          </div>
+
+          <!-- EN -->
+          <div id="enBlock" class="paper hidden">
+            <div class="paper-head">
+              <h2 class="paper-title">VOLUNTARY COLLABORATION AGREEMENT</h2>
+              <p class="paper-sub">(Volunteer Agreement)</p>
+            </div>
+            <div class="paper-body">
+              <div class="party-grid">
+                <div class="party-block">
+                  <b>Hostel Operator</b>
+                  <div>[Hostel Name]</div>
+                  <div>[Address]</div>
+                  <div>[RUC]</div>
+                  <div>Represented by: [Name]</div>
+                  <div>Hereinafter: “the Hostel”</div>
+                </div>
+
+                <div class="party-block">
+                  <b>Volunteer</b>
+                  <div>Full name: __________________</div>
+                  <div>Date of birth: __________________</div>
+                  <div>Passport / ID: __________________</div>
+                  <div>Current address: __________________</div>
+                  <div>Hereinafter: “the Volunteer”</div>
+                </div>
+              </div>
+
+              <!-- Same structure EN -->
+              <div class="article">
+                <h3>Article 1 – Purpose of collaboration</h3>
+                <p>The Volunteer supports the Hostel’s activities, especially including:</p>
+                <ul>
+                  <li>Reception / guest assistance</li>
+                  <li>Cleaning rooms and common areas</li>
+                  <li>Kitchen support and basic operational tasks</li>
+                  <li>Other tasks verbally agreed with the Hostel</li>
+                </ul>
+                <p>This collaboration is voluntary and does not constitute an employment relationship.</p>
+              </div>
+
+              <div class="article"><h3>Article 2 – Duration</h3><p>The collaboration will run from: ____________ to: ____________</p><p>Either party may terminate it with 7 days’ prior notice.</p></div>
+              <div class="article"><h3>Article 3 – Schedule</h3><p>The Volunteer will collaborate an average of ____ hours per day, ____ days per week, according to internal agreement.</p></div>
+              <div class="article"><h3>Article 4 – Benefits</h3><p>As non-salary compensation, the Hostel provides the Volunteer with:</p><ul><li>Free accommodation</li><li>Meals (if applicable) or access to kitchen</li><li>Other internal benefits subject to availability</li></ul><p>No monetary payment exists, unless exceptionally agreed in writing.</p></div>
+              <div class="article"><h3>Article 5 – Internal rules</h3><p>The Volunteer agrees to comply with all Hostel internal rules, including coexistence, hygiene, and safety annexes.</p></div>
+              <div class="article"><h3>Article 6 – Hygiene and food safety (HACCP)</h3><p>If working with food, the Volunteer must comply with hygiene and safe handling rules pursuant to Art. 6 bis of the Sanitary Code.</p></div>
+              <div class="article"><h3>Article 7 – Liability</h3><p>The Volunteer is responsible for personal belongings. The Hostel is not liable for loss or theft, except in cases of proven negligence.</p><p>The Volunteer must cover damages caused by negligence or improper use.</p></div>
+              <div class="article"><h3>Article 8 – Conduct and coexistence</h3><p>Aggressive behavior, harassment, discrimination, or serious disturbances are prohibited. Breach may result in immediate termination.</p></div>
+              <div class="article"><h3>Article 9 – Alcohol and substances</h3><p>Illegal drugs are prohibited. Excessive alcohol consumption affecting coexistence or safety may lead to sanctions or expulsion.</p></div>
+              <div class="article"><h3>Article 10 – Confidentiality</h3><p>The Volunteer agrees not to disclose internal Hostel information, guests, personal data, or internal procedures.</p></div>
+              <div class="article"><h3>Article 11 – Data protection and CCTV</h3><p>The Hostel uses CCTV in common areas for security purposes. Data processing is carried out in accordance with Law 1682/2001 and Law 1969/2002.</p></div>
+              <div class="article"><h3>Article 12 – Hostel protection and security</h3><p>The Volunteer must respect security measures, access, keys, and protocols. Loss of keys/access may result in charges.</p></div>
+              <div class="article"><h3>Article 13 – Immediate termination</h3><p>The Hostel may terminate the collaboration immediately in case of serious breach, including:</p><ul><li>Theft or intentional damage</li><li>Serious violation of internal rules</li><li>Dangerous or aggressive behavior</li><li>Breach of confidentiality or data protection</li></ul></div>
+              <div class="article"><h3>Article 14 – Governing law</h3><p>This agreement is governed by the laws of the Republic of Paraguay. For any dispute, the parties submit to the competent local jurisdiction.</p></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- FINAL: Required acceptance + 2 signatures -->
+        <div class="box">
+          <div class="section-title" id="secFinal">Confirmación final + 2 firmas</div>
+
+          <div class="checkbox">
+            <input id="acceptAll" type="checkbox" />
+            <div>
+              <label for="acceptAll" style="margin:0; color:var(--ink); font-size:13px;" id="acceptAllText">
+                Confirmo que acepto: (1) Contrato, (2) Anexos A–F, (3) NDA, y autorizo el tratamiento de datos según las normas aplicables.
+              </label>
+              <div class="note" id="acceptAllNote" style="margin-top:6px;">
+                Obligatorio para guardar (demo).
+              </div>
+            </div>
+          </div>
+
+          <div class="danger" id="errMsg">Faltan aceptaciones obligatorias (Contrato + Anexos + NDA + Confirmación final).</div>
+
+          <div class="grid" style="margin-top:12px;">
+            <div>
+              <div class="section-title">Firma – Hostel</div>
+              <div class="sig-wrap">
+                <canvas id="sigHostel" class="sig"></canvas>
+                <input type="hidden" id="sigHostelData" />
+                <div class="sig-actions">
+                  <button class="btn" type="button" onclick="clearSig('hostel')">Borrar</button>
+                  <button class="btn" type="button" onclick="saveSig('hostel')">Guardar</button>
+                </div>
+                <div class="note">Firma del representante del Hostel.</div>
+              </div>
+            </div>
+
+            <div>
+              <div class="section-title">Firma – Voluntario/a</div>
+              <div class="sig-wrap">
+                <canvas id="sigVolunteer" class="sig"></canvas>
+                <input type="hidden" id="sigVolunteerData" />
+                <div class="sig-actions">
+                  <button class="btn" type="button" onclick="clearSig('volunteer')">Borrar</button>
+                  <button class="btn" type="button" onclick="saveSig('volunteer')">Guardar</button>
+                </div>
+                <div class="note">Firma del Voluntario/a.</div>
+              </div>
+            </div>
+          </div>
+
+          <p class="note" style="margin-top:10px;">
+            Nota: En producción, el Hostel puede firmar primero (admin) y el voluntario firmar después desde su móvil.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "mh_volunteer_agreement_demo_v3";
+    let lang = "es";
+
+    function toggleLang(){
+      lang = (lang === "es") ? "en" : "es";
+      document.getElementById("esBlock").classList.toggle("hidden", lang !== "es");
+      document.getElementById("enBlock").classList.toggle("hidden", lang !== "en");
+      document.getElementById("langPill").textContent = (lang==="es") ? "Idioma: ES" : "Language: EN";
+      document.getElementById("titleTop").textContent = (lang==="es") ? "CONTRATO DE COLABORACIÓN VOLUNTARIA" : "VOLUNTARY COLLABORATION AGREEMENT";
+      document.getElementById("h1").textContent = (lang==="es") ? "Contrato de Colaboración Voluntaria" : "Voluntary Collaboration Agreement";
+      document.getElementById("subtitle").textContent = (lang==="es")
+        ? "Incluye: Identificación + fotos de documento (demo), anexos A–F, NDA y 2 firmas (Hostel + Voluntario)."
+        : "Includes: ID + document photos (demo), Annexes A–F, NDA and 2 signatures (Hostel + Volunteer).";
+
+      document.getElementById("secId").textContent = (lang==="es") ? "Identificación + Fotos de Documento" : "Identification + Document Photos";
+      document.getElementById("docTypeLbl").textContent = (lang==="es") ? "Tipo de documento" : "Document type";
+      document.getElementById("docNumberLbl").textContent = (lang==="es") ? "Número de documento" : "Document number";
+      document.getElementById("frontLbl").textContent = (lang==="es") ? "Foto del documento – Frente *" : "Document photo – Front *";
+      document.getElementById("backLbl").textContent = (lang==="es") ? "Foto del documento – Dorso (si aplica)" : "Document photo – Back (if applicable)";
+      document.getElementById("selfieLbl").textContent = (lang==="es") ? "Selfie con documento (opcional)" : "Selfie with document (optional)";
+      document.getElementById("fullNameLbl").textContent = (lang==="es") ? "Nombre completo (voluntario/a)" : "Full name (volunteer)";
+      document.getElementById("prevFrontLbl").textContent = (lang==="es") ? "Vista previa – Frente" : "Preview – Front";
+      document.getElementById("prevBackLbl").textContent = (lang==="es") ? "Vista previa – Dorso" : "Preview – Back";
+      document.getElementById("prevSelfieLbl").textContent = (lang==="es") ? "Vista previa – Selfie" : "Preview – Selfie";
+      document.getElementById("privacyNote").textContent = (lang==="es")
+        ? "Recomendación (producción): no almacenar fotos permanentemente; extraer datos y eliminar la imagen."
+        : "Recommendation (production): do not store photos permanently; extract data and delete the image.";
+
+      document.getElementById("secAnnex").textContent = (lang==="es") ? "Anexos (A–F) – Reglas del Hostel" : "Annexes (A–F) – Hostel Rules";
+      document.getElementById("annexNote").textContent = (lang==="es")
+        ? "Estos son los mismos anexos aplicables a huéspedes. El voluntario confirma su lectura y aceptación."
+        : "These are the same annexes applicable to guests. The volunteer confirms reading and acceptance.";
+      document.getElementById("acceptAnnexText").textContent = (lang==="es")
+        ? "Acepto y me comprometo a cumplir todos los Anexos A–F (Reglas del Hostel)."
+        : "I accept and commit to follow all Annexes A–F (Hostel Rules).";
+
+      document.getElementById("secNda").textContent = (lang==="es") ? "NDA – Confidencialidad" : "NDA – Confidentiality";
+      document.getElementById("ndaIntro").textContent = (lang==="es")
+        ? "Esta sección funciona como NDA básico para el voluntario. (Luego se puede separar a NDA.html.)"
+        : "This section works as a basic NDA for the volunteer. (Later it can be separated into NDA.html.)";
+      document.getElementById("acceptNdaText").textContent = (lang==="es")
+        ? "Acepto la cláusula de confidencialidad (NDA) y entiendo sus obligaciones."
+        : "I accept the confidentiality clause (NDA) and understand my obligations.";
+
+      document.getElementById("secAgreement").textContent = (lang==="es") ? "Texto del acuerdo" : "Agreement text";
+      document.getElementById("secFinal").textContent = (lang==="es") ? "Confirmación final + 2 firmas" : "Final confirmation + 2 signatures";
+      document.getElementById("acceptAllText").textContent = (lang==="es")
+        ? "Confirmo que acepto: (1) Contrato, (2) Anexos A–F, (3) NDA, y autorizo el tratamiento de datos según las normas aplicables."
+        : "I confirm I accept: (1) Agreement, (2) Annexes A–F, (3) NDA, and authorize data processing per applicable rules.";
+      document.getElementById("errMsg").textContent = (lang==="es")
+        ? "Faltan aceptaciones obligatorias (Contrato + Anexos + NDA + Confirmación final)."
+        : "Missing required acceptances (Agreement + Annexes + NDA + Final confirmation).";
+    }
+
+    // Images preview
+    function fileToDataURL(file){
+      return new Promise((resolve,reject)=>{
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+    async function setPreview(inputId, imgId){
+      const input = document.getElementById(inputId);
+      const img = document.getElementById(imgId);
+      const file = input.files && input.files[0];
+      if (!file){ img.removeAttribute("src"); return ""; }
+      const data = await fileToDataURL(file);
+      img.src = data;
+      return data;
+    }
+    document.getElementById("docFront").addEventListener("change", ()=>setPreview("docFront","prevFront"));
+    document.getElementById("docBack").addEventListener("change", ()=>setPreview("docBack","prevBack"));
+    document.getElementById("selfie").addEventListener("change", ()=>setPreview("selfie","prevSelfie"));
+
+    // ---- TWO signature pads ----
+    function initPad(canvasId){
+      const c = document.getElementById(canvasId);
+      const ctx = c.getContext("2d");
+
+      function resize(){
+        const ratio = window.devicePixelRatio || 1;
+        const rect = c.getBoundingClientRect();
+        c.width = Math.floor(rect.width * ratio);
+        c.height = Math.floor(rect.height * ratio);
+        ctx.setTransform(ratio,0,0,ratio,0,0);
+        ctx.lineWidth = 2;
+        ctx.lineCap = "round";
+        ctx.strokeStyle = "#111";
+      }
+      resize();
+      window.addEventListener("resize", resize);
+
+      let drawing=false, last={x:0,y:0};
+
+      function pos(e){
+        const r = c.getBoundingClientRect();
+        if (e.touches && e.touches[0]) return {x:e.touches[0].clientX-r.left, y:e.touches[0].clientY-r.top};
+        return {x:e.clientX-r.left, y:e.clientY-r.top};
+      }
+      function start(e){ drawing=true; last=pos(e); e.preventDefault(); }
+      function move(e){
+        if(!drawing) return;
+        const p=pos(e);
+        ctx.beginPath(); ctx.moveTo(last.x,last.y); ctx.lineTo(p.x,p.y); ctx.stroke();
+        last=p; e.preventDefault();
+      }
+      function end(){ drawing=false; }
+
+      c.addEventListener("mousedown", start);
+      c.addEventListener("mousemove", move);
+      window.addEventListener("mouseup", end);
+
+      c.addEventListener("touchstart", start, {passive:false});
+      c.addEventListener("touchmove", move, {passive:false});
+      c.addEventListener("touchend", end);
+
+      return { canvas:c, ctx };
+    }
+
+    const padHostel = initPad("sigHostel");
+    const padVolunteer = initPad("sigVolunteer");
+
+    function clearSig(which){
+      if (which === "hostel"){
+        padHostel.ctx.clearRect(0,0,padHostel.canvas.width,padHostel.canvas.height);
+        document.getElementById("sigHostelData").value = "";
+      } else {
+        padVolunteer.ctx.clearRect(0,0,padVolunteer.canvas.width,padVolunteer.canvas.height);
+        document.getElementById("sigVolunteerData").value = "";
+      }
+    }
+
+    function saveSig(which){
+      if (which === "hostel"){
+        document.getElementById("sigHostelData").value = padHostel.canvas.toDataURL("image/png");
+        alert(lang==="es" ? "Firma Hostel guardada (demo)." : "Hostel signature saved (demo).");
+      } else {
+        document.getElementById("sigVolunteerData").value = padVolunteer.canvas.toDataURL("image/png");
+        alert(lang==="es" ? "Firma Voluntario guardada (demo)." : "Volunteer signature saved (demo).");
+      }
+    }
+
+    // Save/load/clear demo
+    async function saveDemo(){
+      const err = document.getElementById("errMsg");
+      err.classList.remove("show");
+
+      const okAnnex = document.getElementById("acceptAnnex").checked;
+      const okNda   = document.getElementById("acceptNda").checked;
+      const okAll   = document.getElementById("acceptAll").checked;
+
+      if (!okAnnex || !okNda || !okAll){
+        err.classList.add("show");
+        err.scrollIntoView({behavior:"smooth", block:"center"});
+        return;
+      }
+
+      const payload = {
+        lang,
+        docType: document.getElementById("docType").value || "",
+        docNumber: document.getElementById("docNumber").value || "",
+        fullName: document.getElementById("fullName").value || "",
+        acceptAnnex: okAnnex,
+        acceptNda: okNda,
+        acceptAll: okAll,
+        ndaText: document.getElementById("ndaText").value || "",
+        sigHostel: document.getElementById("sigHostelData").value || "",
+        sigVolunteer: document.getElementById("sigVolunteerData").value || "",
+        images: {
+          front: document.getElementById("prevFront").src || "",
+          back: document.getElementById("prevBack").src || "",
+          selfie: document.getElementById("prevSelfie").src || ""
+        },
+        savedAt: new Date().toISOString()
+      };
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      alert(lang==="es" ? "Guardado (demo) ✅" : "Saved (demo) ✅");
+    }
+
+    function loadDemo(){
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw){
+        alert(lang==="es" ? "No hay datos guardados." : "No saved data.");
+        return;
+      }
+      const data = JSON.parse(raw);
+
+      if (data.lang && data.lang !== lang){
+        lang = data.lang;
+        toggleLang();
+      }
+
+      document.getElementById("docType").value = data.docType || "passport";
+      document.getElementById("docNumber").value = data.docNumber || "";
+      document.getElementById("fullName").value = data.fullName || "";
+
+      document.getElementById("acceptAnnex").checked = !!data.acceptAnnex;
+      document.getElementById("acceptNda").checked = !!data.acceptNda;
+      document.getElementById("acceptAll").checked = !!data.acceptAll;
+
+      if (data.ndaText) document.getElementById("ndaText").value = data.ndaText;
+
+      if (data.images && data.images.front) document.getElementById("prevFront").src = data.images.front;
+      if (data.images && data.images.back) document.getElementById("prevBack").src = data.images.back;
+      if (data.images && data.images.selfie) document.getElementById("prevSelfie").src = data.images.selfie;
+
+      document.getElementById("sigHostelData").value = data.sigHostel || "";
+      document.getElementById("sigVolunteerData").value = data.sigVolunteer || "";
+
+      alert(lang==="es" ? "Cargado ✅" : "Loaded ✅");
+    }
+
+    function clearDemo(){
+      localStorage.removeItem(STORAGE_KEY);
+      document.getElementById("docType").value = "passport";
+      document.getElementById("docNumber").value = "";
+      document.getElementById("fullName").value = "";
+      document.getElementById("acceptAnnex").checked = false;
+      document.getElementById("acceptNda").checked = false;
+      document.getElementById("acceptAll").checked = false;
+
+      document.getElementById("prevFront").removeAttribute("src");
+      document.getElementById("prevBack").removeAttribute("src");
+      document.getElementById("prevSelfie").removeAttribute("src");
+      document.getElementById("docFront").value = "";
+      document.getElementById("docBack").value = "";
+      document.getElementById("selfie").value = "";
+
+      document.getElementById("ndaText").value = document.getElementById("ndaText").defaultValue;
+
+      clearSig("hostel");
+      clearSig("volunteer");
+      alert(lang==="es" ? "Borrado ✅" : "Cleared ✅");
+    }
+  </script>
+</body>
+</html>

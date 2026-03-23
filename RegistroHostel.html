@@ -1,0 +1,1093 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Registro de Huésped – DEMO (Auto-relleno)</title>
+
+  
+
+  <!-- OCR (solo si hay internet). Si no carga, el demo sigue funcionando manualmente. -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+  <link rel="stylesheet" href="site-style.css"/>
+  <script src="config.js"></script>
+  <script src="site-components.js" defer></script>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="card">
+
+      <div class="topbar">
+        <div class="brand">
+          <div class="logo">MH</div>
+          <div class="meta">
+            <b data-i18n="title">DEMO – Registro de Huésped</b>
+            <small data-i18n="subtitleTop">Sin email • Sin base de datos • Solo demostración</small>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn" type="button" onclick="window.print()" data-i18n="btnPdf">Imprimir / PDF</button>
+          <button class="btn" type="button" onclick="downloadPDF()">Descargar PDF / Download PDF</button>
+          
+          <button class="btn primary" type="button" onclick="guardarDemo()" data-i18n="btnSave">Guardar (Demo)</button>
+          <button class="btn" type="button" onclick="cargarDemo()" data-i18n="btnLoad">Cargar</button>
+          <button class="btn danger" type="button" onclick="borrarDemo()" data-i18n="btnClear">Borrar</button>
+          <button class="btn" type="button" onclick="toggleLang()" id="langBtn">ES / EN</button>
+        </div>
+      </div>
+
+      <div class="toast" id="toast" data-i18n="toastSaved">✅ Guardado (DEMO). Datos guardados solo en este navegador.</div>
+
+      <header>
+        <h1 data-i18n="h1">Formulario de Registro de Huésped</h1>
+        <p class="subtitle" data-i18n="subHeader">
+          Elija el tipo de documento → use auto-relleno (opcional) → revise → acepte → guarde → PDF.
+        </p>
+        <p class="note" id="ocrInfo"></p>
+      </header>
+
+      <div class="content">
+
+        <!-- 0) DOCUMENTO -->
+        <div class="section-title" data-i18n="sec0">0) Documento – Selección + Auto-relleno</div>
+
+        <div class="box scan">
+          <div class="grid">
+            <div>
+              <label for="tipoScan" data-i18n="docTypeLabel">Tipo de documento *</label>
+              <select id="tipoScan" required onchange="actualizarModo()">
+                <option value="" data-i18n="optChoose">Seleccione…</option>
+                <option value="PASAPORTE" data-i18n="optPassport">Pasaporte (MRZ)</option>
+                <option value="DNI" data-i18n="optId">Cédula / DNI / ID (foto)</option>
+                <option value="LICENCIA" data-i18n="optLicense">Licencia de conducir (foto)</option>
+                <option value="OTRO" data-i18n="optOther">Otro documento (foto)</option>
+              </select>
+              <div class="note" style="margin-top:8px;">
+                <span class="pill" data-i18n="pill1">Paso 1: Elegir tipo</span>
+                <span class="pill" data-i18n="pill2">Paso 2: Auto-relleno (opcional)</span>
+                <span class="pill" data-i18n="pill3">Paso 3: Revisar</span>
+              </div>
+            </div>
+            <div>
+              <label data-i18n="statusLabel">Estado</label>
+              <input id="estado" readonly value="Seleccione un tipo de documento para iniciar." />
+              <div class="note" style="margin-top:8px;" data-i18n="statusHelp">
+                Para pasaporte: enfoque los 2 renglones MRZ (parte inferior del pasaporte).
+              </div>
+            </div>
+          </div>
+
+          <!-- PASAPORTE -->
+          <div id="modoPasaporte" class="hidden" style="margin-top:12px;">
+            <div class="scan-grid">
+              <div>
+                <label data-i18n="camLabel">Cámara (MRZ del pasaporte)</label>
+                <video id="video" autoplay playsinline></video>
+                <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
+                  <button class="btn primary" type="button" onclick="abrirCamara()" data-i18n="btnOpenCam">Abrir cámara</button>
+                  <button class="btn" type="button" onclick="capturarMRZ()" data-i18n="btnCaptureMrz">Capturar y leer MRZ</button>
+                  <button class="btn" type="button" onclick="cerrarCamara()" data-i18n="btnCloseCam">Cerrar cámara</button>
+                </div>
+                <div class="note" style="margin-top:8px;" data-i18n="camTip">
+                  Consejo: buena luz, sin reflejos y acerque el pasaporte.
+                </div>
+              </div>
+
+              <div>
+                <label data-i18n="mrzPasteLabel">MRZ (alternativa: pegar manualmente)</label>
+                <textarea id="mrzText" class="mono" placeholder="Pegue aquí los 2 renglones MRZ (44+44)…"></textarea>
+                <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
+                  <button class="btn" type="button" onclick="rellenarDesdeMRZPegado()" data-i18n="btnFillMrz">Auto-rellenar desde MRZ</button>
+                  <button class="btn" type="button" onclick="document.getElementById('mrzText').value=''" data-i18n="btnClean">Limpiar</button>
+                </div>
+                <div class="note" style="margin-top:8px;" data-i18n="mrzTip">
+                  Si el OCR falla, pegar MRZ es la opción más estable.
+                </div>
+              </div>
+            </div>
+            <canvas id="snap" style="display:none;"></canvas>
+          </div>
+
+          <!-- FOTO (ID / LICENCIA / OTRO) -->
+          <div id="modoFoto" class="hidden" style="margin-top:12px;">
+            <div class="grid">
+              <div>
+                <label data-i18n="photoLabel">Subir foto del documento (frente)</label>
+                <input id="fotoDoc" type="file" accept="image/*" />
+                <div class="note" style="margin-top:8px;" data-i18n="photoTip">
+                  Tome una foto nítida (sin reflejos). El OCR es “mejor esfuerzo” en esta demo.
+                </div>
+                <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
+                  <button class="btn primary" type="button" onclick="leerFoto()" data-i18n="btnReadPhoto">Leer foto y auto-rellenar</button>
+                  <button class="btn" type="button" onclick="limpiarFoto()" data-i18n="btnCleanPhoto">Limpiar foto</button>
+                </div>
+              </div>
+              <div>
+                <label data-i18n="ocrPreviewLabel">Texto detectado (OCR) – solo para revisión</label>
+                <textarea id="ocrPreview" class="mono" placeholder="Aquí se mostrará el texto detectado…"></textarea>
+                <div class="note" style="margin-top:8px;" data-i18n="ocrPreviewTip">
+                  Si el auto-relleno no es perfecto, revise y corrija manualmente.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="danger-msg" id="scanErr"></div>
+        </div>
+
+        <div class="hr"></div>
+
+        <!-- FORMULARIO -->
+        <form id="f" onsubmit="event.preventDefault(); guardarDemo();" novalidate>
+
+          <div class="section-title" data-i18n="sec1">1) Datos personales</div>
+          <div class="grid">
+            <div>
+              <label data-i18n="firstName">Nombre(s) *</label>
+              <input name="nombre" id="nombre" required autocomplete="given-name" />
+            </div>
+            <div>
+              <label data-i18n="lastName">Apellido(s) *</label>
+              <input name="apellido" id="apellido" required autocomplete="family-name" />
+            </div>
+            <div>
+              <label data-i18n="dob">Fecha de nacimiento *</label>
+              <input type="date" name="nacimiento" id="nacimiento" required />
+            </div>
+            <div>
+              <label data-i18n="nationality">Nacionalidad *</label>
+              <input name="nacionalidad" id="nacionalidad" required placeholder="Ej.: ESP, ARG, SVK…" />
+            </div>
+          </div>
+
+          <div class="grid" style="margin-top:12px;">
+            <div>
+              <label data-i18n="sex">Sexo</label>
+              <select name="sexo" id="sexo">
+                <option value="">—</option>
+                <option value="F">F</option>
+                <option value="M">M</option>
+                <option value="X" data-i18n="other">Otro</option>
+              </select>
+            </div>
+            <div>
+              <label data-i18n="marital">Estado civil</label>
+              <select name="estado_civil" id="estado_civil">
+                <option value="">—</option>
+                <option data-i18n="single">Soltero/a</option>
+                <option data-i18n="married">Casado/a</option>
+                <option data-i18n="divorced">Divorciado/a</option>
+                <option data-i18n="widowed">Viudo/a</option>
+                <option data-i18n="other">Otro</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="hr"></div>
+
+          <div class="section-title" data-i18n="sec2">2) Documento de identidad</div>
+          <div class="grid">
+            <div>
+              <label data-i18n="docTypeForm">Tipo de documento *</label>
+              <select name="tipo_doc" id="tipo_doc" required>
+                <option value="" data-i18n="optChoose">Seleccione…</option>
+                <option data-i18n="passport">Pasaporte</option>
+                <option data-i18n="id">Cédula / DNI</option>
+                <option data-i18n="license">Licencia de conducir</option>
+                <option data-i18n="other">Otro</option>
+              </select>
+              <div class="note" style="margin-top:6px;" data-i18n="docTypeNote">
+                (Se completa automáticamente según el tipo elegido arriba, pero puede ajustarse.)
+              </div>
+            </div>
+            <div>
+              <label data-i18n="docNumber">Número de documento *</label>
+              <input name="numero_doc" id="numero_doc" required />
+            </div>
+            <div>
+              <label data-i18n="issueDate">Fecha de emisión</label>
+              <input type="date" name="emision_doc" id="emision_doc" />
+            </div>
+            <div>
+              <label data-i18n="expiryDate">Fecha de vencimiento</label>
+              <input type="date" name="venc_doc" id="venc_doc" />
+            </div>
+          </div>
+
+          <div class="hr"></div>
+
+          <div class="section-title" data-i18n="sec3">3) Contacto</div>
+          <div class="grid">
+            <div>
+              <label data-i18n="phone">Teléfono / WhatsApp *</label>
+              <input name="telefono" id="telefono" required autocomplete="tel" />
+            </div>
+            <div>
+              <label data-i18n="email">Email (opcional en demo)</label>
+              <input type="email" name="email" id="email" autocomplete="email" />
+            </div>
+          </div>
+
+          <div class="hr"></div>
+
+          <div class="section-title" data-i18n="sec4">4) Estancia</div>
+          <div class="grid">
+            <div>
+              <label data-i18n="checkin">Check-in *</label>
+              <input type="date" name="checkin" id="checkin" required />
+            </div>
+            <div>
+              <label data-i18n="checkout">Check-out *</label>
+              <input type="date" name="checkout" id="checkout" required />
+            </div>
+            <div>
+              <label data-i18n="room">Habitación / Cama *</label>
+              <input name="habitacion" id="habitacion" required placeholder="Ej.: Hab. 2 / Cama B" />
+            </div>
+            <div>
+              <label data-i18n="reason">Motivo</label>
+              <select name="motivo" id="motivo">
+                <option value="">—</option>
+                <option data-i18n="tourism">Turismo</option>
+                <option data-i18n="work">Trabajo</option>
+                <option data-i18n="study">Estudios</option>
+                <option data-i18n="other">Otro</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="margin-top:12px;">
+            <label data-i18n="notes">Notas / Observaciones</label>
+            <textarea name="notas" id="notas" placeholder=""></textarea>
+          </div>
+
+          <div class="hr"></div>
+
+          <div class="section-title" data-i18n="sec5">5) GDPR + Aceptación de reglas / anexos</div>
+          <div class="checkbox">
+            <input id="consent" name="consent" type="checkbox" required />
+            <div>
+              <label for="consent" style="margin:0; color:var(--ink); font-size:13px;" data-i18n="consentText">
+                Acepto el tratamiento de datos (GDPR) y confirmo que acepto las normas del hostel y todos los anexos. *
+              </label>
+              <div class="note" style="margin-top:6px;" data-i18n="consentNote">
+                (Demo) En producción: aquí irán los enlaces a las reglas y anexos.
+              </div>
+            </div>
+          </div>
+
+          <div class="hr"></div>
+
+          <div class="section-title" data-i18n="sec6">6) Firma (opcional)</div>
+          <div class="sig-wrap">
+            <canvas id="sig" class="sig"></canvas>
+            <input type="hidden" id="sigData" name="firma_base64" />
+            <div class="sig-actions">
+              <button class="btn" type="button" onclick="borrarFirma()" data-i18n="btnSigClear">Borrar firma</button>
+              <button class="btn" type="button" onclick="guardarFirma()" data-i18n="btnSigSave">Guardar firma</button>
+            </div>
+            <div class="note" data-i18n="sigHelp">Móvil: dedo • PC: mouse. (Demo: firma se guarda solo localmente.)</div>
+          </div>
+
+          <div class="danger-msg" id="err" data-i18n="errRequired">
+            Por favor, complete todos los campos obligatorios (*) y acepte el consentimiento.
+          </div>
+
+          <div class="footer">
+            <div class="note" data-i18n="footerNote">
+              Demo para mostrar el flujo. En producción se conectará a email / base de datos.
+            </div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <button class="btn" type="button" onclick="window.print()" data-i18n="btnPdf">Imprimir / PDF</button>
+              <button class="btn primary" type="submit" data-i18n="btnSave">Guardar (Demo)</button>
+            </div>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // =========================
+    // Idiomas ES/EN (conmutador)
+    // =========================
+    let LANG = "es";
+
+    const I18N = {
+      es: {
+        title: "DEMO – Registro de Huésped",
+        subtitleTop: "Sin email • Sin base de datos • Solo demostración",
+        btnPdf: "Imprimir / PDF",
+        btnSave: "Guardar (Demo)",
+        btnLoad: "Cargar",
+        btnClear: "Borrar",
+        toastSaved: "✅ Guardado (DEMO). Datos guardados solo en este navegador.",
+        h1: "Formulario de Registro de Huésped",
+        subHeader: "Elija el tipo de documento → use auto-relleno (opcional) → revise → acepte → guarde → PDF.",
+        sec0: "0) Documento – Selección + Auto-relleno",
+        docTypeLabel: "Tipo de documento *",
+        optChoose: "Seleccione…",
+        optPassport: "Pasaporte (MRZ)",
+        optId: "Cédula / DNI / ID (foto)",
+        optLicense: "Licencia de conducir (foto)",
+        optOther: "Otro documento (foto)",
+        pill1: "Paso 1: Elegir tipo",
+        pill2: "Paso 2: Auto-relleno (opcional)",
+        pill3: "Paso 3: Revisar",
+        statusLabel: "Estado",
+        statusHelp: "Para pasaporte: enfoque los 2 renglones MRZ (parte inferior del pasaporte).",
+        camLabel: "Cámara (MRZ del pasaporte)",
+        btnOpenCam: "Abrir cámara",
+        btnCaptureMrz: "Capturar y leer MRZ",
+        btnCloseCam: "Cerrar cámara",
+        camTip: "Consejo: buena luz, sin reflejos y acerque el pasaporte.",
+        mrzPasteLabel: "MRZ (alternativa: pegar manualmente)",
+        btnFillMrz: "Auto-rellenar desde MRZ",
+        btnClean: "Limpiar",
+        mrzTip: "Si el OCR falla, pegar MRZ es la opción más estable.",
+        photoLabel: "Subir foto del documento (frente)",
+        photoTip: "Tome una foto nítida (sin reflejos). El OCR es “mejor esfuerzo” en esta demo.",
+        btnReadPhoto: "Leer foto y auto-rellenar",
+        btnCleanPhoto: "Limpiar foto",
+        ocrPreviewLabel: "Texto detectado (OCR) – solo para revisión",
+        ocrPreviewTip: "Si el auto-relleno no es perfecto, revise y corrija manualmente.",
+        sec1: "1) Datos personales",
+        firstName: "Nombre(s) *",
+        lastName: "Apellido(s) *",
+        dob: "Fecha de nacimiento *",
+        nationality: "Nacionalidad *",
+        sex: "Sexo",
+        marital: "Estado civil",
+        single: "Soltero/a",
+        married: "Casado/a",
+        divorced: "Divorciado/a",
+        widowed: "Viudo/a",
+        other: "Otro",
+        sec2: "2) Documento de identidad",
+        docTypeForm: "Tipo de documento *",
+        passport: "Pasaporte",
+        id: "Cédula / DNI",
+        license: "Licencia de conducir",
+        docTypeNote: "(Se completa automáticamente según el tipo elegido arriba, pero puede ajustarse.)",
+        docNumber: "Número de documento *",
+        issueDate: "Fecha de emisión",
+        expiryDate: "Fecha de vencimiento",
+        sec3: "3) Contacto",
+        phone: "Teléfono / WhatsApp *",
+        email: "Email (opcional en demo)",
+        sec4: "4) Estancia",
+        checkin: "Check-in *",
+        checkout: "Check-out *",
+        room: "Habitación / Cama *",
+        reason: "Motivo",
+        tourism: "Turismo",
+        work: "Trabajo",
+        study: "Estudios",
+        notes: "Notas / Observaciones",
+        sec5: "5) GDPR + Aceptación de reglas / anexos",
+        consentText: "Acepto el tratamiento de datos (GDPR) y confirmo que acepto las normas del hostel y todos los anexos. *",
+        consentNote: "(Demo) En producción: aquí irán los enlaces a las reglas y anexos.",
+        sec6: "6) Firma (opcional)",
+        btnSigClear: "Borrar firma",
+        btnSigSave: "Guardar firma",
+        sigHelp: "Móvil: dedo • PC: mouse. (Demo: firma se guarda solo localmente.)",
+        errRequired: "Por favor, complete todos los campos obligatorios (*) y acepte el consentimiento.",
+        footerNote: "Demo para mostrar el flujo. En producción se conectará a email / base de datos."
+      },
+      en: {
+        title: "DEMO – Guest Registration",
+        subtitleTop: "No email • No database • Demo only",
+        btnPdf: "Print / PDF",
+        btnSave: "Save (Demo)",
+        btnLoad: "Load",
+        btnClear: "Clear",
+        toastSaved: "✅ Saved (DEMO). Data is stored only in this browser.",
+        h1: "Guest Registration Form",
+        subHeader: "Choose document type → optional auto-fill → review → accept → save → PDF.",
+        sec0: "0) Document – Selection + Auto-fill",
+        docTypeLabel: "Document type *",
+        optChoose: "Choose…",
+        optPassport: "Passport (MRZ)",
+        optId: "ID card (photo)",
+        optLicense: "Driver's license (photo)",
+        optOther: "Other document (photo)",
+        pill1: "Step 1: Choose type",
+        pill2: "Step 2: Auto-fill (optional)",
+        pill3: "Step 3: Review",
+        statusLabel: "Status",
+        statusHelp: "For passport: focus the 2 MRZ lines (bottom of the passport).",
+        camLabel: "Camera (Passport MRZ)",
+        btnOpenCam: "Open camera",
+        btnCaptureMrz: "Capture & read MRZ",
+        btnCloseCam: "Close camera",
+        camTip: "Tip: good light, no glare, bring the passport closer.",
+        mrzPasteLabel: "MRZ (alternative: paste manually)",
+        btnFillMrz: "Auto-fill from MRZ",
+        btnClean: "Clear",
+        mrzTip: "If OCR fails, pasting MRZ is the most reliable option.",
+        photoLabel: "Upload document photo (front)",
+        photoTip: "Take a sharp photo (no glare). OCR is best-effort in this demo.",
+        btnReadPhoto: "Read photo & auto-fill",
+        btnCleanPhoto: "Clear photo",
+        ocrPreviewLabel: "Detected text (OCR) – review only",
+        ocrPreviewTip: "If auto-fill isn't perfect, review and correct manually.",
+        sec1: "1) Personal details",
+        firstName: "First name(s) *",
+        lastName: "Last name(s) *",
+        dob: "Date of birth *",
+        nationality: "Nationality *",
+        sex: "Sex",
+        marital: "Marital status",
+        single: "Single",
+        married: "Married",
+        divorced: "Divorced",
+        widowed: "Widowed",
+        other: "Other",
+        sec2: "2) Identity document",
+        docTypeForm: "Document type *",
+        passport: "Passport",
+        id: "ID card",
+        license: "Driver's license",
+        docTypeNote: "(Auto-filled based on selection above, but you may adjust.)",
+        docNumber: "Document number *",
+        issueDate: "Issue date",
+        expiryDate: "Expiry date",
+        sec3: "3) Contact",
+        phone: "Phone / WhatsApp *",
+        email: "Email (optional in demo)",
+        sec4: "4) Stay",
+        checkin: "Check-in *",
+        checkout: "Check-out *",
+        room: "Room / Bed *",
+        reason: "Reason",
+        tourism: "Tourism",
+        work: "Work",
+        study: "Study",
+        notes: "Notes",
+        sec5: "5) GDPR + Rules/annex acceptance",
+        consentText: "I accept data processing (GDPR) and confirm I accept hostel rules and all annexes. *",
+        consentNote: "(Demo) In production: links to rules and annexes go here.",
+        sec6: "6) Signature (optional)",
+        btnSigClear: "Clear signature",
+        btnSigSave: "Save signature",
+        sigHelp: "Mobile: finger • Desktop: mouse. (Demo: signature is stored locally.)",
+        errRequired: "Please complete all required fields (*) and accept the consent checkbox.",
+        footerNote: "Demo to show the flow. Production will connect to email / database."
+      }
+    };
+
+    function applyI18n(){
+      const dict = I18N[LANG];
+      document.querySelectorAll("[data-i18n]").forEach(el=>{
+        const key = el.getAttribute("data-i18n");
+        if (dict[key]) el.textContent = dict[key];
+      });
+
+      // OCR info message (dynamic)
+      const info = document.getElementById("ocrInfo");
+      const hasT = typeof window.Tesseract !== "undefined";
+      if (LANG === "es"){
+        info.textContent = hasT
+          ? "OCR: disponible (requiere internet). Si no funciona, el formulario igualmente se puede completar manualmente."
+          : "OCR: no disponible (probablemente sin internet). El formulario funciona igual en modo manual.";
+      } else {
+        info.textContent = hasT
+          ? "OCR: available (internet required). If it fails, you can still complete the form manually."
+          : "OCR: not available (likely offline). The form still works in manual mode.";
+      }
+    }
+
+    function toggleLang(){
+      LANG = (LANG === "es") ? "en" : "es";
+      applyI18n();
+      // Update placeholders (optional) based on language
+      document.getElementById("mrzText").placeholder = (LANG==="es")
+        ? "Pegue aquí los 2 renglones MRZ (44+44)…"
+        : "Paste the 2 MRZ lines here (44+44)…";
+      document.getElementById("ocrPreview").placeholder = (LANG==="es")
+        ? "Aquí se mostrará el texto detectado…"
+        : "Detected text will appear here…";
+    }
+
+    // =========================
+    // DEMO: Guardar/Cargar local
+    // =========================
+    const KEY = "mandioca_registro_demo_working_v1";
+
+    function mostrarToast(){
+      const t = document.getElementById("toast");
+      t.classList.add("show");
+      setTimeout(()=>t.classList.remove("show"), 2500);
+    }
+
+    function formToObj(form){
+      const fd = new FormData(form);
+      const obj = {};
+      for (const [k,v] of fd.entries()) obj[k] = v;
+      obj.consent = document.getElementById("consent").checked ? "yes" : "no";
+      obj.tipoScan = document.getElementById("tipoScan").value || "";
+      obj.signature = document.getElementById("sigData").value || "";
+      obj.lang = LANG;
+      return obj;
+    }
+
+    function objToForm(obj){
+      const form = document.getElementById("f");
+      Object.entries(obj || {}).forEach(([k,v]) => {
+        if (k === "consent" || k === "signature" || k === "tipoScan" || k === "lang") return;
+        const el = form.elements[k];
+        if (el) el.value = v;
+      });
+      document.getElementById("consent").checked = (obj && obj.consent === "yes");
+      document.getElementById("sigData").value = (obj && obj.signature) ? obj.signature : "";
+      document.getElementById("tipoScan").value = (obj && obj.tipoScan) ? obj.tipoScan : "";
+      LANG = (obj && obj.lang) ? obj.lang : LANG;
+      applyI18n();
+      actualizarModo();
+    }
+
+    function guardarDemo(){
+      const form = document.getElementById("f");
+      const err = document.getElementById("err");
+      err.classList.remove("show");
+
+      if (!form.checkValidity() || !document.getElementById("consent").checked) {
+        err.classList.add("show");
+        form.reportValidity();
+        err.scrollIntoView({behavior:"smooth", block:"center"});
+        return;
+      }
+
+      const ci = document.getElementById("checkin").value;
+      const co = document.getElementById("checkout").value;
+      if (ci && co && co < ci){
+        err.textContent = (LANG==="es")
+          ? "La fecha de check-out no puede ser anterior al check-in."
+          : "Check-out cannot be earlier than check-in.";
+        err.classList.add("show");
+        err.scrollIntoView({behavior:"smooth", block:"center"});
+        return;
+      } else {
+        err.textContent = I18N[LANG].errRequired;
+      }
+
+      const data = formToObj(form);
+      localStorage.setItem(KEY, JSON.stringify({ data, savedAt: new Date().toISOString() }));
+      mostrarToast();
+    }
+
+    function cargarDemo(){
+      const raw = localStorage.getItem(KEY);
+      if(!raw){
+        alert(LANG==="es" ? "No hay datos guardados." : "No saved data found.");
+        return;
+      }
+      const parsed = JSON.parse(raw);
+      objToForm(parsed.data);
+      alert(LANG==="es" ? "Demo cargado ✅" : "Demo loaded ✅");
+    }
+
+    function borrarDemo(){
+      localStorage.removeItem(KEY);
+      document.getElementById("f").reset();
+      document.getElementById("sigData").value = "";
+      document.getElementById("ocrPreview").value = "";
+      document.getElementById("mrzText").value = "";
+      document.getElementById("tipoScan").value = "";
+      cerrarCamara();
+      borrarFirma();
+      actualizarModo();
+      alert(LANG==="es" ? "Demo borrado." : "Demo cleared.");
+    }
+
+    // =========================
+    // Modo: pasaporte vs foto
+    // =========================
+    function setEstado(msg){
+      document.getElementById("estado").value = msg;
+    }
+
+    function actualizarModo(){
+      const tipo = document.getElementById("tipoScan").value;
+      const pas = document.getElementById("modoPasaporte");
+      const foto = document.getElementById("modoFoto");
+      const err = document.getElementById("scanErr");
+      err.classList.remove("show");
+      err.textContent = "";
+
+      cerrarCamara();
+
+      if (!tipo){
+        pas.classList.add("hidden");
+        foto.classList.add("hidden");
+        setEstado(LANG==="es" ? "Seleccione un tipo de documento para iniciar." : "Choose a document type to start.");
+        return;
+      }
+
+      if (tipo === "PASAPORTE"){
+        pas.classList.remove("hidden");
+        foto.classList.add("hidden");
+        document.getElementById("tipo_doc").value = (LANG==="es" ? "Pasaporte" : "Passport");
+        setEstado(LANG==="es"
+          ? "Modo Pasaporte (MRZ): abra la cámara o pegue el MRZ."
+          : "Passport mode (MRZ): open camera or paste MRZ.");
+      } else {
+        pas.classList.add("hidden");
+        foto.classList.remove("hidden");
+
+        if (tipo === "DNI") document.getElementById("tipo_doc").value = (LANG==="es" ? "Cédula / DNI" : "ID card");
+        else if (tipo === "LICENCIA") document.getElementById("tipo_doc").value = (LANG==="es" ? "Licencia de conducir" : "Driver's license");
+        else document.getElementById("tipo_doc").value = (LANG==="es" ? "Otro" : "Other");
+
+        setEstado(LANG==="es"
+          ? "Modo Foto (OCR): suba una foto y ejecute el auto-relleno (opcional)."
+          : "Photo mode (OCR): upload a photo and run auto-fill (optional).");
+      }
+    }
+
+    // =========================
+    // Cámara + MRZ OCR (pasaporte)
+    // =========================
+    let stream = null;
+
+    async function abrirCamara(){
+      const err = document.getElementById("scanErr");
+      err.classList.remove("show"); err.textContent = "";
+
+      if (document.getElementById("tipoScan").value !== "PASAPORTE"){
+        err.textContent = (LANG==="es")
+          ? "Seleccione 'Pasaporte (MRZ)' para usar la cámara."
+          : "Select 'Passport (MRZ)' to use the camera.";
+        err.classList.add("show");
+        return;
+      }
+
+      try{
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "environment", width: {ideal: 1280}, height: {ideal: 720} },
+          audio: false
+        });
+        const video = document.getElementById("video");
+        video.srcObject = stream;
+        await video.play();
+      }catch(e){
+        err.textContent = (LANG==="es")
+          ? "No se pudo abrir la cámara. Use MRZ pegado como alternativa."
+          : "Could not open camera. Use pasted MRZ as fallback.";
+        err.classList.add("show");
+      }
+    }
+
+    function cerrarCamara(){
+      const video = document.getElementById("video");
+      if (video && video.srcObject){
+        video.srcObject.getTracks().forEach(t => t.stop());
+        video.srcObject = null;
+      }
+      stream = null;
+    }
+
+    async function capturarMRZ(){
+      const err = document.getElementById("scanErr");
+      err.classList.remove("show"); err.textContent = "";
+
+      if (document.getElementById("tipoScan").value !== "PASAPORTE"){
+        err.textContent = (LANG==="es")
+          ? "Seleccione 'Pasaporte (MRZ)' para usar este escaneo."
+          : "Select 'Passport (MRZ)' to use this scan.";
+        err.classList.add("show");
+        return;
+      }
+
+      if (typeof window.Tesseract === "undefined"){
+        err.textContent = (LANG==="es")
+          ? "OCR no disponible (sin internet). Pegue el MRZ manualmente."
+          : "OCR not available (offline). Please paste MRZ manually.";
+        err.classList.add("show");
+        return;
+      }
+
+      const video = document.getElementById("video");
+      if (!video || !video.srcObject){
+        err.textContent = (LANG==="es")
+          ? "Primero haga clic en 'Abrir cámara'."
+          : "Click 'Open camera' first.";
+        err.classList.add("show");
+        return;
+      }
+
+      // Snapshot
+      const canvas = document.getElementById("snap");
+      const ctx = canvas.getContext("2d");
+      const vw = video.videoWidth || 1280;
+      const vh = video.videoHeight || 720;
+
+      canvas.width = vw;
+      canvas.height = vh;
+      ctx.drawImage(video, 0, 0, vw, vh);
+
+      // Crop bottom area (MRZ usually)
+      const cropY = Math.floor(vh * 0.62);
+      const cropH = Math.floor(vh * 0.38);
+      const crop = ctx.getImageData(0, cropY, vw, cropH);
+
+      const temp = document.createElement("canvas");
+      temp.width = vw;
+      temp.height = cropH;
+      const tctx = temp.getContext("2d");
+      tctx.putImageData(crop, 0, 0);
+
+      try{
+        setEstado(LANG==="es" ? "Leyendo MRZ… (OCR)" : "Reading MRZ… (OCR)");
+        const ocr = await Tesseract.recognize(temp, "eng");
+        const text = (ocr.data && ocr.data.text ? ocr.data.text : "")
+          .toUpperCase()
+          .replace(/ /g,"")
+          .replace(/[^A-Z0-9<\n]/g,"");
+
+        const mrz = extraerMRZ(text);
+        if (!mrz){
+          setEstado(LANG==="es" ? "MRZ no detectado." : "MRZ not detected.");
+          err.textContent = (LANG==="es")
+            ? "No se detectó MRZ. Intente mejor luz / más cerca, o pegue el MRZ manualmente."
+            : "MRZ not detected. Try better light/closer, or paste MRZ manually.";
+          err.classList.add("show");
+          return;
+        }
+
+        document.getElementById("mrzText").value = mrz.line1 + "\n" + mrz.line2;
+        const parsed = parseTD3(mrz.line1, mrz.line2);
+
+        if (!parsed){
+          setEstado(LANG==="es" ? "MRZ detectado pero no interpretado." : "MRZ detected but not parsed.");
+          err.textContent = (LANG==="es")
+            ? "MRZ detectado pero no se pudo interpretar. Pegue MRZ o intente otra vez."
+            : "MRZ detected but couldn't be parsed. Paste MRZ or try again.";
+          err.classList.add("show");
+          return;
+        }
+
+        aplicarPasaporte(parsed);
+        setEstado(LANG==="es" ? "Auto-relleno completado (pasaporte)." : "Auto-fill done (passport).");
+      }catch(e){
+        setEstado(LANG==="es" ? "OCR falló." : "OCR failed.");
+        err.textContent = (LANG==="es")
+          ? "OCR falló (demo). Pegue MRZ manualmente."
+          : "OCR failed (demo). Please paste MRZ manually.";
+        err.classList.add("show");
+      }
+    }
+
+    function rellenarDesdeMRZPegado(){
+      const err = document.getElementById("scanErr");
+      err.classList.remove("show"); err.textContent = "";
+
+      if (document.getElementById("tipoScan").value !== "PASAPORTE"){
+        err.textContent = (LANG==="es")
+          ? "Seleccione 'Pasaporte (MRZ)' para usar esta función."
+          : "Select 'Passport (MRZ)' to use this function.";
+        err.classList.add("show");
+        return;
+      }
+
+      const raw = (document.getElementById("mrzText").value || "").toUpperCase();
+      const lines = raw.split(/\r?\n/).map(l => l.trim().replace(/ /g,"")).filter(Boolean);
+
+      if (lines.length < 2){
+        err.textContent = (LANG==="es") ? "Pegue los 2 renglones MRZ." : "Paste the 2 MRZ lines.";
+        err.classList.add("show");
+        return;
+      }
+
+      const l1 = normalizarMRZ(lines[0]);
+      const l2 = normalizarMRZ(lines[1]);
+      const parsed = parseTD3(l1, l2);
+
+      if (!parsed){
+        err.textContent = (LANG==="es")
+          ? "No se pudo interpretar el MRZ. Verifique el texto pegado."
+          : "Could not parse MRZ. Please verify the pasted text.";
+        err.classList.add("show");
+        return;
+      }
+
+      aplicarPasaporte(parsed);
+      setEstado(LANG==="es" ? "Auto-relleno completado (MRZ pegado)." : "Auto-fill done (pasted MRZ).");
+    }
+
+    function normalizarMRZ(line){
+      const cleaned = (line || "").toUpperCase().replace(/[^A-Z0-9<]/g,"");
+      return cleaned.length >= 44 ? cleaned.slice(0,44) : cleaned.padEnd(44, "<");
+    }
+
+    function extraerMRZ(text){
+      const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+      const candidates = lines
+        .map(l => l.replace(/[^A-Z0-9<]/g,""))
+        .filter(l => l.length >= 35 && (l.match(/</g)||[]).length >= 5);
+
+      if (candidates.length < 2) return null;
+      candidates.sort((a,b) => Math.abs(a.length-44) - Math.abs(b.length-44));
+      return { line1: normalizarMRZ(candidates[0]), line2: normalizarMRZ(candidates[1]) };
+    }
+
+    function parseTD3(line1, line2){
+      if (!line1 || !line2) return null;
+      line1 = normalizarMRZ(line1);
+      line2 = normalizarMRZ(line2);
+      if (line1.length !== 44 || line2.length !== 44) return null;
+      if (!line1.startsWith("P<")) return null;
+
+      const namesRaw = line1.slice(5).split("<<");
+      const apellido = (namesRaw[0] || "").replace(/</g,"").trim();
+      const nombres = (namesRaw.slice(1).join(" ") || "").replace(/</g," ").trim().replace(/\s+/g," ");
+
+      const numero = line2.slice(0,9).replace(/</g,"").trim();
+      const nacionalidad = line2.slice(10,13).replace(/</g,"").trim();
+      const dob = line2.slice(13,19);
+      const sexo = line2.slice(20,21).replace(/</g,"").trim();
+      const exp = line2.slice(21,27);
+
+      return {
+        numero_doc: numero,
+        apellido,
+        nombre: nombres,
+        nacionalidad,
+        nacimientoISO: yyMMddToISO(dob),
+        sexo: (sexo === "M" || sexo === "F") ? sexo : "",
+        vencISO: yyMMddToISO(exp)
+      };
+    }
+
+    function yyMMddToISO(yyMMdd){
+      if (!/^\d{6}$/.test(yyMMdd)) return "";
+      const yy = parseInt(yyMMdd.slice(0,2),10);
+      const mm = yyMMdd.slice(2,4);
+      const dd = yyMMdd.slice(4,6);
+
+      const now = new Date();
+      const currentYY = parseInt(String(now.getFullYear()).slice(2),10);
+      const century = (yy > currentYY ? "19" : "20");
+      return `${century}${String(yy).padStart(2,"0")}-${mm}-${dd}`;
+    }
+
+    function aplicarPasaporte(p){
+      document.getElementById("tipo_doc").value = (LANG==="es") ? "Pasaporte" : "Passport";
+      document.getElementById("numero_doc").value = p.numero_doc || "";
+      document.getElementById("apellido").value = p.apellido || "";
+      document.getElementById("nombre").value = p.nombre || "";
+      document.getElementById("nacimiento").value = p.nacimientoISO || "";
+      document.getElementById("nacionalidad").value = p.nacionalidad || "";
+      if (p.sexo) document.getElementById("sexo").value = p.sexo;
+      document.getElementById("venc_doc").value = p.vencISO || "";
+
+      alert(LANG==="es"
+        ? "✅ Datos cargados desde pasaporte (MRZ). Revise y corrija si es necesario."
+        : "✅ Data loaded from passport (MRZ). Please review and correct if needed.");
+      document.getElementById("nombre").scrollIntoView({behavior:"smooth", block:"center"});
+    }
+
+    // =========================
+    // FOTO OCR (ID / licencia / otro) – best effort
+    // =========================
+    function limpiarFoto(){
+      document.getElementById("fotoDoc").value = "";
+    }
+
+    async function leerFoto(){
+      const err = document.getElementById("scanErr");
+      err.classList.remove("show"); err.textContent = "";
+
+      const tipo = document.getElementById("tipoScan").value;
+      if (!tipo || tipo === "PASAPORTE"){
+        err.textContent = (LANG==="es")
+          ? "Seleccione un tipo de documento con foto (DNI / licencia / otro)."
+          : "Select a photo-based document type (ID / license / other).";
+        err.classList.add("show");
+        return;
+      }
+
+      if (typeof window.Tesseract === "undefined"){
+        err.textContent = (LANG==="es")
+          ? "OCR no disponible (sin internet). Complete manualmente."
+          : "OCR not available (offline). Please fill manually.";
+        err.classList.add("show");
+        return;
+      }
+
+      const file = document.getElementById("fotoDoc").files?.[0];
+      if (!file){
+        err.textContent = (LANG==="es") ? "Suba una foto del documento." : "Please upload a document photo.";
+        err.classList.add("show");
+        return;
+      }
+
+      try{
+        setEstado(LANG==="es" ? "Leyendo foto… (OCR)" : "Reading photo… (OCR)");
+        const img = await fileToImage(file);
+
+        const ocr = await Tesseract.recognize(img, "spa+eng");
+        const raw = (ocr.data && ocr.data.text) ? ocr.data.text : "";
+        document.getElementById("ocrPreview").value = raw;
+
+        const cleaned = normalizarOCR(raw);
+        const result = extraerCamposDesdeOCR(cleaned);
+
+        // Set doc type in form according to selection
+        if (tipo === "DNI") document.getElementById("tipo_doc").value = (LANG==="es") ? "Cédula / DNI" : "ID card";
+        else if (tipo === "LICENCIA") document.getElementById("tipo_doc").value = (LANG==="es") ? "Licencia de conducir" : "Driver's license";
+        else document.getElementById("tipo_doc").value = (LANG==="es") ? "Otro" : "Other";
+
+        if (result.numero_doc) document.getElementById("numero_doc").value = result.numero_doc;
+        if (result.nombre) document.getElementById("nombre").value = result.nombre;
+        if (result.apellido) document.getElementById("apellido").value = result.apellido;
+        if (result.nacimientoISO) document.getElementById("nacimiento").value = result.nacimientoISO;
+
+        setEstado(LANG==="es" ? "Auto-relleno completado (foto)." : "Auto-fill done (photo).");
+        alert(LANG==="es"
+          ? "✅ Auto-relleno desde foto (demo). Revise y corrija antes de guardar."
+          : "✅ Auto-filled from photo (demo). Please review and correct before saving.");
+      }catch(e){
+        setEstado(LANG==="es" ? "OCR falló." : "OCR failed.");
+        err.textContent = (LANG==="es")
+          ? "No se pudo leer la foto (demo). Intente otra foto o complete manualmente."
+          : "Could not read photo (demo). Try another photo or fill manually.";
+        err.classList.add("show");
+      }
+    }
+
+    function fileToImage(file){
+      return new Promise((resolve,reject)=>{
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
+        img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("img error")); };
+        img.src = url;
+      });
+    }
+
+    function normalizarOCR(raw){
+      return (raw || "")
+        .toUpperCase()
+        .replace(/\u00A0/g," ")
+        .replace(/[^\w\s\/\-\.:]/g," ")
+        .replace(/\s+/g," ")
+        .trim();
+    }
+
+    function extraerCamposDesdeOCR(text){
+      const out = { numero_doc:"", nombre:"", apellido:"", nacimientoISO:"" };
+
+      // Document number heuristics
+      const m1 = text.match(/\b(DOC(UMENTO)?|DNI|CI|ID|NRO|N°|NUM(ERO)?)\b[:\.\- ]{0,6}([A-Z0-9\-]{6,15})\b/);
+      if (m1) out.numero_doc = (m1[4] || "").replace(/[^A-Z0-9\-]/g,"").slice(0,18);
+      else {
+        const m2 = text.match(/\b(\d{7,12})\b/);
+        if (m2) out.numero_doc = m2[1];
+      }
+
+      // DOB heuristics dd/mm/yyyy or dd-mm-yyyy
+      const dm = text.match(/\b(FEC(HA)?\s*DE\s*NAC(IMIENTO)?|NAC(IMIENTO)?)\b[:\.\- ]{0,10}(\d{2}[\/\-]\d{2}[\/\-]\d{4})\b/);
+      const anyDate = text.match(/\b(\d{2}[\/\-]\d{2}[\/\-]\d{4})\b/);
+      const d = (dm && dm[5]) ? dm[5] : (anyDate ? anyDate[1] : "");
+      if (d) out.nacimientoISO = ddmmyyyyToISO(d);
+
+      // Name heuristics
+      const ap = text.match(/\bAPELLIDOS?\b[:\.\- ]{0,10}([A-Z ]{3,40})\b/);
+      const no = text.match(/\bNOMBRES?\b[:\.\- ]{0,10}([A-Z ]{3,40})\b/);
+      if (ap) out.apellido = limpiarNombre(ap[1]);
+      if (no) out.nombre = limpiarNombre(no[1]);
+
+      return out;
+    }
+
+    function limpiarNombre(s){
+      return (s || "")
+        .replace(/\b(SEX0|SEXO|NACIMIENTO|FECHA|DOCUMENTO|DNI|CI|ID|NACIONALIDAD)\b/g," ")
+        .replace(/\s+/g," ")
+        .trim();
+    }
+
+    function ddmmyyyyToISO(s){
+      const m = (s || "").match(/(\d{2})[\/\-](\d{2})[\/\-](\d{4})/);
+      if (!m) return "";
+      return `${m[3]}-${m[2]}-${m[1]}`;
+    }
+
+    // =========================
+    // Firma (canvas)
+    // =========================
+    const sig = document.getElementById("sig");
+    const sctx = sig.getContext("2d");
+
+    function ajustarFirma(){
+      const ratio = window.devicePixelRatio || 1;
+      const rect = sig.getBoundingClientRect();
+      sig.width = Math.floor(rect.width * ratio);
+      sig.height = Math.floor(rect.height * ratio);
+      sctx.setTransform(ratio,0,0,ratio,0,0);
+      sctx.lineWidth = 2;
+      sctx.lineCap = "round";
+      sctx.strokeStyle = "#111";
+    }
+    ajustarFirma();
+    window.addEventListener("resize", ajustarFirma);
+
+    let dibujando = false;
+    let ultimo = {x:0,y:0};
+
+    function posFirma(e){
+      const r = sig.getBoundingClientRect();
+      if (e.touches && e.touches[0]) return { x: e.touches[0].clientX - r.left, y: e.touches[0].clientY - r.top };
+      return { x: e.clientX - r.left, y: e.clientY - r.top };
+    }
+    function iniciarFirma(e){ dibujando=true; ultimo=posFirma(e); e.preventDefault(); }
+    function moverFirma(e){
+      if(!dibujando) return;
+      const p = posFirma(e);
+      sctx.beginPath();
+      sctx.moveTo(ultimo.x, ultimo.y);
+      sctx.lineTo(p.x, p.y);
+      sctx.stroke();
+      ultimo = p;
+      e.preventDefault();
+    }
+    function terminarFirma(){ dibujando=false; }
+
+    sig.addEventListener("mousedown", iniciarFirma);
+    sig.addEventListener("mousemove", moverFirma);
+    window.addEventListener("mouseup", terminarFirma);
+
+    sig.addEventListener("touchstart", iniciarFirma, {passive:false});
+    sig.addEventListener("touchmove", moverFirma, {passive:false});
+    sig.addEventListener("touchend", terminarFirma);
+
+    function borrarFirma(){ sctx.clearRect(0,0,sig.width,sig.height); }
+    function guardarFirma(){
+      const data = sig.toDataURL("image/png");
+      document.getElementById("sigData").value = data;
+      alert(LANG==="es" ? "Firma guardada (demo)." : "Signature saved (demo).");
+    }
+
+    // =========================
+    // Inicialización
+    // =========================
+    (function init(){
+      applyI18n();
+      actualizarModo();
+
+      const raw = localStorage.getItem(KEY);
+      if(raw){
+        try{
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed.data) objToForm(parsed.data);
+        }catch(e){}
+      }
+    })();
+  </script>
+</body>
+</html>

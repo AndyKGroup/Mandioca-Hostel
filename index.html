@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Document Hub – Mandioca Hostel</title>
+
+  <!-- Shared site UI (same as other documents) -->
+  <link rel="stylesheet" href="site-style.css" />
+  <script src="config.js"></script>
+  <script src="site-components.js" defer></script>
+
+  <style>
+    /* Hub-specific fixes to prevent cut-off on some viewports/in-app browsers */
+    html, body { max-width: 100%; }
+    body { overflow-x: hidden; }
+
+    .hub-page { padding: 20px 14px 34px; }
+    .hub-container { max-width: 1100px; margin: 0 auto; }
+
+    .hub-hero{
+      background: #fff;
+      border: 1px solid var(--line, #e7e7ea);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.06);
+      overflow:hidden;
+    }
+
+    .hub-title{
+      font-family: var(--serif, ui-serif);
+      font-size: 28px;
+      margin: 0;
+      line-height: 1.12;
+    }
+    .hub-sub{
+      margin: 10px 0 0;
+      color: var(--muted, #666);
+      line-height: 1.45;
+      font-size: 14px;
+      max-width: 880px;
+    }
+
+    .hub-meta{
+      margin-top: 12px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+      min-width:0;
+    }
+    .hub-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(176,141,87,.35);
+      background: rgba(176,141,87,.08);
+      color:#6a4d24;
+      font-weight: 700;
+      font-size: 12px;
+      white-space:nowrap;
+    }
+    .hub-btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--line, #e7e7ea);
+      background:#fff;
+      cursor:pointer;
+      font-weight: 800;
+      gap:8px;
+    }
+    .hub-btn:hover{
+      border-color: rgba(176,141,87,.55);
+      box-shadow: 0 0 0 4px rgba(176,141,87,.10);
+    }
+
+    /* IMPORTANT: minmax(0,1fr) prevents overflow/cut-off */
+    .hub-grid{
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 16px;
+      width: 100%;
+      min-width: 0;
+    }
+    /* 3 → 2 columns */
+    @media (max-width: 1180px){
+      .hub-grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    /* 2 → 1 column */
+    @media (max-width: 860px){
+      .hub-grid{ grid-template-columns: minmax(0, 1fr); }
+      .hub-title{ font-size: 24px; }
+      .hub-hero{ padding: 14px; }
+    }
+
+    .hub-section{
+      background:#fff;
+      border: 1px solid var(--line, #e7e7ea);
+      border-radius: 18px;
+      padding: 14px;
+      min-width: 0;
+    }
+    .hub-section h2{
+      margin:0 0 10px;
+      font-size: 12px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color:#222;
+    }
+
+    .hub-links{ display:grid; gap:10px; min-width:0; }
+    .hub-links a{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding: 12px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--line, #e7e7ea);
+      text-decoration:none;
+      color: var(--ink, #111);
+      font-weight: 800;
+      background:#fff;
+      min-width:0;
+    }
+    .hub-links a:hover{
+      border-color: rgba(176,141,87,.55);
+      box-shadow: 0 0 0 4px rgba(176,141,87,.10);
+    }
+
+    .hub-left{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+      min-width:0;
+    }
+    .hub-left .title{
+      font-size: 14px;
+      line-height:1.25;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      min-width:0;
+    }
+    .hub-left .desc{
+      font-size: 12px;
+      color: var(--muted, #666);
+      line-height:1.35;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      min-width:0;
+    }
+
+    .tag{
+      font-size: 11px;
+      font-weight: 800;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(176,141,87,.35);
+      background: rgba(176,141,87,.08);
+      color:#6a4d24;
+      white-space:nowrap;
+      flex-shrink:0;
+    }
+
+    .hub-note{
+      margin: 10px 0 0;
+      color: var(--muted, #666);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .hub-footer{
+      margin-top: 14px;
+      border-top: 1px solid var(--line, #e7e7ea);
+      padding-top: 12px;
+      color: var(--muted, #666);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- site-components.js injects the same header/footer as other documents -->
+
+  <main class="hub-page">
+    <div class="hub-container">
+      <section class="hub-hero">
+        <h1 class="hub-title" data-tpl="PROPERTY_NAME">Mandioca Hostel</h1>
+        <p class="hub-sub">
+          Centro de documentos (demo). Abrí un formulario o contrato, y revisá los anexos A–F.
+          Cada documento tiene su propio switch ES/EN y está listo para usar con QR.
+        </p>
+
+        <div class="hub-meta">
+          <span class="hub-pill">UI = estilo del sitio</span>
+          <span class="hub-pill">ES/EN dentro de cada documento</span>
+          <span class="hub-pill">Listo para QR</span>
+          <button class="hub-btn" type="button" onclick="window.print()">🖨️ Imprimir / PDF</button>
+        </div>
+
+        <div class="hub-grid">
+
+          <!-- FORMS -->
+          <div class="hub-section">
+            <h2>Forms</h2>
+            <div class="hub-links">
+              <a href="RegistroHostel.html">
+                <div class="hub-left">
+                  <div class="title">Formulario de Registro de Huésped</div>
+                  <div class="desc">Registro + aceptación de reglas/anexos (ideal QR recepción)</div>
+                </div>
+                <span class="tag">FORM</span>
+              </a>
+              <a href="InvoiceGenerator.html">
+                <div class="hub-left">
+                  <div class="title">Factura / Invoice Generator (PYG + USD)</div>
+                  <div class="desc">Cálculo automático por noches + extras, total en PYG y USD, listo para PDF</div>
+                </div>
+                <span class="tag">Generator</span>
+              </a>
+
+            </div>
+            <p class="hub-note">
+              Recomendado: imprimir el QR de este formulario y colocarlo en recepción.
+            </p>
+          </div>
+
+          <!-- CONTRACTS -->
+          <div class="hub-section">
+            <h2>Contracts</h2>
+            <div class="hub-links">
+              <a href="LongTermAgreement_EN.html">
+                <div class="hub-left">
+                  <div class="title">Long-Term Accommodation Agreement</div>
+                  <div class="desc">Contrato larga estancia + anexos + firma (demo)</div>
+                </div>
+                <span class="tag">CONTRACT</span>
+              </a>
+
+              <a href="volunteeragreement.html">
+                <div class="hub-left">
+                  <div class="title">Volunteer Collaboration Agreement</div>
+                  <div class="desc">Contrato voluntario + NDA + anexos + 2 firmas (demo)</div>
+                </div>
+                <span class="tag">CONTRACT</span>
+              </a>
+            </div>
+            <p class="hub-note">
+              Estos contratos son “demo-ready”: se pueden imprimir en PDF y luego firmar físicamente o digitalmente (futuro).
+            </p>
+          </div>
+
+          <!-- ANNEXES -->
+          <div class="hub-section">
+            <h2>Annexes A–F</h2>
+            <div class="hub-links">
+              <a href="ANEXOA.html"><div class="hub-left"><div class="title">ANEXO A – Normas de la Casa</div><div class="desc">Reglas generales y convivencia</div></div><span class="tag">A</span></a>
+              <a href="ANEXOB.html"><div class="hub-left"><div class="title">ANEXO B – Cocina y Áreas Comunes</div><div class="desc">Uso de cocina y áreas compartidas</div></div><span class="tag">B</span></a>
+              <a href="ANNEXOC.html"><div class="hub-left"><div class="title">ANEXO C – Piscina y Seguridad</div><div class="desc">Normas de piscina y seguridad</div></div><span class="tag">C</span></a>
+              <a href="ANEXOD.html"><div class="hub-left"><div class="title">ANEXO D – Seguridad y CCTV</div><div class="desc">Política de seguridad y videovigilancia</div></div><span class="tag">D</span></a>
+              <a href="ANEXOE.html"><div class="hub-left"><div class="title">ANEXO E – Higiene y Operación</div><div class="desc">Higiene, limpieza y operación</div></div><span class="tag">E</span></a>
+              <a href="ANNEXF.html"><div class="hub-left"><div class="title">ANEXO F – Términos y Responsabilidad</div><div class="desc">Términos generales y responsabilidad</div></div><span class="tag">F</span></a>
+              <a href="ANNEXOI.html"><div class="hub-left"><div class="title">ANEXO I – Área de Coworking</div><div class="desc">Normas del área de coworking</div></div><span class="tag">I</span></a>
+            </div>
+            <p class="hub-note">
+              Podés generar un QR por cada anexo y colocarlo en el área correspondiente (cocina/piscina/etc.).
+            </p>
+          </div>
+
+        </div>
+
+        <div class="hub-footer">
+          Tip: Subí este paquete a Netlify/hosting. El link del Hub puede ser el “QR principal” y cada documento puede tener su propio QR.
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    // Preserve optional ?key=... across hub links (no password required; safe to keep).
+    (function(){
+      const params = new URLSearchParams(window.location.search);
+      const key = params.get("key");
+      if (!key) return;
+      document.querySelectorAll('a[href$=".html"]').forEach(a=>{
+        const url = new URL(a.getAttribute("href"), window.location.href);
+        url.searchParams.set("key", key);
+        a.setAttribute("href", url.pathname + url.search);
+      });
+    })();
+  </script>
+</body>
+</html>

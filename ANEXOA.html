@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ANEXO A – Normas de la Casa | ANNEX A – House Rules</title>
+  
+
+  <link rel="stylesheet" href="site-style.css"/>
+  <script src="config.js"></script>
+  <script src="site-components.js" defer></script>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="card">
+
+      <div class="topbar">
+        <div class="brand">
+          <div class="logo">MH</div>
+          <div class="meta">
+            <b id="docTitle">ANEXO A – Normas de la Casa</b>
+            <small id="docSub">Parte integral de las condiciones de estadía</small>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn" type="button" onclick="window.print()">Imprimir / PDF</button>
+          <button class="btn" type="button" onclick="downloadPDF()">Descargar PDF / Download PDF</button>
+          
+          <button class="btn primary" type="button" onclick="toggleLang()" id="langBtn">ES / EN</button>
+        </div>
+      </div>
+
+      <header>
+        <h1 id="h1">ANEXO A – Normas de la Casa</h1>
+        <p class="subtitle" id="sub">
+          Este documento forma parte integral de las condiciones de estadía del hostel.
+        </p>
+
+        <div class="langbar">
+          <span class="pill" id="langPill">Idioma: ES</span>
+        </div>
+
+        <p class="note print-hide" id="hint" style="margin-top:10px;">
+          Consejo: Esta página está lista para usarse con QR (URL pública) y para imprimir en PDF.
+        </p>
+      </header>
+
+      <div class="content">
+        <!-- ES -->
+        <div id="es" class="box">
+          <p>
+            Este documento forma parte integral de las condiciones de estadía del hostel.
+            El incumplimiento de estas normas puede resultar en advertencias, cargos adicionales o la finalización anticipada
+            de la estadía sin derecho a reembolso.
+          </p>
+
+          <h2>1. Respeto y convivencia</h2>
+          <ul>
+            <li>Todos los huéspedes deben comportarse con respeto hacia otros huéspedes, el personal y las instalaciones.</li>
+            <li>No se toleran comportamientos agresivos, discriminatorios, violentos o inapropiados.</li>
+            <li>El hostel promueve un ambiente tranquilo, seguro y respetuoso para todos.</li>
+          </ul>
+
+          <h2>2. Horarios de silencio</h2>
+          <ul>
+            <li>Horario de silencio: 22:00 – 08:00</li>
+            <li>Durante este horario se debe evitar:</li>
+            <li>Música alta</li>
+            <li>Gritos o ruidos excesivos</li>
+            <li>Llamadas en altavoz en áreas comunes</li>
+          </ul>
+
+          <h2>3. Uso de las instalaciones</h2>
+          <ul>
+            <li>Las áreas comunes son de uso compartido y deben mantenerse limpias y ordenadas.</li>
+            <li>No está permitido dormir en sofás, áreas comunes o espacios no designados como habitaciones.</li>
+            <li>Está prohibido mover muebles sin autorización.</li>
+          </ul>
+
+          <h2>4. Visitantes</h2>
+          <ul>
+            <li>No se permiten visitantes externos sin autorización previa de la administración.</li>
+            <li>Cualquier visitante autorizado debe registrarse y respetar las normas del hostel.</li>
+            <li>El huésped es responsable del comportamiento de sus visitantes.</li>
+          </ul>
+
+          <h2>5. Prohibiciones generales</h2>
+          <ul>
+            <li>Está prohibido fumar en habitaciones y áreas internas del hostel.</li>
+            <li>No se permiten drogas ilegales dentro de las instalaciones.</li>
+            <li>No se permite el consumo excesivo de alcohol que afecte la convivencia o seguridad.</li>
+            <li>Está prohibido realizar actividades comerciales sin autorización.</li>
+          </ul>
+
+          <h2>6. Responsabilidad del huésped</h2>
+          <ul>
+            <li>Cada huésped es responsable de sus pertenencias personales.</li>
+            <li>El hostel no se responsabiliza por pérdidas, robos o daños de objetos personales.</li>
+            <li>Cualquier daño causado a la propiedad del hostel deberá ser cubierto por el huésped responsable.</li>
+          </ul>
+
+          <h2>7. Cumplimiento y sanciones</h2>
+          <ul>
+            <li>El incumplimiento de estas normas puede resultar en:</li>
+            <li>Advertencia verbal o escrita</li>
+            <li>Cargos adicionales</li>
+            <li>Expulsión del hostel sin reembolso, en casos graves</li>
+          </ul>
+
+          <h2>8. Aceptación</h2>
+          <p>
+            Al firmar el formulario de registro o aceptar digitalmente las condiciones, el huésped declara haber leído,
+            comprendido y aceptado estas Normas de la Casa, las cuales forman parte integral de su estadía.
+          </p>
+        </div>
+
+        <!-- EN -->
+        <div id="en" class="box hidden">
+          <p>
+            This document forms an integral part of the hostel’s stay conditions.
+            Failure to comply with these rules may result in warnings, additional charges, or early termination of the stay
+            with no right to a refund.
+          </p>
+
+          <h2>1. Respect and coexistence</h2>
+          <ul>
+            <li>All guests must behave respectfully toward other guests, staff, and the facilities.</li>
+            <li>Aggressive, discriminatory, violent, or inappropriate behavior will not be tolerated.</li>
+            <li>The hostel promotes a calm, safe, and respectful environment for everyone.</li>
+          </ul>
+
+          <h2>2. Quiet hours</h2>
+          <ul>
+            <li>Quiet hours: 22:00 – 08:00</li>
+            <li>During this time, please avoid:</li>
+            <li>Loud music</li>
+            <li>Shouting or excessive noise</li>
+            <li>Speakerphone calls in common areas</li>
+          </ul>
+
+          <h2>3. Use of facilities</h2>
+          <ul>
+            <li>Common areas are shared and must be kept clean and tidy.</li>
+            <li>Sleeping on sofas, in common areas, or in spaces not designated as bedrooms is not permitted.</li>
+            <li>Moving furniture without authorization is prohibited.</li>
+          </ul>
+
+          <h2>4. Visitors</h2>
+          <ul>
+            <li>External visitors are not allowed without prior authorization from management.</li>
+            <li>Any authorized visitor must register and comply with hostel rules.</li>
+            <li>The guest is responsible for the behavior of their visitors.</li>
+          </ul>
+
+          <h2>5. General prohibitions</h2>
+          <ul>
+            <li>Smoking is prohibited in rooms and indoor areas of the hostel.</li>
+            <li>Illegal drugs are not allowed on the premises.</li>
+            <li>Excessive alcohol consumption that affects coexistence or safety is not permitted.</li>
+            <li>Commercial activities are prohibited without authorization.</li>
+          </ul>
+
+          <h2>6. Guest responsibility</h2>
+          <ul>
+            <li>Each guest is responsible for their personal belongings.</li>
+            <li>The hostel is not responsible for loss, theft, or damage of personal items.</li>
+            <li>Any damage caused to hostel property must be paid by the responsible guest.</li>
+          </ul>
+
+          <h2>7. Compliance and sanctions</h2>
+          <ul>
+            <li>Failure to comply with these rules may result in:</li>
+            <li>Verbal or written warning</li>
+            <li>Additional charges</li>
+            <li>Expulsion from the hostel without refund in serious cases</li>
+          </ul>
+
+          <h2>8. Acceptance</h2>
+          <p>
+            By signing the registration form or digitally accepting the conditions, the guest declares they have read,
+            understood, and accepted these House Rules, which form an integral part of their stay.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let lang = "es";
+
+    function setLabels() {
+      const pill = document.getElementById("langPill");
+      const title = document.getElementById("docTitle");
+      const h1 = document.getElementById("h1");
+      const sub = document.getElementById("sub");
+      const docSub = document.getElementById("docSub");
+      const hint = document.getElementById("hint");
+
+      if (lang === "es") {
+        pill.textContent = "Idioma: ES";
+        title.textContent = "ANEXO A – Normas de la Casa";
+        h1.textContent = "ANEXO A – Normas de la Casa";
+        sub.textContent = "Este documento forma parte integral de las condiciones de estadía del hostel.";
+        docSub.textContent = "Parte integral de las condiciones de estadía";
+        hint.textContent = "Consejo: Esta página está lista para usarse con QR (URL pública) y para imprimir en PDF.";
+      } else {
+        pill.textContent = "Language: EN";
+        title.textContent = "ANNEX A – House Rules";
+        h1.textContent = "ANNEX A – House Rules";
+        sub.textContent = "This document forms an integral part of the hostel’s stay conditions.";
+        docSub.textContent = "Integral part of stay conditions";
+        hint.textContent = "Tip: This page is ready for QR (public URL) and for printing to PDF.";
+      }
+    }
+
+    function toggleLang(){
+      lang = (lang === "es") ? "en" : "es";
+      document.getElementById("es").classList.toggle("hidden", lang !== "es");
+      document.getElementById("en").classList.toggle("hidden", lang !== "en");
+      setLabels();
+    }
+
+    setLabels();
+  </script>
+</body>
+</html>

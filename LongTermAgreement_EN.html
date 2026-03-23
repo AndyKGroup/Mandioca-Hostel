@@ -1,0 +1,704 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Long-Term Accommodation Agreement – Mandioca Hostel (EN)</title>
+
+  
+
+  <link rel="stylesheet" href="site-style.css"/>
+  <script src="config.js"></script>
+  <script src="site-components.js" defer></script>
+
+  <style>
+    .fill{
+      display:inline-block;
+      min-width:180px;
+      padding: 0 6px 2px;
+      border-bottom: 1px solid var(--mh-line, #e7e7ea);
+      border-radius: 6px;
+      background: rgba(255,255,255,.6);
+      outline: none;
+      line-height: 1.2;
+    }
+    .fill.small{ min-width:120px; }
+    .fill.tiny{ min-width:70px; text-align:center; }
+    .fill[contenteditable="true"]:focus{
+      box-shadow: 0 0 0 4px rgba(13,90,74,.10);
+      border-bottom-color: rgba(13,90,74,.45);
+      background: #fff;
+    }
+    .lang-en{ display:inline; }
+    .lang-es{ display:none; }
+    .lang-is-es .lang-en{ display:none; }
+    .lang-is-es .lang-es{ display:inline; }
+  </style>
+
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="card">
+
+      <div class="topbar">
+        <div class="brand">
+          <div class="logo">MH</div>
+          <div class="meta">
+            <b id="docTitle">LONG-TERM ACCOMMODATION AGREEMENT</b>
+            <small id="docSub">Private Room – Mandioca Hostel • EN • Annex G/H + 2 signatures</small>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn" type="button" onclick="window.print()" id="btnPrint">Print / PDF</button>
+          <button class="btn" type="button" onclick="downloadPDF()">Descargar PDF / Download PDF</button>
+          
+          <button class="btn primary" type="button" onclick="toggleLang()" id="langBtn">ES / EN</button>
+          <button class="btn" type="button" onclick="saveDemo()" id="btnSave">Save (Demo)</button>
+          <button class="btn" type="button" onclick="loadDemo()" id="btnLoad">Load</button>
+          <button class="btn" type="button" onclick="clearDemo()" id="btnClear">Clear</button>
+        </div>
+      </div>
+
+      <header>
+        <h1 id="h1">Long-Term Accommodation Agreement</h1>
+        <p class="subtitle" id="sub">
+          HTML version (EN) based on the PDF. Includes Annex G (ID/Passport copy), Annex H (Emergency Contact),
+          Annex A–F links, Annex I (Coworking), and two signatures (Landlord + Tenant).
+        </p>
+        <div class="langbar"><span class="pill" id="langPill">Language: EN</span></div>
+        <p class="note print-hide" style="margin-top:10px;">
+          Demo note: photos and signatures are stored only in this browser (localStorage).
+        </p>
+      </header>
+
+      <div class="content">
+
+        <!-- Annex G: ID/Passport copy (photos) -->
+        <div class="box upload">
+          <div class="section-title">ANNEX G – Copy of Tenant ID / Passport</div>
+
+          <div class="grid">
+            <div>
+              <label>Document type</label>
+              <input id="docType" placeholder="Passport / ID / Other" />
+            </div>
+            <div>
+              <label>Passport / ID Number</label>
+              <input id="docNumber" placeholder="______________________________" />
+            </div>
+          </div>
+
+          <div class="grid" style="margin-top:12px;">
+            <div>
+              <label>Document photo – Front *</label>
+              <input id="docFront" type="file" accept="image/*" capture="environment" />
+            </div>
+            <div>
+              <label>Document photo – Back (if applicable)</label>
+              <input id="docBack" type="file" accept="image/*" capture="environment" />
+            </div>
+          </div>
+
+          <div class="grid" style="margin-top:12px;">
+            <div>
+              <label>Selfie with document (optional)</label>
+              <input id="selfie" type="file" accept="image/*" capture="user" />
+            </div>
+            <div>
+              <label>Tenant Full Name</label>
+              <input id="tenantName" placeholder="______________________________" />
+            </div>
+          </div>
+
+          <div class="preview" style="margin-top:12px;">
+            <div class="imgbox"><div class="note">Preview – Front</div><img id="prevFront" alt="Front preview" /></div>
+            <div class="imgbox"><div class="note">Preview – Back</div><img id="prevBack" alt="Back preview" /></div>
+            <div class="imgbox"><div class="note">Preview – Selfie</div><img id="prevSelfie" alt="Selfie preview" /></div>
+          </div>
+        </div>
+
+        <!-- Annex H: Emergency contact -->
+        <div class="box">
+          <div class="section-title">ANNEX H – Emergency Contact Information</div>
+
+          <div class="grid">
+            <div>
+              <label>Emergency contact full name *</label>
+              <input id="emName" placeholder="______________________________" />
+            </div>
+            <div>
+              <label>Relationship *</label>
+              <input id="emRel" placeholder="Parent / Partner / Friend..." />
+            </div>
+            <div>
+              <label>Phone / WhatsApp *</label>
+              <input id="emPhone" placeholder="+595 ..." />
+            </div>
+            <div>
+              <label>Email (optional)</label>
+              <input id="emEmail" placeholder="example@email.com" />
+            </div>
+          </div>
+
+          <div style="margin-top:12px;">
+            <label>Address (optional)</label>
+            <input id="emAddr" placeholder="______________________________" />
+          </div>
+        </div>
+
+        <!-- Annexes A–F links -->
+        <div class="box">
+          <div class="section-title"><span class="lang-en">ANNEXES (A–I) – Hostel Rules</span><span class="lang-es">ANEXOS (A–I) – Reglas del Hostel</span></div>
+          <div class="links">
+            <a href="ANEXOA.html" target="_blank"><span class="lang-en">Annex A – House Rules</span><span class="lang-es">Anexo A – Normas de la Casa</span></a>
+            <a href="ANEXOB.html" target="_blank"><span class="lang-en">Annex B – Kitchen & Common Areas Rules</span><span class="lang-es">Anexo B – Normas de Uso de la Cocina y Áreas Comunes</span></a>
+            <a href="ANNEXOC.html" target="_blank"><span class="lang-en">Annex C – Pool & Safety Rules</span><span class="lang-es">Anexo C – Normas de Piscina y Seguridad</span></a>
+            <a href="ANEXOD.html" target="_blank"><span class="lang-en">Annex D – Security & CCTV Policy</span><span class="lang-es">Anexo D – Política de Seguridad y CCTV</span></a>
+            <a href="ANEXOE.html" target="_blank"><span class="lang-en">Annex E – Hygiene & Operational Rules</span><span class="lang-es">Anexo E – Normas de Higiene y Operación</span></a>
+            <a href="ANNEXF.html" target="_blank"><span class="lang-en">Annex F – General Terms & Liability</span><span class="lang-es">Anexo F – Términos Generales y Responsabilidad</span></a>
+            <a href="ANNEXOI.html" target="_blank"><span class="lang-en">Annex I – Coworking Area Rules</span><span class="lang-es">Anexo I – Normas del Área de Coworking</span></a>
+          </div>
+
+          <div class="checkbox" style="margin-top:12px;">
+            <input id="acceptAnnex" type="checkbox" />
+            <div>
+              <label for="acceptAnnex" style="margin:0; color:var(--ink); font-size:13px;">
+                I confirm I have read and accept Annexes A–F (Hostel Rules).
+              </label>
+              <div class="note">(Required to save demo.)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Agreement text (1:1) -->
+        <div class="box">
+          <div class="section-title" id="agreementTitle">Agreement text (as per PDF)</div>
+
+          <div class="paper">
+            <div class="paper-head">
+              <h2 class="paper-title" id="paperTitle">LONG-TERM ACCOMMODATION AGREEMENT</h2>
+              <p class="paper-sub" id="paperSub">Private Room – Mandioca Hostel • Contract Number: MH-2026-<span class="fill tiny" contenteditable="true" data-fill="contract_no">____</span></p>
+            </div>
+
+            <div class="paper-body">
+<div id="enText">
+
+              <div class="article">
+                <p><b>Executed</b> in the City of <span class="fill" contenteditable="true" data-fill="exec_city">____________________</span>, Republic of Paraguay, on this <span class="fill tiny" contenteditable="true" data-fill="exec_day">___</span> day of <span class="fill small" contenteditable="true" data-fill="exec_month">__________</span> 2026.</p>
+                <p>This Long-Term Accommodation Agreement (hereinafter referred to as the “Agreement”) is entered into under the following terms and conditions:</p>
+              </div>
+
+              <div class="article">
+                <h3>I. PARTIES</h3>
+                <p><b>LANDLORD:</b> Mandioca Hostel</p>
+                <p>Address: <span class="fill" contenteditable="true" data-fill="landlord_address">______________________________</span></p>
+                <p>Represented by: <span class="fill" contenteditable="true" data-fill="landlord_rep">______________________________</span></p>
+                <p><b>AND</b></p>
+                <p><b>TENANT:</b></p>
+                <p>Full Name: <span class="fill" contenteditable="true" data-fill="tenant_name">______________________________</span></p>
+                <p>Passport / ID Number: <span class="fill" contenteditable="true" data-fill="tenant_doc">______________________________</span></p>
+                <p>Nationality: <span class="fill" contenteditable="true" data-fill="tenant_nat">______________________________</span></p>
+                <p>Permanent Address: <span class="fill" contenteditable="true" data-fill="landlord_address">______________________________</span></p>
+                <p>Phone / Email: <span class="fill" contenteditable="true" data-fill="tenant_contact">______________________________</span></p>
+                <p>Both parties declare that they possess full legal capacity to enter into this Agreement under the laws of the Republic of Paraguay.</p>
+              </div>
+
+              <div class="article">
+                <h3>II. PURPOSE OF THE AGREEMENT</h3>
+                <p>The Landlord grants the Tenant the right to occupy one private room within Mandioca Hostel.</p>
+                <p>This Agreement constitutes long-term hostel accommodation and does not create ownership rights or permanent residential tenancy rights under the Paraguayan Civil Code.</p>
+              </div>
+
+              <div class="article">
+                <h3>III. TERM</h3>
+                <p>This Agreement shall remain in force from:</p>
+                <p><b>March 1, 2026 until March 1, 2027</b></p>
+                <p>Fixed term: 12 months.</p>
+                <p>The term is legally binding upon both parties under the principle of contractual autonomy.</p>
+              </div>
+
+              <div class="article">
+                <h3>IV. RENT AND PAYMENT CONDITIONS</h3>
+                <p>Monthly Rent: USD 100.00</p>
+                <p>Total Annual Amount: USD 1200.00</p>
+                <p>Payment must be completed no later than: <b>March 8, 2026</b></p>
+                <p>Failure to pay constitutes material breach and grounds for contractual termination under Paraguayan law.</p>
+              </div>
+
+              <div class="article">
+                <h3>V. SECURITY DEPOSIT</h3>
+                <p>The Tenant shall provide a security deposit in the amount of USD <span class="fill small" contenteditable="true" data-fill="deposit_amount">___________</span>.</p>
+                <p>The deposit secures:</p>
+                <ul>
+                  <li>Property damage</li>
+                  <li>Contractual non-compliance</li>
+                  <li>Outstanding financial obligations</li>
+                </ul>
+                <p>The Landlord may legally offset damages or unpaid amounts against the deposit in accordance with the principle of compensation of credits.</p>
+              </div>
+
+              <div class="article">
+                <h3>VI. TERMINATION AND NOTICE</h3>
+                <p>Either party may terminate this Agreement by providing a minimum of 30 days’ written notice.</p>
+                <p>Notice must be delivered via:</p>
+                <ul>
+                  <li>Signed written document, or</li>
+                  <li>Verifiable email communication.</li>
+                </ul>
+                <p>During the notice period, all contractual obligations remain fully enforceable.</p>
+                <p>Failure to provide proper notice authorizes the Landlord to retain the security deposit as reasonable contractual penalty.</p>
+              </div>
+
+              <div class="article">
+                <h3>VII. IMMEDIATE TERMINATION</h3>
+                <p>The Landlord may terminate this Agreement without prior notice in case of:</p>
+                <ul>
+                  <li>Non-payment</li>
+                  <li>Illegal activities</li>
+                  <li>Serious violation of house rules</li>
+                  <li>Conduct endangering safety</li>
+                </ul>
+                <p>Such termination is legally justified due to material breach of contractual obligations.</p>
+              </div>
+
+              <div class="article">
+                <h3>VIII. AUTOMATIC RENEWAL</h3>
+                <p>Upon expiration, this Agreement shall automatically renew for successive 12-month periods unless either party provides written notice of non-renewal at least 30 days prior to expiration.</p>
+                <p>Renewal constitutes tacit acceptance of the conditions then in force.</p>
+              </div>
+
+              <div class="article">
+                <h3>IX. RENT ADJUSTMENT</h3>
+                <p>The Landlord reserves the right to adjust rent in the event of:</p>
+                <ul>
+                  <li>Tax increases</li>
+                  <li>Significant inflation</li>
+                  <li>Increased operational costs</li>
+                  <li>Regulatory or legal changes</li>
+                </ul>
+                <p>Any adjustment must be reasonable, proportional, and notified 30 days in advance.</p>
+              </div>
+
+              <div class="article">
+                <h3>X. LIABILITY FOR DAMAGES</h3>
+                <p>The Tenant is civilly liable for damages caused to:</p>
+                <ul>
+                  <li>The room</li>
+                  <li>Furniture</li>
+                  <li>Common areas</li>
+                </ul>
+                <p>If damages exceed the security deposit, the Tenant must pay the difference within 7 days.</p>
+                <p>Failure to pay entitles the Landlord to initiate legal proceedings.</p>
+              </div>
+
+              <div class="article">
+                <h3>XI. SECURITY AND CCTV</h3>
+                <p>Common areas are monitored by CCTV.</p>
+                <p>Recordings are used strictly for security purposes under principles of proportionality and necessity.</p>
+                <p>Footage may be provided to authorities if legally required.</p>
+              </div>
+
+              <div class="article">
+                <h3>XII. DATA PROTECTION</h3>
+                <p>The Landlord processes personal data under principles of:</p>
+                <ul>
+                  <li>Lawfulness</li>
+                  <li>Specific purpose</li>
+                  <li>Proportionality</li>
+                  <li>Confidentiality</li>
+                </ul>
+                <p>The Tenant grants explicit consent upon signing this Agreement.</p>
+              </div>
+
+              <div class="article">
+                <h3>XIII. TAX ADJUSTMENTS</h3>
+                <p>If new taxes, governmental fees, or fiscal obligations affecting accommodation services arise during the contract term, the Landlord may proportionally adjust rent to reflect such changes.</p>
+              </div>
+
+              <div class="article">
+                <h3>XIV. USE FOR PERMANENT RESIDENCY AND MIGRATION PURPOSES</h3>
+                <p>This Agreement may be used as valid supporting documentation for:</p>
+                <ul>
+                  <li>Temporary or permanent residency applications</li>
+                  <li>Immigration procedures</li>
+                  <li>Tax registration</li>
+                </ul>
+                <p>The Landlord declares that this Agreement reflects a genuine and effective accommodation relationship.</p>
+                <p>However, the Landlord assumes no responsibility for administrative decisions made by immigration or governmental authorities.</p>
+              </div>
+
+              <div class="article">
+                <h3>XV. ANNEXES</h3>
+                <p>The following annexes form an integral and legally binding part of this Agreement:</p>
+                <ul>
+                  <li>Annex A – House Rules</li>
+                  <li>Annex B – Kitchen & Common Areas Rules</li>
+                  <li>Annex C – Pool & Safety Rules</li>
+                  <li>Annex D – Security & CCTV Policy</li>
+                  <li>Annex E – Hygiene & Operational Rules</li>
+                  <li>Annex F – General Terms & Liability</li>
+                  <li>Annex G – Copy of Tenant ID / Passport</li>
+                  <li>Annex H – Emergency Contact Information</li>
+                </ul>
+                <p>All annexes hold equal legal validity to the main Agreement.</p>
+              </div>
+
+              <div class="article">
+                <h3>XVI. GOVERNING LAW AND JURISDICTION</h3>
+                <p>This Agreement shall be governed by and interpreted in accordance with the laws of the Republic of Paraguay.</p>
+                <p>Any dispute arising from this Agreement shall be subject to the exclusive jurisdiction of the competent courts of Paraguay, with both parties waiving any other jurisdiction.</p>
+              </div>
+
+              <div class="article">
+                <h3>XVII. ACCEPTANCE</h3>
+                <p>By signing below, both parties acknowledge that they have read, understood, and voluntarily accept all terms of this Agreement and its annexes.</p>
+              </div>
+
+<div id="esText" class="hidden">
+  <div class="article">
+<h2>CONTRATO DE ALQUILER DE LARGA ESTANCIA</h2>
+<p>Habitación Privada – Mandioca Hostel Número de Contrato: MH-2026-<span class="fill tiny" contenteditable="true" data-fill="es_fill_001">____</span> En la ciudad de <span class="fill" contenteditable="true" data-fill="es_fill_002">____________________</span>, República del Paraguay, a los <span class="fill tiny" contenteditable="true" data-fill="es_fill_003">___</span> días del mes de <span class="fill small" contenteditable="true" data-fill="es_fill_004">__________</span> de 2026, se celebra el presente Contrato de Alquiler de Larga Estancia (en adelante, el “Contrato”), que se regirá por las siguientes cláusulas:</p>
+<hr>
+<h3>I. PARTES CONTRATANTES</h3>
+<p>ARRRENDADOR: Mandioca Hostel Dirección: <span class="fill" contenteditable="true" data-fill="es_fill_005">_______________________________</span> Representado por: <span class="fill" contenteditable="true" data-fill="es_fill_006">_______________________________</span> Y ARRENDATARIO: Nombre completo: <span class="fill" contenteditable="true" data-fill="es_fill_007">_______________________________</span> Documento (Pasaporte/Cédula): <span class="fill" contenteditable="true" data-fill="es_fill_008">_______________________________</span> Nacionalidad: <span class="fill" contenteditable="true" data-fill="es_fill_009">_______________________________</span> Domicilio: <span class="fill" contenteditable="true" data-fill="es_fill_010">_______________________________</span> Teléfono / Email: <span class="fill" contenteditable="true" data-fill="es_fill_011">_______________________________</span> Ambas partes declaran tener capacidad legal para contratar conforme a las leyes de la República del Paraguay.</p>
+<h3>II. OBJETO DEL CONTRATO</h3>
+<p>El Arrendador concede al Arrendatario el uso de una habitación privada dentro de Mandioca Hostel. El presente contrato constituye alojamiento de larga estancia en modalidad hostel y no genera derechos de propiedad ni arrendamiento permanente conforme al Código Civil Paraguayo.</p>
+<h3>III. PLAZO</h3>
+<p>El contrato tendrá vigencia desde el 1 de marzo de 2026 hasta el 1 de marzo de 2027, con duración fija de 12 meses. Legalmente, el plazo es determinado y vinculante para ambas partes conforme al principio de autonomía de la voluntad contractual.</p>
+<h3>IV. RENTA Y CONDICIONES DE PAGO</h3>
+<p>La renta mensual es de USD 100,00 totalizando USD 1200,00 anuales. El pago deberá realizarse hasta el 8 de marzo de 2026. El incumplimiento del pago constituye causal de resolución contractual conforme a la legislación paraguaya.</p>
+<h3>V. DEPÓSITO DE GARANTÍA</h3>
+<p>El Arrendatario entrega un depósito de USD <span class="fill small" contenteditable="true" data-fill="es_fill_012">___________</span>. Este depósito garantiza: • Daños materiales • Incumplimientos contractuales • Obligaciones pendientes El depósito podrá ser compensado legalmente conforme al principio de compensación de créditos.</p>
+<h3>VI. TERMINACIÓN Y PREAVISO</h3>
+<p>Cualquiera de las partes podrá rescindir el contrato con un preaviso mínimo de 30 días por escrito. La notificación deberá realizarse mediante: • Documento firmado • Correo electrónico verificable Durante el preaviso, el contrato mantiene plena vigencia jurídica. La falta de preaviso autoriza al Arrendador a retener el depósito como penalización contractual razonable.</p>
+<h3>VII. TERMINACIÓN INMEDIATA</h3>
+<p>El Arrendador podrá resolver el contrato sin preaviso en caso de: • Falta de pago • Actividades ilegales • Violación grave de normas • Riesgo a la seguridad Dicha resolución se fundamenta en el incumplimiento grave de obligaciones contractuales.</p>
+<h3>VIII. RENOVACIÓN AUTOMÁTICA</h3>
+<p>El contrato se renovará automáticamente por períodos sucesivos de 12 meses, salvo notificación escrita con 30 días de anticipación. La renovación implica aceptación tácita de condiciones vigentes.</p>
+<h3>IX. ACTUALIZACIÓN DE RENTA</h3>
+<p>La renta podrá ajustarse en caso de: • Incrementos tributarios • Inflación significativa • Incremento de costos operativos • Cambios regulatorios El ajuste deberá ser razonable, proporcional y notificado con 30 días de anticipación.</p>
+<h3>X. RESPONSABILIDAD POR DAÑOS</h3>
+<p>El Arrendatario responde civilmente por daños causados a: • Habitación • Mobiliario • Áreas comunes Si el daño supera el depósito, el Arrendatario deberá abonar la diferencia en un plazo máximo de 7 días. El incumplimiento faculta al Arrendador a iniciar acciones judiciales.</p>
+<h3>XI. SEGURIDAD Y VIDEOVIGILANCIA</h3>
+<p>Las áreas comunes cuentan con CCTV. Las grabaciones se utilizan con fines de seguridad conforme a principios de proporcionalidad y necesidad. Podrán entregarse a autoridades cuando la ley lo exija.</p>
+<h3>XII. PROTECCIÓN DE DATOS</h3>
+<p>El Arrendador procesa datos personales conforme a: • Principio de legalidad • Finalidad específica • Proporcionalidad • Confidencialidad El Arrendatario otorga consentimiento expreso al firmar el presente contrato.</p>
+<h3>XIII. AJUSTES FISCALES</h3>
+<p>Si durante la vigencia del contrato se establecen nuevos impuestos o cargas fiscales aplicables al servicio de alojamiento, el Arrendador podrá ajustar la renta proporcionalmente.</p>
+<h3>XIV. USO PARA RESIDENCIA Y TRÁMITES MIGRATORIOS</h3>
+<p>Este contrato podrá utilizarse como documento válido ante: • Dirección General de Migraciones • Autoridades fiscales • Instituciones públicas El Arrendador declara que la relación contractual es real y efectiva. No obstante, no garantiza decisiones administrativas de autoridades.</p>
+<h3>XV. ANEXOS</h3>
+<p>Forman parte integral del contrato: • Anexo A – Normas de la Casa • Anexo B – Cocina y Áreas Comunes • Anexo C – Piscina y Seguridad • Anexo D – Seguridad y CCTV • Anexo E – Higiene y Operación • Anexo F – Términos Generales • Anexo G – Copia de Documento • Anexo H – Contacto de Emergencia Los anexos tienen la misma validez jurídica que el contrato principal.</p>
+<h3>XVI. LEGISLACIÓN APLICABLE Y JURISDICCIÓN</h3>
+<p>El presente contrato se rige por las leyes de la República del Paraguay. Para cualquier controversia, las partes se someten a la jurisdicción de los tribunales competentes de Paraguay, renunciando a cualquier otro fuero.</p>
+<h3>XVII. ACEPTACIÓN</h3>
+<p>Leído el presente contrato, ambas partes firman en conformidad, reconociendo su plena validez legal. Firma Arrendador: <span class="fill" contenteditable="true" data-fill="es_fill_013">__________________________</span> Fecha: <span class="fill" contenteditable="true" data-fill="es_fill_014">__________________________</span> Firma Arrendatario: <span class="fill" contenteditable="true" data-fill="es_fill_015">__________________________</span> Fecha: <span class="fill" contenteditable="true" data-fill="es_fill_016">__________________________</span></p>
+  </div>
+</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Final acceptance + signatures -->
+        <div class="box">
+          <div class="section-title">Final acceptance + signatures</div>
+
+          <div class="checkbox">
+            <input id="acceptAll" type="checkbox" />
+            <div>
+              <label for="acceptAll" style="margin:0; color:var(--ink); font-size:13px;">
+                I confirm I accept this Agreement and all annexes (A–H), and I consent to data processing as stated.
+              </label>
+              <div class="note">Required to save demo.</div>
+            </div>
+          </div>
+
+          <div class="danger" id="errMsg">Missing required fields/acceptances (Annexes + Final acceptance + Emergency contact).</div>
+
+          <div class="grid" style="margin-top:12px;">
+            <div>
+              <div class="section-title">Landlord Signature</div>
+              <div class="sig-wrap">
+                <canvas id="sigLandlord" class="sig"></canvas>
+                <input type="hidden" id="sigLandlordData" />
+                <div class="sig-actions">
+                  <button class="btn" type="button" onclick="clearSig('landlord')">Clear</button>
+                  <button class="btn" type="button" onclick="saveSig('landlord')">Save</button>
+                </div>
+                <label style="margin-top:10px;">Date</label>
+                <input id="landlordDate" placeholder="__________________________" />
+              </div>
+            </div>
+
+            <div>
+              <div class="section-title">Tenant Signature</div>
+              <div class="sig-wrap">
+                <canvas id="sigTenant" class="sig"></canvas>
+                <input type="hidden" id="sigTenantData" />
+                <div class="sig-actions">
+                  <button class="btn" type="button" onclick="clearSig('tenant')">Clear</button>
+                  <button class="btn" type="button" onclick="saveSig('tenant')">Save</button>
+                </div>
+                <label style="margin-top:10px;">Date</label>
+                <input id="tenantDate" placeholder="__________________________" />
+              </div>
+            </div>
+          </div>
+
+          <p class="note" style="margin-top:10px;">
+            Production tip: Landlord signature can be done by admin first, then tenant signs later via a link.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const KEY = "mh_longterm_demo_v1";
+
+    // previews
+    function fileToDataURL(file){
+      return new Promise((resolve,reject)=>{
+        const r = new FileReader();
+        r.onload = () => resolve(r.result);
+        r.onerror = reject;
+        r.readAsDataURL(file);
+      });
+    }
+    async function setPreview(inputId, imgId){
+      const input = document.getElementById(inputId);
+      const img = document.getElementById(imgId);
+      const file = input.files && input.files[0];
+      if (!file){ img.removeAttribute("src"); return ""; }
+      const data = await fileToDataURL(file);
+      img.src = data;
+      return data;
+    }
+    document.getElementById("docFront").addEventListener("change", ()=>setPreview("docFront","prevFront"));
+    document.getElementById("docBack").addEventListener("change", ()=>setPreview("docBack","prevBack"));
+    document.getElementById("selfie").addEventListener("change", ()=>setPreview("selfie","prevSelfie"));
+
+    // two signature pads
+    function initPad(canvasId){
+      const c = document.getElementById(canvasId);
+      const ctx = c.getContext("2d");
+
+      function resize(){
+        const ratio = window.devicePixelRatio || 1;
+        const rect = c.getBoundingClientRect();
+        c.width = Math.floor(rect.width * ratio);
+        c.height = Math.floor(rect.height * ratio);
+        ctx.setTransform(ratio,0,0,ratio,0,0);
+        ctx.lineWidth = 2; ctx.lineCap = "round"; ctx.strokeStyle = "#111";
+      }
+      resize();
+      window.addEventListener("resize", resize);
+
+      let drawing=false, last={x:0,y:0};
+      function pos(e){
+        const r = c.getBoundingClientRect();
+        if (e.touches && e.touches[0]) return {x:e.touches[0].clientX-r.left, y:e.touches[0].clientY-r.top};
+        return {x:e.clientX-r.left, y:e.clientY-r.top};
+      }
+      function start(e){ drawing=true; last=pos(e); e.preventDefault(); }
+      function move(e){
+        if(!drawing) return;
+        const p=pos(e);
+        ctx.beginPath(); ctx.moveTo(last.x,last.y); ctx.lineTo(p.x,p.y); ctx.stroke();
+        last=p; e.preventDefault();
+      }
+      function end(){ drawing=false; }
+
+      c.addEventListener("mousedown", start);
+      c.addEventListener("mousemove", move);
+      window.addEventListener("mouseup", end);
+      c.addEventListener("touchstart", start, {passive:false});
+      c.addEventListener("touchmove", move, {passive:false});
+      c.addEventListener("touchend", end);
+
+      return {canvas:c, ctx};
+    }
+    const padLandlord = initPad("sigLandlord");
+    const padTenant = initPad("sigTenant");
+
+    function clearSig(which){
+      if (which==="landlord"){
+        padLandlord.ctx.clearRect(0,0,padLandlord.canvas.width,padLandlord.canvas.height);
+        document.getElementById("sigLandlordData").value="";
+      } else {
+        padTenant.ctx.clearRect(0,0,padTenant.canvas.width,padTenant.canvas.height);
+        document.getElementById("sigTenantData").value="";
+      }
+    }
+    function saveSig(which){
+      if (which==="landlord"){
+        document.getElementById("sigLandlordData").value = padLandlord.canvas.toDataURL("image/png");
+        alert("Landlord signature saved (demo).");
+      } else {
+        document.getElementById("sigTenantData").value = padTenant.canvas.toDataURL("image/png");
+        alert("Tenant signature saved (demo).");
+      }
+    }
+
+    function requiredOk(){
+      const emName = document.getElementById("emName").value.trim();
+      const emRel = document.getElementById("emRel").value.trim();
+      const emPhone = document.getElementById("emPhone").value.trim();
+      const okEm = emName && emRel && emPhone;
+
+      const okAnnex = document.getElementById("acceptAnnex").checked;
+      const okAll = document.getElementById("acceptAll").checked;
+
+      return okEm && okAnnex && okAll;
+    }
+
+    function saveDemo(){
+      const err = document.getElementById("errMsg");
+      err.classList.remove("show");
+
+      if (!requiredOk()){
+        err.classList.add("show");
+        err.scrollIntoView({behavior:"smooth", block:"center"});
+        return;
+      }
+
+      const payload = {
+        docType: document.getElementById("docType").value,
+        docNumber: document.getElementById("docNumber").value,
+        tenantName: document.getElementById("tenantName").value,
+        images: {
+          front: document.getElementById("prevFront").src || "",
+          back: document.getElementById("prevBack").src || "",
+          selfie: document.getElementById("prevSelfie").src || ""
+        },
+        emergency: {
+          name: document.getElementById("emName").value,
+          rel: document.getElementById("emRel").value,
+          phone: document.getElementById("emPhone").value,
+          email: document.getElementById("emEmail").value,
+          addr: document.getElementById("emAddr").value
+        },
+        acceptAnnex: document.getElementById("acceptAnnex").checked,
+        acceptAll: document.getElementById("acceptAll").checked,
+        sigLandlord: document.getElementById("sigLandlordData").value || "",
+        sigTenant: document.getElementById("sigTenantData").value || "",
+        landlordDate: document.getElementById("landlordDate").value,
+        tenantDate: document.getElementById("tenantDate").value,
+        savedAt: new Date().toISOString()
+      };
+
+      localStorage.setItem(KEY, JSON.stringify(payload));
+      alert("Saved ✅ (demo)");
+    }
+
+    function loadDemo(){
+      const raw = localStorage.getItem(KEY);
+      if(!raw){ alert("No saved data."); return; }
+      const d = JSON.parse(raw);
+
+      document.getElementById("docType").value = d.docType || "";
+      document.getElementById("docNumber").value = d.docNumber || "";
+      document.getElementById("tenantName").value = d.tenantName || "";
+
+      if (d.images?.front) document.getElementById("prevFront").src = d.images.front;
+      if (d.images?.back) document.getElementById("prevBack").src = d.images.back;
+      if (d.images?.selfie) document.getElementById("prevSelfie").src = d.images.selfie;
+
+      document.getElementById("emName").value = d.emergency?.name || "";
+      document.getElementById("emRel").value = d.emergency?.rel || "";
+      document.getElementById("emPhone").value = d.emergency?.phone || "";
+      document.getElementById("emEmail").value = d.emergency?.email || "";
+      document.getElementById("emAddr").value = d.emergency?.addr || "";
+
+      document.getElementById("acceptAnnex").checked = !!d.acceptAnnex;
+      document.getElementById("acceptAll").checked = !!d.acceptAll;
+
+      document.getElementById("sigLandlordData").value = d.sigLandlord || "";
+      document.getElementById("sigTenantData").value = d.sigTenant || "";
+
+      document.getElementById("landlordDate").value = d.landlordDate || "";
+      document.getElementById("tenantDate").value = d.tenantDate || "";
+
+      alert("Loaded ✅");
+    }
+
+    function clearDemo(){
+      localStorage.removeItem(KEY);
+      location.reload();
+    }
+  
+    // --- Language toggle (shared pattern across docs) ---
+    const LANG_KEY = "docLang";
+    let lang = "en";
+
+    function applyLang(){
+      document.documentElement.classList.toggle("lang-is-es", lang === "es");
+      document.getElementById("enText").classList.toggle("hidden", lang !== "en");
+      document.getElementById("esText").classList.toggle("hidden", lang !== "es");
+      setLabels();
+      try { localStorage.setItem(LANG_KEY, lang); } catch(e){}
+    }
+
+    function toggleLang(){
+      lang = (lang === "en") ? "es" : "en";
+      applyLang();
+    }
+
+    function setLabels(){
+      const pill = document.getElementById("langPill");
+      const docTitle = document.getElementById("docTitle");
+      const docSub = document.getElementById("docSub");
+      const h1 = document.getElementById("h1");
+      const sub = document.getElementById("sub");
+      const ag = document.getElementById("agreementTitle");
+      const pt = document.getElementById("paperTitle");
+      const ps = document.getElementById("paperSub");
+      const btnPrint = document.getElementById("btnPrint");
+      const btnSave = document.getElementById("btnSave");
+      const btnLoad = document.getElementById("btnLoad");
+      const btnClear = document.getElementById("btnClear");
+
+      if (lang === "es") {
+        if(pill) pill.textContent = "Idioma: ES";
+        if(docTitle) docTitle.textContent = "CONTRATO DE ALQUILER DE LARGA ESTANCIA";
+        if(docSub) docSub.textContent = "Habitación Privada – Mandioca Hostel • ES • Anexos G/H + 2 firmas";
+        if(h1) h1.textContent = "Contrato de Alquiler de Larga Estancia";
+        if(sub) sub.textContent = "Versión HTML (ES) basada en el PDF. Incluye ANEXO G (Copia de Documento), ANEXO H (Contacto de Emergencia), enlaces ANEXO A–F + ANEXO I, y dos firmas (Hostel + Huésped).";
+        if(ag) ag.textContent = "Texto del contrato (según PDF)";
+        if(pt) pt.textContent = "CONTRATO DE ALQUILER DE LARGA ESTANCIA";
+        if(ps) ps.textContent = "Habitación Privada – Mandioca Hostel • Número de Contrato: MH-2026-<span class="fill tiny" contenteditable="true" data-fill="contract_no">____</span>";
+        if(btnPrint) btnPrint.textContent = "Imprimir / PDF";
+        if(btnSave) btnSave.textContent = "Guardar (Demo)";
+        if(btnLoad) btnLoad.textContent = "Cargar";
+        if(btnClear) btnClear.textContent = "Limpiar";
+        document.documentElement.lang = "es";
+      } else {
+        if(pill) pill.textContent = "Language: EN";
+        if(docTitle) docTitle.textContent = "LONG-TERM ACCOMMODATION AGREEMENT";
+        if(docSub) docSub.textContent = "Private Room – Mandioca Hostel • EN • Annex G/H + 2 signatures";
+        if(h1) h1.textContent = "Long-Term Accommodation Agreement";
+        if(sub) sub.textContent = "HTML version (EN) based on the PDF. Includes Annex G (ID/Passport copy), Annex H (Emergency Contact), Annex A–F links, Annex I (Coworking), and two signatures (Landlord + Tenant).";
+        if(ag) ag.textContent = "Agreement text (as per PDF)";
+        if(pt) pt.textContent = "LONG-TERM ACCOMMODATION AGREEMENT";
+        if(ps) ps.textContent = "Private Room – Mandioca Hostel • Contract Number: MH-2026-<span class="fill tiny" contenteditable="true" data-fill="contract_no">____</span>";
+        if(btnPrint) btnPrint.textContent = "Print / PDF";
+        if(btnSave) btnSave.textContent = "Save (Demo)";
+        if(btnLoad) btnLoad.textContent = "Load";
+        if(btnClear) btnClear.textContent = "Clear";
+        document.documentElement.lang = "en";
+      }
+    }
+
+    (function initLang(){
+      try {
+        const saved = localStorage.getItem(LANG_KEY);
+        if(saved === "es" || saved === "en") lang = saved;
+      } catch(e){}
+      applyLang();
+    })();
+</script>
+</body>
+</html>

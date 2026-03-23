@@ -1,0 +1,543 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Factura – Generador (PYG/USD)</title>
+
+  <link rel="stylesheet" href="site-style.css"/>
+  <script src="config.js"></script>
+  <script src="site-components.js" defer></script>
+
+  <style>
+    /* Only invoice-specific helpers (kept minimal to preserve global UI consistency) */
+    .gridWide{ display:grid; grid-template-columns: 1.2fr .8fr; gap:12px; }
+    @media (max-width: 920px){ .gridWide{ grid-template-columns:1fr; } }
+
+    table{ width:100%; border-collapse:separate; border-spacing:0; overflow:hidden; }
+    th,td{ padding:10px 10px; border-bottom:1px solid var(--mh-line); vertical-align:top; }
+    th{ font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:var(--mh-green); background:rgba(13,90,74,.03); }
+    td input{ width:100%; }
+    .right{ text-align:right; }
+    .muted{ color: var(--mh-muted); font-size:13px; line-height:1.45; }
+    .sumBox{ border:1px solid var(--mh-line); border-radius:16px; padding:14px; background:#fff; }
+    .sumLine{ display:flex; justify-content:space-between; gap:12px; margin:8px 0; }
+    .sumLine .k{ color:var(--mh-muted); font-size:13px; }
+    .sumLine .v{ font-weight:900; }
+    .big{ font-family:var(--mh-serif); font-size:22px; font-weight:900; }
+    .pill{ margin-right:8px; }
+    .checks{ display:flex; gap:14px; flex-wrap:wrap; margin-top:10px; }
+    .check{ display:flex; align-items:center; gap:8px; }
+    .check input{ width:16px; height:16px; padding:0 !important; }
+    .btnRow{ display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
+
+    @media print{
+      .print-hide{ display:none !important; }
+      th{ background:#f4f6f8 !important; color:#000 !important; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="card">
+
+      <!-- Hidden legacy topbar kept for compatibility across docs -->
+      <div class="topbar">
+        <div class="brand">
+          <div class="logo">MH</div>
+          <div class="meta">
+            <b>Factura (PYG/USD)</b>
+            <small>Demo</small>
+          </div>
+        </div>
+        <div class="actions print-hide">
+          <button class="btn" type="button" onclick="window.print()" id="btnPrint">Imprimir / PDF</button>
+          <button class="btn" type="button" onclick="downloadPDF()">Descargar PDF / Download PDF</button>
+          
+          <button class="btn primary" type="button" onclick="toggleLang()" id="btnLang">ES / EN</button>
+        </div>
+      </div>
+
+      <header>
+        <h1 id="t_h1">Factura</h1>
+        <p class="subtitle" id="t_sub">Genera una factura con total automático en PYG y USD (listo para imprimir en PDF).</p>
+        <div class="row" style="margin-top:10px;">
+          <span class="pill" id="pillLang">Idioma: ES</span>
+          <span class="pill" id="pillMode">PYG ↔ USD</span>
+        </div>
+      </header>
+
+      <div class="content">
+        <div class="gridWide">
+
+          <!-- LEFT: FORM -->
+          <div>
+            <div class="box">
+              <div class="section-title" id="t_head">Encabezado</div>
+
+              <div class="grid" style="margin-top:10px;">
+                <div>
+                  <label id="t_invno">N° de factura</label>
+                  <input id="invNo" value="MH-INV-2026-001" />
+                </div>
+                <div>
+                  <label id="t_date">Fecha</label>
+                  <input id="invDate" type="date" />
+                </div>
+              </div>
+
+              <div class="grid" style="margin-top:10px;">
+                <div>
+                  <label id="t_due">Vence</label>
+                  <input id="invDue" type="date" />
+                </div>
+                <div>
+                  <label id="t_client">Cliente / Huésped</label>
+                  <input id="toName" placeholder="Nombre completo" />
+                </div>
+              </div>
+
+              <div class="hr"></div>
+
+              <div class="section-title" id="t_bill">Datos de facturación</div>
+
+              <div class="grid" style="margin-top:10px;">
+                <div>
+                  <label id="t_hostel_fixed">Hotel (fijo)</label>
+                  <textarea id="hostelBill" rows="5" disabled></textarea>
+                </div>
+                <div>
+                  <label id="t_client_bill">Cliente (editable)</label>
+                  <textarea id="clientBill" rows="5" placeholder="Dirección de facturación"></textarea>
+                </div>
+              </div>
+
+              <div class="grid" style="margin-top:10px;">
+                <div>
+                  <label id="t_doctype">Documento</label>
+                  <select id="clientDocType">
+                    <option value="passport">Pasaporte</option>
+                    <option value="id">Cédula / ID</option>
+                    <option value="other">Otro</option>
+                  </select>
+                </div>
+                <div>
+                  <label id="t_docno">N° de documento</label>
+                  <input id="clientDocNo" placeholder="Número" />
+                </div>
+              </div>
+
+              <div class="grid" style="margin-top:10px;">
+                <div>
+                  <label id="t_rate">Tipo de cambio (1 USD = PYG)</label>
+                  <input id="usdRate" inputmode="decimal" value="7300" />
+                </div>
+                <div>
+                  <label id="t_show">Mostrar</label>
+                  <select id="displayMode">
+                    <option value="both">PYG + USD</option>
+                    <option value="pyg">Solo PYG</option>
+                    <option value="usd">Solo USD</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="box">
+              <div class="section-title" id="t_stay">Estadía</div>
+              <div class="grid" style="margin-top:10px;">
+                <div>
+                  <label id="t_price">Precio por noche (PYG)</label>
+                  <input id="nightPrice" inputmode="numeric" value="139000" />
+                </div>
+                <div>
+                  <label id="t_nights">Noches</label>
+                  <input id="nights" inputmode="numeric" value="1" />
+                </div>
+              </div>
+              <div style="margin-top:10px;">
+                <label id="t_room">Habitación</label>
+                <input id="room" value="Private Room" />
+              </div>
+              <p class="muted" id="t_hint" style="margin:10px 0 0;">
+                La primera línea se genera automáticamente desde esta sección.
+              </p>
+            </div>
+
+            <div class="box">
+              <div class="section-title" id="t_items">Items</div>
+
+              <table style="margin-top:10px;">
+                <thead>
+                  <tr>
+                    <th id="th_desc">Descripción</th>
+                    <th class="right" style="width:110px;" id="th_qty">Cant.</th>
+                    <th class="right" style="width:160px;" id="th_unit">Unit (PYG)</th>
+                    <th class="right" style="width:170px;" id="th_total">Total (PYG)</th>
+                    <th class="print-hide" style="width:54px;"></th>
+                  </tr>
+                </thead>
+                <tbody id="itemsBody"></tbody>
+              </table>
+
+              <div class="btnRow print-hide">
+                <button class="btn" type="button" onclick="addItem()" id="btnAdd">+ Agregar item</button>
+                <button class="btn" type="button" onclick="copyReadyText()" id="btnCopy">Copiar texto listo</button>
+              </div>
+            </div>
+
+            <div class="box">
+              <div class="section-title" id="t_pay">Método de pago</div>
+              <div class="checks print-hide">
+                <label class="check"><input type="checkbox" id="payCash" checked><span id="pm_cash">Efectivo</span></label>
+                <label class="check"><input type="checkbox" id="payTransfer"><span id="pm_transfer">Transferencia</span></label>
+                <label class="check"><input type="checkbox" id="payCard"><span id="pm_card">Tarjeta</span></label>
+              </div>
+
+              <div style="margin-top:10px;">
+                <label id="t_notes">Notas</label>
+                <textarea id="notes" rows="3" placeholder="Ej: Pago antes del check-in."></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT: SUMMARY -->
+          <div>
+            <div class="box">
+              <div class="section-title" id="t_sum">Resumen</div>
+
+              <div class="sumBox" style="margin-top:10px;">
+                <div class="sumLine">
+                  <div class="k" id="k_sub">Subtotal</div>
+                  <div class="v"><span id="subPYG">0</span> PYG</div>
+                </div>
+
+                <div class="sumLine" id="rowSubUSD">
+                  <div class="k" id="k_subusd">Subtotal (USD)</div>
+                  <div class="v">$ <span id="subUSD">0.00</span></div>
+                </div>
+
+                <div class="hr"></div>
+
+                <div class="sumLine">
+                  <div class="k" id="k_total">TOTAL</div>
+                  <div class="v big"><span id="totPYG">0</span> PYG</div>
+                </div>
+
+                <div class="sumLine" id="rowTotUSD">
+                  <div class="k" id="k_totalusd">TOTAL (USD)</div>
+                  <div class="v big">$ <span id="totUSD">0.00</span></div>
+                </div>
+
+                <p class="muted" id="t_formula" style="margin:10px 0 0;">
+                  USD = PYG / (PYG por 1 USD)
+                </p>
+              </div>
+            </div>
+
+            <div class="box">
+              <div class="section-title" id="t_ready">Texto listo</div>
+              <div class="muted" id="readyText" style="margin-top:10px; white-space:pre-line;"></div>
+              <div class="btnRow print-hide">
+                <button class="btn" type="button" onclick="window.print()" id="btnPrint2">Imprimir / PDF</button>
+                <button class="btn primary" type="button" onclick="toggleLang()" id="btnLang2">ES / EN</button>
+              </div>
+            </div>
+
+            <div class="box">
+              <div class="section-title" id="t_payinfo">Información de pago</div>
+              <div class="muted" id="payInfo" style="margin-top:10px; white-space:pre-line;"></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+<script>
+/* =========================================================
+   Fixed hostel info (edit once)
+   ========================================================= */
+const HOSTEL_FIXED = {
+  name: (window.HOSTEL_CONFIG && window.HOSTEL_CONFIG.PROPERTY_NAME) ? window.HOSTEL_CONFIG.PROPERTY_NAME : "Mandioca Hostel",
+  addressES: "Av. Colón 1090\nAsunción, Paraguay",
+  addressEN: "Av. Colón 1090\nAsunción, Paraguay",
+  taxLabelES: "RUC (si aplica)",
+  taxLabelEN: "Tax ID (if applicable)",
+  taxValue: "",
+  bankES: "Transferencia bancaria:\nCuenta: ____________________\nBanco: ____________________\nTitular: ____________________",
+  bankEN: "Bank transfer:\nAccount: ____________________\nBank: ____________________\nAccount holder: ____________________",
+  cashES: "Efectivo: Pago en efectivo en recepción.",
+  cashEN: "Cash: Pay at reception.",
+  cardES: "Tarjeta: Disponible según disponibilidad (recargo si aplica).",
+  cardEN: "Card: Subject to availability (surcharge may apply)."
+};
+
+let lang = "es";
+
+const $ = (id)=>document.getElementById(id);
+const fmtInt = (n)=>Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+const fmtUSD = (n)=> (Math.round((n+Number.EPSILON)*100)/100).toFixed(2);
+const num = (v)=> {
+  const s = String(v||"").replaceAll(",", "").replaceAll(" ", "");
+  const x = Number(s);
+  return isFinite(x)?x:0;
+};
+function todayISO(){
+  const d=new Date();
+  const z=n=>String(n).padStart(2,"0");
+  return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())}`;
+}
+
+function setFixed(){
+  const addr = (lang==="es") ? HOSTEL_FIXED.addressES : HOSTEL_FIXED.addressEN;
+  const taxL = (lang==="es") ? HOSTEL_FIXED.taxLabelES : HOSTEL_FIXED.taxLabelEN;
+  $("hostelBill").value = `${HOSTEL_FIXED.name}\n${addr}\n${taxL}: ${HOSTEL_FIXED.taxValue || "-"}`;
+}
+
+function makeRow({auto=false, desc="", qty=1, unit=0}){
+  const tr=document.createElement("tr");
+  tr.dataset.auto = auto ? "1":"0";
+
+  const tdD=document.createElement("td");
+  const iD=document.createElement("input");
+  iD.value=desc;
+  iD.placeholder = auto ? "" : (lang==="es" ? "Ej: Lavandería" : "e.g., Laundry");
+  iD.disabled = auto;
+  iD.addEventListener("input", update);
+  tdD.appendChild(iD);
+
+  const tdQ=document.createElement("td"); tdQ.className="right";
+  const iQ=document.createElement("input"); iQ.inputMode="numeric";
+  iQ.value=qty; iQ.disabled=auto;
+  iQ.addEventListener("input", update);
+  tdQ.appendChild(iQ);
+
+  const tdU=document.createElement("td"); tdU.className="right";
+  const iU=document.createElement("input"); iU.inputMode="numeric";
+  iU.value=unit; iU.disabled=auto;
+  iU.addEventListener("input", update);
+  tdU.appendChild(iU);
+
+  const tdT=document.createElement("td"); tdT.className="right";
+  const span=document.createElement("span"); span.className="vLine"; span.textContent="0";
+  tdT.appendChild(span);
+
+  const tdX=document.createElement("td"); tdX.className="right print-hide";
+  const b=document.createElement("button"); b.className="btn"; b.type="button"; b.textContent="✕";
+  if(auto){ b.disabled=true; b.style.opacity=".35"; }
+  b.onclick=()=>{ tr.remove(); ensureBase(); update(); };
+  tdX.appendChild(b);
+
+  tr.append(tdD,tdQ,tdU,tdT,tdX);
+  return tr;
+}
+
+function ensureBase(){
+  const body=$("itemsBody");
+  if(body.children.length===0){
+    body.appendChild(makeRow({auto:true, desc:"", qty:1, unit:0}));
+  }
+  body.children[0].dataset.auto="1";
+}
+
+function addItem(){
+  $("itemsBody").appendChild(makeRow({auto:false, desc:"", qty:1, unit:0}));
+  update();
+}
+
+function paymentText(){
+  const lines=[];
+  if($("payCash").checked) lines.push("• " + (lang==="es"?HOSTEL_FIXED.cashES:HOSTEL_FIXED.cashEN));
+  if($("payTransfer").checked) lines.push("• " + (lang==="es"?HOSTEL_FIXED.bankES:HOSTEL_FIXED.bankEN));
+  if($("payCard").checked) lines.push("• " + (lang==="es"?HOSTEL_FIXED.cardES:HOSTEL_FIXED.cardEN));
+  return lines.join("\n\n");
+}
+
+function update(){
+  ensureBase();
+  setFixed();
+
+  const rate = num($("usdRate").value);
+  const mode = $("displayMode").value;
+
+  const nights = Math.max(0, Math.round(num($("nights").value)));
+  const nightPrice = Math.max(0, num($("nightPrice").value));
+  const room = ($("room").value||"").trim();
+
+  // auto line
+  const base = $("itemsBody").children[0];
+  const d = base.children[0].querySelector("input");
+  const q = base.children[1].querySelector("input");
+  const u = base.children[2].querySelector("input");
+
+  d.value = (lang==="es")
+    ? `Alojamiento (${room}) — ${nights} noche${nights===1?"":"s"}`
+    : `Accommodation (${room}) — ${nights} night${nights===1?"":"s"}`;
+  q.value = String(nights);
+  u.value = String(nightPrice);
+
+  let subtotalPYG=0;
+  [...$("itemsBody").children].forEach(tr=>{
+    const desc = tr.children[0].querySelector("input").value.trim();
+    const qty  = num(tr.children[1].querySelector("input").value);
+    const unit = num(tr.children[2].querySelector("input").value);
+    const line = Math.max(0,qty)*Math.max(0,unit);
+    tr.querySelector(".vLine").textContent = fmtInt(line);
+    if(desc) subtotalPYG += line;
+  });
+
+  const subtotalUSD = (rate>0) ? subtotalPYG / rate : 0;
+
+  $("rowSubUSD").style.display = (mode==="pyg") ? "none" : "flex";
+  $("rowTotUSD").style.display = (mode==="pyg") ? "none" : "flex";
+
+  $("subPYG").textContent = fmtInt(subtotalPYG);
+  $("totPYG").textContent = fmtInt(subtotalPYG);
+  $("subUSD").textContent = fmtUSD(subtotalUSD);
+  $("totUSD").textContent = fmtUSD(subtotalUSD);
+
+  // ready text
+  const invNo = ($("invNo").value||"").trim();
+  const client = ($("toName").value||"").trim();
+  const docType = $("clientDocType").value;
+  const docNo = ($("clientDocNo").value||"").trim();
+  const docLabelES = docType==="passport"?"Pasaporte":docType==="id"?"Cédula/ID":"Documento";
+  const docLabelEN = docType==="passport"?"Passport":docType==="id"?"ID":"Document";
+  const docPart = docNo ? ` — ${(lang==="es"?docLabelES:docLabelEN)}: ${docNo}` : "";
+
+  const totalLine = (lang==="es")
+    ? `Factura ${invNo || "(sin número)"}\nTotal: ${fmtInt(subtotalPYG)} PYG${mode!=="pyg" ? " / $" + fmtUSD(subtotalUSD) + " USD" : ""}${client?("\nCliente: "+client+docPart):""}`
+    : `Invoice ${invNo || "(no number)"}\nTotal: ${fmtInt(subtotalPYG)} PYG${mode!=="pyg" ? " / $" + fmtUSD(subtotalUSD) + " USD" : ""}${client?("\nClient: "+client+docPart):""}`;
+
+  $("readyText").textContent = totalLine + ($("notes").value.trim()?("\n\n" + $("notes").value.trim()):"");
+  $("payInfo").textContent = paymentText();
+
+  // pills
+  $("pillLang").textContent = (lang==="es") ? "Idioma: ES" : "Language: EN";
+}
+
+async function copyReadyText(){
+  const txt = $("readyText").textContent || "";
+  try{ await navigator.clipboard.writeText(txt); }catch(e){ alert(txt); }
+}
+
+function setTexts(){
+  if(lang==="es"){
+    $("t_h1").textContent="Factura";
+    $("t_sub").textContent="Genera una factura con total automático en PYG y USD (listo para imprimir en PDF).";
+    $("pillMode").textContent="PYG ↔ USD";
+    $("t_head").textContent="Encabezado";
+    $("t_invno").textContent="N° de factura";
+    $("t_date").textContent="Fecha";
+    $("t_due").textContent="Vence";
+    $("t_client").textContent="Cliente / Huésped";
+    $("t_bill").textContent="Datos de facturación";
+    $("t_hostel_fixed").textContent="Hotel (fijo)";
+    $("t_client_bill").textContent="Cliente (editable)";
+    $("t_doctype").textContent="Documento";
+    $("t_docno").textContent="N° de documento";
+    $("t_rate").textContent="Tipo de cambio (1 USD = PYG)";
+    $("t_show").textContent="Mostrar";
+    $("t_stay").textContent="Estadía";
+    $("t_price").textContent="Precio por noche (PYG)";
+    $("t_nights").textContent="Noches";
+    $("t_room").textContent="Habitación";
+    $("t_hint").textContent="La primera línea se genera automáticamente desde esta sección.";
+    $("t_items").textContent="Items";
+    $("th_desc").textContent="Descripción";
+    $("th_qty").textContent="Cant.";
+    $("th_unit").textContent="Unit (PYG)";
+    $("th_total").textContent="Total (PYG)";
+    $("btnAdd").textContent="+ Agregar item";
+    $("btnCopy").textContent="Copiar texto listo";
+    $("t_pay").textContent="Método de pago";
+    $("pm_cash").textContent="Efectivo";
+    $("pm_transfer").textContent="Transferencia";
+    $("pm_card").textContent="Tarjeta";
+    $("t_notes").textContent="Notas";
+    $("t_sum").textContent="Resumen";
+    $("k_sub").textContent="Subtotal";
+    $("k_subusd").textContent="Subtotal (USD)";
+    $("k_total").textContent="TOTAL";
+    $("k_totalusd").textContent="TOTAL (USD)";
+    $("t_formula").textContent="USD = PYG / (PYG por 1 USD)";
+    $("t_ready").textContent="Texto listo";
+    $("t_payinfo").textContent="Información de pago";
+    $("btnPrint").textContent="Imprimir / PDF";
+    $("btnPrint2").textContent="Imprimir / PDF";
+  } else {
+    $("t_h1").textContent="Invoice";
+    $("t_sub").textContent="Generate an invoice with automatic totals in PYG and USD (PDF-ready).";
+    $("pillMode").textContent="PYG ↔ USD";
+    $("t_head").textContent="Header";
+    $("t_invno").textContent="Invoice No.";
+    $("t_date").textContent="Date";
+    $("t_due").textContent="Due";
+    $("t_client").textContent="Client / Guest";
+    $("t_bill").textContent="Billing details";
+    $("t_hostel_fixed").textContent="Hostel (fixed)";
+    $("t_client_bill").textContent="Client (editable)";
+    $("t_doctype").textContent="Document type";
+    $("t_docno").textContent="Document number";
+    $("t_rate").textContent="Exchange rate (1 USD = PYG)";
+    $("t_show").textContent="Display";
+    $("t_stay").textContent="Stay";
+    $("t_price").textContent="Price per night (PYG)";
+    $("t_nights").textContent="Nights";
+    $("t_room").textContent="Room";
+    $("t_hint").textContent="The first line is automatically generated from this section.";
+    $("t_items").textContent="Items";
+    $("th_desc").textContent="Description";
+    $("th_qty").textContent="Qty";
+    $("th_unit").textContent="Unit (PYG)";
+    $("th_total").textContent="Total (PYG)";
+    $("btnAdd").textContent="+ Add item";
+    $("btnCopy").textContent="Copy ready text";
+    $("t_pay").textContent="Payment method";
+    $("pm_cash").textContent="Cash";
+    $("pm_transfer").textContent="Bank transfer";
+    $("pm_card").textContent="Card";
+    $("t_notes").textContent="Notes";
+    $("t_sum").textContent="Summary";
+    $("k_sub").textContent="Subtotal";
+    $("k_subusd").textContent="Subtotal (USD)";
+    $("k_total").textContent="TOTAL";
+    $("k_totalusd").textContent="TOTAL (USD)";
+    $("t_formula").textContent="USD = PYG / (PYG per 1 USD)";
+    $("t_ready").textContent="Ready text";
+    $("t_payinfo").textContent="Payment information";
+    $("btnPrint").textContent="Print / PDF";
+    $("btnPrint2").textContent="Print / PDF";
+  }
+
+  $("pillLang").textContent = (lang==="es") ? "Idioma: ES" : "Language: EN";
+  update();
+}
+
+function toggleLang(){
+  lang = (lang==="es") ? "en" : "es";
+  setTexts();
+}
+
+// init
+(function(){
+  $("invDate").value = todayISO();
+  ensureBase();
+
+  const ids = ["invNo","invDate","invDue","toName","clientBill","clientDocType","clientDocNo","usdRate","displayMode","nightPrice","nights","room","notes","payCash","payTransfer","payCard"];
+  ids.forEach(id=>{
+    const el=$(id);
+    if(!el) return;
+    el.addEventListener("input", update);
+    el.addEventListener("change", update);
+  });
+
+  setTexts();
+})();
+</script>
+</body>
+</html>
