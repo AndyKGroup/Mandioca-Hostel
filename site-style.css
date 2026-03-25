@@ -415,4 +415,16 @@ video{
   /* avoid breaking headings */
   h1, h2, h3{ page-break-after: avoid; }
 }
+/* ==== Large screens / Reception display ==== */
+@media (min-width: 1400px){
+  .wrap{ padding: 18px 28px; }
+  .card{ max-width: 1600px; margin: 0 auto; }
+  .hub-grid{ gap: 18px; }
+  .hub-col{ min-height: auto; }
+}
 
+/* Ultra-wide screens */
+@media (min-width: 1900px){
+  .card{ max-width: 1800px; }
+  body{ font-size: 16px; }
+}
