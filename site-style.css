@@ -428,3 +428,57 @@ video{
   .card{ max-width: 1800px; }
   body{ font-size: 16px; }
 }
+/* ================================
+   27" Reception Display (2560x1440)
+   ================================ */
+
+@media (min-width: 1400px){
+  /* page padding */
+  .wrap{ padding: 20px 34px; }
+
+  /* main card container */
+  .card{
+    max-width: 1650px;
+    margin: 0 auto;
+  }
+
+  /* typography */
+  body{ font-size: 16px; }
+  h1{ font-size: 42px; line-height: 1.1; }
+  .subtitle{ font-size: 16px; }
+
+  /* topbar buttons */
+  .btn{
+    padding: 10px 14px;
+    font-size: 14px;
+  }
+
+  /* hub layout spacing */
+  .hub-grid{ gap: 18px; }
+  .hub-col{ padding: 14px; }
+
+  /* hub links bigger */
+  .hub-links a{
+    padding: 12px 14px;
+  }
+  .hub-links .title{ font-size: 16px; }
+  .hub-links .desc{ font-size: 13px; }
+
+  /* forms grid more readable */
+  .grid{ gap: 14px; }
+  input, select, textarea{
+    font-size: 15px;
+    padding: 12px 12px;
+  }
+
+  /* signature box size */
+  .sig{ min-height: 220px; }
+
+  /* prevent “tiny center” feel */
+  .content{ padding-top: 2px; }
+}
+
+/* ultra-clean on very wide screens */
+@media (min-width: 1900px){
+  .card{ max-width: 1800px; }
+}
