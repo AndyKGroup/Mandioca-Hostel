@@ -3,9 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Registro de Huésped –  (Auto-relleno)</title>
-
-  
+  <title>Registro de Huésped (Auto-relleno)</title>
 
   <!-- OCR (solo si hay internet). Si no carga, el local sigue funcionando manualmente. -->
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
@@ -23,7 +21,7 @@
         <div class="brand">
           <div class="logo">MH</div>
           <div class="meta">
-            <b data-i18n="title"> – Registro de Huésped</b>
+            <b data-i18n="title">Registro de Huésped</b>
             <small data-i18n="subtitleTop">Sin email • Sin backend • Guardado local</small>
           </div>
         </div>
@@ -31,7 +29,7 @@
         <div class="actions">
           <button class="btn" type="button" onclick="window.print()" data-i18n="btnPdf">Imprimir / PDF</button>
           <button class="btn" type="button" onclick="downloadPDF()">Descargar PDF / Download PDF</button>
-          
+
           <button class="btn primary" type="button" onclick="guardarDemo()" data-i18n="btnSave">Guardar</button>
           <button class="btn" type="button" onclick="cargarDemo()" data-i18n="btnLoad">Cargar</button>
           <button class="btn danger" type="button" onclick="borrarDemo()" data-i18n="btnClear">Borrar</button>
@@ -39,7 +37,7 @@
         </div>
       </div>
 
-      <div class="toast" id="toast" data-i18n="toastSaved">✅ Guardado (). Datos guardados solo en este navegador.</div>
+      <div class="toast" id="toast" data-i18n="toastSaved">✅ Guardado. Datos guardados solo en este navegador.</div>
 
       <header>
         <h1 data-i18n="h1">Formulario de Registro de Huésped</h1>
@@ -91,6 +89,18 @@
                   <button class="btn" type="button" onclick="capturarMRZ()" data-i18n="btnCaptureMrz">Capturar y leer MRZ</button>
                   <button class="btn" type="button" onclick="cerrarCamara()" data-i18n="btnCloseCam">Cerrar cámara</button>
                 </div>
+
+                <!-- ✅ iPad fallback: photo MRZ -->
+                <div class="hr"></div>
+                <label><b>iPad fallback</b> – MRZ desde foto</label>
+                <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:8px;">
+                  <input id="mrzFoto" type="file" accept="image/*" capture="environment" />
+                  <button class="btn" type="button" onclick="leerMRZDesdeFoto()">Leer MRZ desde foto</button>
+                </div>
+                <div class="note" style="margin-top:8px;">
+                  iPad: si “Abrir cámara” no funciona, use este método (abre la cámara nativa).
+                </div>
+
                 <div class="note" style="margin-top:8px;" data-i18n="camTip">
                   Consejo: buena luz, sin reflejos y acerque el pasaporte.
                 </div>
@@ -116,7 +126,15 @@
             <div class="grid">
               <div>
                 <label data-i18n="photoLabel">Subir foto del documento (frente)</label>
-                <input id="fotoDoc" type="file" accept="image/*" />
+
+                <!-- ✅ iPad camera support -->
+                <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                  <input id="fotoDoc" type="file" accept="image/*" capture="environment" />
+                  <button class="btn primary" type="button" onclick="document.getElementById('fotoDoc').click()">
+                    📷 Tomar foto / Take photo
+                  </button>
+                </div>
+
                 <div class="note" style="margin-top:8px;" data-i18n="photoTip">
                   Tome una foto nítida (sin reflejos). El OCR es “mejor esfuerzo” en esta local.
                 </div>
@@ -266,6 +284,24 @@
 
           <div class="hr"></div>
 
+          <!-- ✅ Annexes BEFORE signature -->
+          <div class="section-title">Anexos (A–I) – Reglas y políticas</div>
+          <div class="note" style="margin-top:6px;">
+            Antes de firmar, el huésped debe leer estos anexos. Al firmar, confirma que los entendió y acepta.
+          </div>
+
+          <div class="hub-links" style="margin-top:10px;">
+            <a href="ANEXOA.html"><div class="hub-left"><div class="title">ANEXO A – Normas de la Casa</div><div class="desc">Reglas generales y convivencia</div></div><span class="tag">A</span></a>
+            <a href="ANEXOB.html"><div class="hub-left"><div class="title">ANEXO B – Cocina y Áreas Comunes</div><div class="desc">Uso de cocina y áreas compartidas</div></div><span class="tag">B</span></a>
+            <a href="ANNEXOC.html"><div class="hub-left"><div class="title">ANEXO C – Piscina y Seguridad</div><div class="desc">Normas de piscina y seguridad</div></div><span class="tag">C</span></a>
+            <a href="ANEXOD.html"><div class="hub-left"><div class="title">ANEXO D – Seguridad y CCTV</div><div class="desc">Política de seguridad y videovigilancia</div></div><span class="tag">D</span></a>
+            <a href="ANEXOE.html"><div class="hub-left"><div class="title">ANEXO E – Higiene y Operación</div><div class="desc">Higiene, limpieza y operación</div></div><span class="tag">E</span></a>
+            <a href="ANNEXF.html"><div class="hub-left"><div class="title">ANEXO F – Términos y Responsabilidad</div><div class="desc">Términos generales y responsabilidad</div></div><span class="tag">F</span></a>
+            <a href="ANNEXOI.html"><div class="hub-left"><div class="title">ANEXO I – Área de Coworking</div><div class="desc">Normas del área de coworking</div></div><span class="tag">I</span></a>
+          </div>
+
+          <div class="hr"></div>
+
           <div class="section-title" data-i18n="sec5">5) GDPR + Aceptación de reglas / anexos</div>
           <div class="checkbox">
             <input id="consent" name="consent" type="checkbox" required />
@@ -274,7 +310,7 @@
                 Acepto el tratamiento de datos (GDPR) y confirmo que acepto las normas del hostel y todos los anexos. *
               </label>
               <div class="note" style="margin-top:6px;" data-i18n="consentNote">
-                (Local) En producción: aquí irán los enlaces a las reglas y anexos.
+                Al firmar, confirma que entendió los anexos y las reglas del hostel.
               </div>
             </div>
           </div>
@@ -298,7 +334,7 @@
 
           <div class="footer">
             <div class="note" data-i18n="footerNote">
-              Local para mostrar el flujo. En producción se conectará a email / base de datos.
+              Modo local: sin email / sin base de datos. Guardado solo en este dispositivo.
             </div>
             <div style="display:flex; gap:10px; flex-wrap:wrap;">
               <button class="btn" type="button" onclick="window.print()" data-i18n="btnPdf">Imprimir / PDF</button>
@@ -312,6 +348,9 @@
   </div>
 
   <script>
+    // Download PDF helper (avoid missing function)
+    function downloadPDF(){ window.print(); }
+
     // =========================
     // Idiomas ES/EN (conmutador)
     // =========================
@@ -319,13 +358,13 @@
 
     const I18N = {
       es: {
-        title: " – Registro de Huésped",
+        title: "Registro de Huésped",
         subtitleTop: "Sin email • Sin backend • Guardado local",
         btnPdf: "Imprimir / PDF",
         btnSave: "Guardar",
         btnLoad: "Cargar",
         btnClear: "Borrar",
-        toastSaved: "✅ Guardado (). Datos guardados solo en este navegador.",
+        toastSaved: "✅ Guardado. Datos guardados solo en este navegador.",
         h1: "Formulario de Registro de Huésped",
         subHeader: "Elija el tipo de documento → use auto-relleno (opcional) → revise → acepte → guarde → PDF.",
         sec0: "0) Documento – Selección + Auto-relleno",
@@ -390,22 +429,22 @@
         notes: "Notas / Observaciones",
         sec5: "5) GDPR + Aceptación de reglas / anexos",
         consentText: "Acepto el tratamiento de datos (GDPR) y confirmo que acepto las normas del hostel y todos los anexos. *",
-        consentNote: "(Local) En producción: aquí irán los enlaces a las reglas y anexos.",
+        consentNote: "Al firmar, confirma que entendió los anexos y las reglas del hostel.",
         sec6: "6) Firma (opcional)",
         btnSigClear: "Borrar firma",
         btnSigSave: "Guardar firma",
         sigHelp: "Móvil: dedo • PC: mouse. (Local: firma se guarda solo localmente.)",
         errRequired: "Por favor, complete todos los campos obligatorios (*) y acepte el consentimiento.",
-        footerNote: "Local para mostrar el flujo. En producción se conectará a email / base de datos."
+        footerNote: "Modo local: sin email / sin base de datos. Guardado solo en este dispositivo."
       },
       en: {
-        title: " – Guest Registration",
-        subtitleTop: "No email • No database • Local only",
+        title: "Guest Registration",
+        subtitleTop: "No email • No backend • Local storage",
         btnPdf: "Print / PDF",
         btnSave: "Save",
         btnLoad: "Load",
         btnClear: "Clear",
-        toastSaved: "✅ Saved (). Data is stored only in this browser.",
+        toastSaved: "✅ Saved. Data is stored only in this browser.",
         h1: "Guest Registration Form",
         subHeader: "Choose document type → optional auto-fill → review → accept → save → PDF.",
         sec0: "0) Document – Selection + Auto-fill",
@@ -430,7 +469,7 @@
         btnClean: "Clear",
         mrzTip: "If OCR fails, pasting MRZ is the most reliable option.",
         photoLabel: "Upload document photo (front)",
-        photoTip: "Take a sharp photo (no glare). OCR is best-effort in this local.",
+        photoTip: "Take a sharp photo (no glare). OCR is best-effort in local mode.",
         btnReadPhoto: "Read photo & auto-fill",
         btnCleanPhoto: "Clear photo",
         ocrPreviewLabel: "Detected text (OCR) – review only",
@@ -470,13 +509,13 @@
         notes: "Notes",
         sec5: "5) GDPR + Rules/annex acceptance",
         consentText: "I accept data processing (GDPR) and confirm I accept hostel rules and all annexes. *",
-        consentNote: "(Local) In production: links to rules and annexes go here.",
+        consentNote: "By signing, the guest confirms they read and understood the annexes and hostel rules.",
         sec6: "6) Signature (optional)",
         btnSigClear: "Clear signature",
         btnSigSave: "Save signature",
         sigHelp: "Mobile: finger • Desktop: mouse. (Local: signature is stored locally.)",
         errRequired: "Please complete all required fields (*) and accept the consent checkbox.",
-        footerNote: "Local to show the flow. Production will connect to email / database."
+        footerNote: "Local mode: no email / no database. Stored only on this device."
       }
     };
 
@@ -487,24 +526,16 @@
         if (dict[key]) el.textContent = dict[key];
       });
 
-      // OCR info message (dynamic)
       const info = document.getElementById("ocrInfo");
       const hasT = typeof window.Tesseract !== "undefined";
-      if (LANG === "es"){
-        info.textContent = hasT
-          ? "OCR: disponible (requiere internet). Si no funciona, el formulario igualmente se puede completar manualmente."
-          : "OCR: no disponible (probablemente sin internet). El formulario funciona igual en modo manual.";
-      } else {
-        info.textContent = hasT
-          ? "OCR: available (internet required). If it fails, you can still complete the form manually."
-          : "OCR: not available (likely offline). The form still works in manual mode.";
-      }
+      info.textContent = (LANG === "es")
+        ? (hasT ? "OCR disponible (internet). Si falla, completar manualmente." : "OCR no disponible (offline). Completar manualmente.")
+        : (hasT ? "OCR available (internet). If it fails, fill manually." : "OCR not available (offline). Fill manually.");
     }
 
     function toggleLang(){
       LANG = (LANG === "es") ? "en" : "es";
       applyI18n();
-      // Update placeholders (optional) based on language
       document.getElementById("mrzText").placeholder = (LANG==="es")
         ? "Pegue aquí los 2 renglones MRZ (44+44)…"
         : "Paste the 2 MRZ lines here (44+44)…";
@@ -514,9 +545,9 @@
     }
 
     // =========================
-    // : Guardar/Cargar local
+    // Guardar/Cargar local
     // =========================
-    const KEY = "mandioca_registro_demo_working_v1";
+    const KEY = "mandioca_registro_local_v2";
 
     function mostrarToast(){
       const t = document.getElementById("toast");
@@ -588,7 +619,7 @@
       }
       const parsed = JSON.parse(raw);
       objToForm(parsed.data);
-      alert(LANG==="es" ? "Local cargado ✅" : "Local loaded ✅");
+      alert(LANG==="es" ? "Cargado ✅" : "Loaded ✅");
     }
 
     function borrarDemo(){
@@ -601,15 +632,13 @@
       cerrarCamara();
       borrarFirma();
       actualizarModo();
-      alert(LANG==="es" ? "Local borrado." : "Local cleared.");
+      alert(LANG==="es" ? "Borrado." : "Cleared.");
     }
 
     // =========================
     // Modo: pasaporte vs foto
     // =========================
-    function setEstado(msg){
-      document.getElementById("estado").value = msg;
-    }
+    function setEstado(msg){ document.getElementById("estado").value = msg; }
 
     function actualizarModo(){
       const tipo = document.getElementById("tipoScan").value;
@@ -618,7 +647,6 @@
       const err = document.getElementById("scanErr");
       err.classList.remove("show");
       err.textContent = "";
-
       cerrarCamara();
 
       if (!tipo){
@@ -632,42 +660,26 @@
         pas.classList.remove("hidden");
         foto.classList.add("hidden");
         document.getElementById("tipo_doc").value = (LANG==="es" ? "Pasaporte" : "Passport");
-        setEstado(LANG==="es"
-          ? "Modo Pasaporte (MRZ): abra la cámara o pegue el MRZ."
-          : "Passport mode (MRZ): open camera or paste MRZ.");
+        setEstado(LANG==="es" ? "Modo Pasaporte (MRZ)." : "Passport mode (MRZ).");
       } else {
         pas.classList.add("hidden");
         foto.classList.remove("hidden");
-
         if (tipo === "DNI") document.getElementById("tipo_doc").value = (LANG==="es" ? "Cédula / DNI" : "ID card");
         else if (tipo === "LICENCIA") document.getElementById("tipo_doc").value = (LANG==="es" ? "Licencia de conducir" : "Driver's license");
         else document.getElementById("tipo_doc").value = (LANG==="es" ? "Otro" : "Other");
-
-        setEstado(LANG==="es"
-          ? "Modo Foto (OCR): suba una foto y ejecute el auto-relleno (opcional)."
-          : "Photo mode (OCR): upload a photo and run auto-fill (optional).");
+        setEstado(LANG==="es" ? "Modo Foto (OCR)." : "Photo mode (OCR).");
       }
     }
 
     // =========================
     // Cámara + MRZ OCR (pasaporte)
     // =========================
-    let stream = null;
-
     async function abrirCamara(){
       const err = document.getElementById("scanErr");
       err.classList.remove("show"); err.textContent = "";
 
-      if (document.getElementById("tipoScan").value !== "PASAPORTE"){
-        err.textContent = (LANG==="es")
-          ? "Seleccione 'Pasaporte (MRZ)' para usar la cámara."
-          : "Select 'Passport (MRZ)' to use the camera.";
-        err.classList.add("show");
-        return;
-      }
-
       try{
-        stream = await navigator.mediaDevices.getUserMedia({
+        const stream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: "environment", width: {ideal: 1280}, height: {ideal: 720} },
           audio: false
         });
@@ -676,8 +688,8 @@
         await video.play();
       }catch(e){
         err.textContent = (LANG==="es")
-          ? "No se pudo abrir la cámara. Use MRZ pegado como alternativa."
-          : "Could not open camera. Use pasted MRZ as fallback.";
+          ? "No se pudo abrir la cámara. Use MRZ desde foto o pegue MRZ."
+          : "Could not open camera. Use MRZ from photo or paste MRZ.";
         err.classList.add("show");
       }
     }
@@ -688,39 +700,27 @@
         video.srcObject.getTracks().forEach(t => t.stop());
         video.srcObject = null;
       }
-      stream = null;
     }
 
     async function capturarMRZ(){
       const err = document.getElementById("scanErr");
       err.classList.remove("show"); err.textContent = "";
 
-      if (document.getElementById("tipoScan").value !== "PASAPORTE"){
-        err.textContent = (LANG==="es")
-          ? "Seleccione 'Pasaporte (MRZ)' para usar este escaneo."
-          : "Select 'Passport (MRZ)' to use this scan.";
-        err.classList.add("show");
-        return;
-      }
-
       if (typeof window.Tesseract === "undefined"){
         err.textContent = (LANG==="es")
-          ? "OCR no disponible (sin internet). Pegue el MRZ manualmente."
-          : "OCR not available (offline). Please paste MRZ manually.";
+          ? "OCR no disponible (sin internet). Pegue MRZ manualmente."
+          : "OCR not available (offline). Please paste MRZ.";
         err.classList.add("show");
         return;
       }
 
       const video = document.getElementById("video");
       if (!video || !video.srcObject){
-        err.textContent = (LANG==="es")
-          ? "Primero haga clic en 'Abrir cámara'."
-          : "Click 'Open camera' first.";
+        err.textContent = (LANG==="es") ? "Primero 'Abrir cámara'." : "Open camera first.";
         err.classList.add("show");
         return;
       }
 
-      // Snapshot
       const canvas = document.getElementById("snap");
       const ctx = canvas.getContext("2d");
       const vw = video.videoWidth || 1280;
@@ -730,7 +730,6 @@
       canvas.height = vh;
       ctx.drawImage(video, 0, 0, vw, vh);
 
-      // Crop bottom area (MRZ usually)
       const cropY = Math.floor(vh * 0.62);
       const cropH = Math.floor(vh * 0.38);
       const crop = ctx.getImageData(0, cropY, vw, cropH);
@@ -745,28 +744,20 @@
         setEstado(LANG==="es" ? "Leyendo MRZ… (OCR)" : "Reading MRZ… (OCR)");
         const ocr = await Tesseract.recognize(temp, "eng");
         const text = (ocr.data && ocr.data.text ? ocr.data.text : "")
-          .toUpperCase()
-          .replace(/ /g,"")
-          .replace(/[^A-Z0-9<\n]/g,"");
+          .toUpperCase().replace(/ /g,"").replace(/[^A-Z0-9<\n]/g,"");
 
         const mrz = extraerMRZ(text);
         if (!mrz){
           setEstado(LANG==="es" ? "MRZ no detectado." : "MRZ not detected.");
-          err.textContent = (LANG==="es")
-            ? "No se detectó MRZ. Intente mejor luz / más cerca, o pegue el MRZ manualmente."
-            : "MRZ not detected. Try better light/closer, or paste MRZ manually.";
+          err.textContent = (LANG==="es") ? "No se detectó MRZ. Use MRZ desde foto o pegue MRZ." : "MRZ not detected. Use photo method or paste MRZ.";
           err.classList.add("show");
           return;
         }
 
         document.getElementById("mrzText").value = mrz.line1 + "\n" + mrz.line2;
         const parsed = parseTD3(mrz.line1, mrz.line2);
-
         if (!parsed){
-          setEstado(LANG==="es" ? "MRZ detectado pero no interpretado." : "MRZ detected but not parsed.");
-          err.textContent = (LANG==="es")
-            ? "MRZ detectado pero no se pudo interpretar. Pegue MRZ o intente otra vez."
-            : "MRZ detected but couldn't be parsed. Paste MRZ or try again.";
+          err.textContent = (LANG==="es") ? "MRZ detectado pero no interpretado." : "MRZ detected but not parsed.";
           err.classList.add("show");
           return;
         }
@@ -775,9 +766,77 @@
         setEstado(LANG==="es" ? "Auto-relleno completado (pasaporte)." : "Auto-fill done (passport).");
       }catch(e){
         setEstado(LANG==="es" ? "OCR falló." : "OCR failed.");
-        err.textContent = (LANG==="es")
-          ? "OCR falló . Pegue MRZ manualmente."
-          : "OCR failed . Please paste MRZ manually.";
+        err.textContent = (LANG==="es") ? "OCR falló. Use MRZ desde foto o pegue MRZ." : "OCR failed. Use photo method or paste MRZ.";
+        err.classList.add("show");
+      }
+    }
+
+    async function leerMRZDesdeFoto(){
+      const err = document.getElementById("scanErr");
+      err.classList.remove("show"); err.textContent = "";
+
+      const file = document.getElementById("mrzFoto").files?.[0];
+      if (!file){
+        err.textContent = (LANG==="es") ? "Seleccione una foto primero." : "Select a photo first.";
+        err.classList.add("show");
+        return;
+      }
+
+      if (typeof window.Tesseract === "undefined"){
+        err.textContent = (LANG==="es") ? "OCR no disponible (offline). Pegue MRZ manualmente." : "OCR not available (offline). Paste MRZ manually.";
+        err.classList.add("show");
+        return;
+      }
+
+      try{
+        setEstado(LANG==="es" ? "Leyendo MRZ desde foto… (OCR)" : "Reading MRZ from photo… (OCR)");
+        const img = await fileToImage(file);
+
+        // draw to canvas
+        const canvas = document.getElementById("snap");
+        const ctx = canvas.getContext("2d");
+        const vw = img.naturalWidth || img.width;
+        const vh = img.naturalHeight || img.height;
+        canvas.width = vw;
+        canvas.height = vh;
+        ctx.drawImage(img, 0, 0, vw, vh);
+
+        // crop bottom for MRZ
+        const cropY = Math.floor(vh * 0.62);
+        const cropH = Math.floor(vh * 0.38);
+        const crop = ctx.getImageData(0, cropY, vw, cropH);
+
+        const temp = document.createElement("canvas");
+        temp.width = vw;
+        temp.height = cropH;
+        const tctx = temp.getContext("2d");
+        tctx.putImageData(crop, 0, 0);
+
+        const ocr = await Tesseract.recognize(temp, "eng");
+        const text = (ocr.data && ocr.data.text ? ocr.data.text : "")
+          .toUpperCase().replace(/ /g,"").replace(/[^A-Z0-9<\n]/g,"");
+
+        const mrz = extraerMRZ(text);
+        if (!mrz){
+          setEstado(LANG==="es" ? "MRZ no detectado." : "MRZ not detected.");
+          err.textContent = (LANG==="es")
+            ? "No se detectó MRZ. Intente otra foto (más cerca / buena luz) o pegue MRZ manualmente."
+            : "MRZ not detected. Try another photo (closer / good light) or paste MRZ manually.";
+          err.classList.add("show");
+          return;
+        }
+
+        document.getElementById("mrzText").value = mrz.line1 + "\n" + mrz.line2;
+        const parsed = parseTD3(mrz.line1, mrz.line2);
+        if (!parsed){
+          err.textContent = (LANG==="es") ? "MRZ detectado pero no interpretado." : "MRZ detected but not parsed.";
+          err.classList.add("show");
+          return;
+        }
+        aplicarPasaporte(parsed);
+        setEstado(LANG==="es" ? "MRZ leído ✅ (datos completados)" : "MRZ read ✅ (fields filled)");
+      }catch(e){
+        err.textContent = (LANG==="es") ? "Error leyendo la foto. Intente otra." : "Error reading photo. Try another.";
         err.classList.add("show");
       }
     }
@@ -786,17 +845,8 @@
       const err = document.getElementById("scanErr");
       err.classList.remove("show"); err.textContent = "";
 
-      if (document.getElementById("tipoScan").value !== "PASAPORTE"){
-        err.textContent = (LANG==="es")
-          ? "Seleccione 'Pasaporte (MRZ)' para usar esta función."
-          : "Select 'Passport (MRZ)' to use this function.";
-        err.classList.add("show");
-        return;
-      }
-
       const raw = (document.getElementById("mrzText").value || "").toUpperCase();
       const lines = raw.split(/\r?\n/).map(l => l.trim().replace(/ /g,"")).filter(Boolean);
-
       if (lines.length < 2){
         err.textContent = (LANG==="es") ? "Pegue los 2 renglones MRZ." : "Paste the 2 MRZ lines.";
         err.classList.add("show");
@@ -806,15 +856,11 @@
       const l1 = normalizarMRZ(lines[0]);
       const l2 = normalizarMRZ(lines[1]);
       const parsed = parseTD3(l1, l2);
-
       if (!parsed){
-        err.textContent = (LANG==="es")
-          ? "No se pudo interpretar el MRZ. Verifique el texto pegado."
-          : "Could not parse MRZ. Please verify the pasted text.";
+        err.textContent = (LANG==="es") ? "No se pudo interpretar el MRZ." : "Could not parse MRZ.";
         err.classList.add("show");
         return;
       }
-
       aplicarPasaporte(parsed);
       setEstado(LANG==="es" ? "Auto-relleno completado (MRZ pegado)." : "Auto-fill done (pasted MRZ).");
     }
@@ -836,7 +882,6 @@
     }
 
     function parseTD3(line1, line2){
-      if (!line1 || !line2) return null;
       line1 = normalizarMRZ(line1);
       line2 = normalizarMRZ(line2);
       if (line1.length !== 44 || line2.length !== 44) return null;
@@ -868,7 +913,6 @@
       const yy = parseInt(yyMMdd.slice(0,2),10);
       const mm = yyMMdd.slice(2,4);
       const dd = yyMMdd.slice(4,6);
-
       const now = new Date();
       const currentYY = parseInt(String(now.getFullYear()).slice(2),10);
       const century = (yy > currentYY ? "19" : "20");
@@ -884,19 +928,13 @@
       document.getElementById("nacionalidad").value = p.nacionalidad || "";
       if (p.sexo) document.getElementById("sexo").value = p.sexo;
       document.getElementById("venc_doc").value = p.vencISO || "";
-
-      alert(LANG==="es"
-        ? "✅ Datos cargados desde pasaporte (MRZ). Revise y corrija si es necesario."
-        : "✅ Data loaded from passport (MRZ). Please review and correct if needed.");
       document.getElementById("nombre").scrollIntoView({behavior:"smooth", block:"center"});
     }
 
     // =========================
-    // FOTO OCR (ID / licencia / otro) – best effort
+    // FOTO OCR (ID/licencia/otro)
     // =========================
-    function limpiarFoto(){
-      document.getElementById("fotoDoc").value = "";
-    }
+    function limpiarFoto(){ document.getElementById("fotoDoc").value = ""; }
 
     async function leerFoto(){
       const err = document.getElementById("scanErr");
@@ -904,24 +942,20 @@
 
       const tipo = document.getElementById("tipoScan").value;
       if (!tipo || tipo === "PASAPORTE"){
-        err.textContent = (LANG==="es")
-          ? "Seleccione un tipo de documento con foto (DNI / licencia / otro)."
-          : "Select a photo-based document type (ID / license / other).";
+        err.textContent = (LANG==="es") ? "Seleccione un tipo con foto (DNI/licencia/otro)." : "Select a photo document type (ID/license/other).";
         err.classList.add("show");
         return;
       }
 
       if (typeof window.Tesseract === "undefined"){
-        err.textContent = (LANG==="es")
-          ? "OCR no disponible (sin internet). Complete manualmente."
-          : "OCR not available (offline). Please fill manually.";
+        err.textContent = (LANG==="es") ? "OCR no disponible (offline). Complete manualmente." : "OCR not available (offline). Fill manually.";
         err.classList.add("show");
         return;
       }
 
       const file = document.getElementById("fotoDoc").files?.[0];
       if (!file){
-        err.textContent = (LANG==="es") ? "Suba una foto del documento." : "Please upload a document photo.";
+        err.textContent = (LANG==="es") ? "Suba una foto del documento." : "Upload a document photo.";
         err.classList.add("show");
         return;
       }
@@ -929,33 +963,14 @@
       try{
         setEstado(LANG==="es" ? "Leyendo foto… (OCR)" : "Reading photo… (OCR)");
         const img = await fileToImage(file);
-
         const ocr = await Tesseract.recognize(img, "spa+eng");
         const raw = (ocr.data && ocr.data.text) ? ocr.data.text : "";
         document.getElementById("ocrPreview").value = raw;
 
-        const cleaned = normalizarOCR(raw);
-        const result = extraerCamposDesdeOCR(cleaned);
-
-        // Set doc type in form according to selection
-        if (tipo === "DNI") document.getElementById("tipo_doc").value = (LANG==="es") ? "Cédula / DNI" : "ID card";
-        else if (tipo === "LICENCIA") document.getElementById("tipo_doc").value = (LANG==="es") ? "Licencia de conducir" : "Driver's license";
-        else document.getElementById("tipo_doc").value = (LANG==="es") ? "Otro" : "Other";
-
-        if (result.numero_doc) document.getElementById("numero_doc").value = result.numero_doc;
-        if (result.nombre) document.getElementById("nombre").value = result.nombre;
-        if (result.apellido) document.getElementById("apellido").value = result.apellido;
-        if (result.nacimientoISO) document.getElementById("nacimiento").value = result.nacimientoISO;
-
-        setEstado(LANG==="es" ? "Auto-relleno completado (foto)." : "Auto-fill done (photo).");
-        alert(LANG==="es"
-          ? "✅ Auto-relleno desde foto . Revise y corrija antes de guardar."
-          : "✅ Auto-filled from photo . Please review and correct before saving.");
+        setEstado(LANG==="es" ? "OCR completado. Revise manualmente si hace falta." : "OCR done. Review manually if needed.");
       }catch(e){
         setEstado(LANG==="es" ? "OCR falló." : "OCR failed.");
-        err.textContent = (LANG==="es")
-          ? "No se pudo leer la foto . Intente otra foto o complete manualmente."
-          : "Could not read photo . Try another photo or fill manually.";
+        err.textContent = (LANG==="es") ? "No se pudo leer la foto. Intente otra." : "Could not read photo. Try another.";
         err.classList.add("show");
       }
     }
@@ -968,54 +983,6 @@
         img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("img error")); };
         img.src = url;
       });
-    }
-
-    function normalizarOCR(raw){
-      return (raw || "")
-        .toUpperCase()
-        .replace(/\u00A0/g," ")
-        .replace(/[^\w\s\/\-\.:]/g," ")
-        .replace(/\s+/g," ")
-        .trim();
-    }
-
-    function extraerCamposDesdeOCR(text){
-      const out = { numero_doc:"", nombre:"", apellido:"", nacimientoISO:"" };
-
-      // Document number heuristics
-      const m1 = text.match(/\b(DOC(UMENTO)?|DNI|CI|ID|NRO|N°|NUM(ERO)?)\b[:\.\- ]{0,6}([A-Z0-9\-]{6,15})\b/);
-      if (m1) out.numero_doc = (m1[4] || "").replace(/[^A-Z0-9\-]/g,"").slice(0,18);
-      else {
-        const m2 = text.match(/\b(\d{7,12})\b/);
-        if (m2) out.numero_doc = m2[1];
-      }
-
-      // DOB heuristics dd/mm/yyyy or dd-mm-yyyy
-      const dm = text.match(/\b(FEC(HA)?\s*DE\s*NAC(IMIENTO)?|NAC(IMIENTO)?)\b[:\.\- ]{0,10}(\d{2}[\/\-]\d{2}[\/\-]\d{4})\b/);
-      const anyDate = text.match(/\b(\d{2}[\/\-]\d{2}[\/\-]\d{4})\b/);
-      const d = (dm && dm[5]) ? dm[5] : (anyDate ? anyDate[1] : "");
-      if (d) out.nacimientoISO = ddmmyyyyToISO(d);
-
-      // Name heuristics
-      const ap = text.match(/\bAPELLIDOS?\b[:\.\- ]{0,10}([A-Z ]{3,40})\b/);
-      const no = text.match(/\bNOMBRES?\b[:\.\- ]{0,10}([A-Z ]{3,40})\b/);
-      if (ap) out.apellido = limpiarNombre(ap[1]);
-      if (no) out.nombre = limpiarNombre(no[1]);
-
-      return out;
-    }
-
-    function limpiarNombre(s){
-      return (s || "")
-        .replace(/\b(SEX0|SEXO|NACIMIENTO|FECHA|DOCUMENTO|DNI|CI|ID|NACIONALIDAD)\b/g," ")
-        .replace(/\s+/g," ")
-        .trim();
-    }
-
-    function ddmmyyyyToISO(s){
-      const m = (s || "").match(/(\d{2})[\/\-](\d{2})[\/\-](\d{4})/);
-      if (!m) return "";
-      return `${m[3]}-${m[2]}-${m[1]}`;
     }
 
     // =========================
@@ -1070,16 +1037,15 @@
     function guardarFirma(){
       const data = sig.toDataURL("image/png");
       document.getElementById("sigData").value = data;
-      alert(LANG==="es" ? "Firma guardada ." : "Signature saved .");
+      alert(LANG==="es" ? "Firma guardada ✅" : "Signature saved ✅");
     }
 
     // =========================
-    // Inicialización
+    // Init
     // =========================
     (function init(){
       applyI18n();
       actualizarModo();
-
       const raw = localStorage.getItem(KEY);
       if(raw){
         try{
