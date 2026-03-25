@@ -35,7 +35,19 @@
       .print-hide{ display:none !important; }
       th{ background:#f4f6f8 !important; color:#000 !important; }
     }
-  </style>
+  
+/* --- Print: prevent cut-off and keep full pages --- */
+@page { size: A4; margin: 12mm; }
+@media print{
+  html, body { width:auto !important; height:auto !important; overflow: visible !important; }
+  .wrap, .card, .content { overflow: visible !important; }
+  .grid2, .gridWide { display:block !important; }
+  .tableWrap { overflow: visible !important; border: 0 !important; }
+  table { width:100% !important; }
+  tr, td, th { break-inside: avoid; page-break-inside: avoid; }
+  .box, .sumBox { break-inside: avoid; page-break-inside: avoid; }
+}
+</style>
 </head>
 
 <body>
@@ -48,7 +60,7 @@
           <div class="logo">MH</div>
           <div class="meta">
             <b>Factura (PYG/USD)</b>
-            <small>Demo</small>
+            <small>Local</small>
           </div>
         </div>
         <div class="actions print-hide">

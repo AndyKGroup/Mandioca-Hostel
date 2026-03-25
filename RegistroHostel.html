@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Registro de Huésped – DEMO (Auto-relleno)</title>
+  <title>Registro de Huésped –  (Auto-relleno)</title>
 
   
 
-  <!-- OCR (solo si hay internet). Si no carga, el demo sigue funcionando manualmente. -->
+  <!-- OCR (solo si hay internet). Si no carga, el local sigue funcionando manualmente. -->
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
   <link rel="stylesheet" href="site-style.css"/>
@@ -23,8 +23,8 @@
         <div class="brand">
           <div class="logo">MH</div>
           <div class="meta">
-            <b data-i18n="title">DEMO – Registro de Huésped</b>
-            <small data-i18n="subtitleTop">Sin email • Sin base de datos • Solo demostración</small>
+            <b data-i18n="title"> – Registro de Huésped</b>
+            <small data-i18n="subtitleTop">Sin email • Sin backend • Guardado local</small>
           </div>
         </div>
 
@@ -32,14 +32,14 @@
           <button class="btn" type="button" onclick="window.print()" data-i18n="btnPdf">Imprimir / PDF</button>
           <button class="btn" type="button" onclick="downloadPDF()">Descargar PDF / Download PDF</button>
           
-          <button class="btn primary" type="button" onclick="guardarDemo()" data-i18n="btnSave">Guardar (Demo)</button>
+          <button class="btn primary" type="button" onclick="guardarDemo()" data-i18n="btnSave">Guardar</button>
           <button class="btn" type="button" onclick="cargarDemo()" data-i18n="btnLoad">Cargar</button>
           <button class="btn danger" type="button" onclick="borrarDemo()" data-i18n="btnClear">Borrar</button>
           <button class="btn" type="button" onclick="toggleLang()" id="langBtn">ES / EN</button>
         </div>
       </div>
 
-      <div class="toast" id="toast" data-i18n="toastSaved">✅ Guardado (DEMO). Datos guardados solo en este navegador.</div>
+      <div class="toast" id="toast" data-i18n="toastSaved">✅ Guardado (). Datos guardados solo en este navegador.</div>
 
       <header>
         <h1 data-i18n="h1">Formulario de Registro de Huésped</h1>
@@ -118,7 +118,7 @@
                 <label data-i18n="photoLabel">Subir foto del documento (frente)</label>
                 <input id="fotoDoc" type="file" accept="image/*" />
                 <div class="note" style="margin-top:8px;" data-i18n="photoTip">
-                  Tome una foto nítida (sin reflejos). El OCR es “mejor esfuerzo” en esta demo.
+                  Tome una foto nítida (sin reflejos). El OCR es “mejor esfuerzo” en esta local.
                 </div>
                 <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
                   <button class="btn primary" type="button" onclick="leerFoto()" data-i18n="btnReadPhoto">Leer foto y auto-rellenar</button>
@@ -226,7 +226,7 @@
               <input name="telefono" id="telefono" required autocomplete="tel" />
             </div>
             <div>
-              <label data-i18n="email">Email (opcional en demo)</label>
+              <label data-i18n="email">Email (opcional en local)</label>
               <input type="email" name="email" id="email" autocomplete="email" />
             </div>
           </div>
@@ -274,7 +274,7 @@
                 Acepto el tratamiento de datos (GDPR) y confirmo que acepto las normas del hostel y todos los anexos. *
               </label>
               <div class="note" style="margin-top:6px;" data-i18n="consentNote">
-                (Demo) En producción: aquí irán los enlaces a las reglas y anexos.
+                (Local) En producción: aquí irán los enlaces a las reglas y anexos.
               </div>
             </div>
           </div>
@@ -289,7 +289,7 @@
               <button class="btn" type="button" onclick="borrarFirma()" data-i18n="btnSigClear">Borrar firma</button>
               <button class="btn" type="button" onclick="guardarFirma()" data-i18n="btnSigSave">Guardar firma</button>
             </div>
-            <div class="note" data-i18n="sigHelp">Móvil: dedo • PC: mouse. (Demo: firma se guarda solo localmente.)</div>
+            <div class="note" data-i18n="sigHelp">Móvil: dedo • PC: mouse. (Local: firma se guarda solo localmente.)</div>
           </div>
 
           <div class="danger-msg" id="err" data-i18n="errRequired">
@@ -298,11 +298,11 @@
 
           <div class="footer">
             <div class="note" data-i18n="footerNote">
-              Demo para mostrar el flujo. En producción se conectará a email / base de datos.
+              Local para mostrar el flujo. En producción se conectará a email / base de datos.
             </div>
             <div style="display:flex; gap:10px; flex-wrap:wrap;">
               <button class="btn" type="button" onclick="window.print()" data-i18n="btnPdf">Imprimir / PDF</button>
-              <button class="btn primary" type="submit" data-i18n="btnSave">Guardar (Demo)</button>
+              <button class="btn primary" type="submit" data-i18n="btnSave">Guardar</button>
             </div>
           </div>
 
@@ -319,13 +319,13 @@
 
     const I18N = {
       es: {
-        title: "DEMO – Registro de Huésped",
-        subtitleTop: "Sin email • Sin base de datos • Solo demostración",
+        title: " – Registro de Huésped",
+        subtitleTop: "Sin email • Sin backend • Guardado local",
         btnPdf: "Imprimir / PDF",
-        btnSave: "Guardar (Demo)",
+        btnSave: "Guardar",
         btnLoad: "Cargar",
         btnClear: "Borrar",
-        toastSaved: "✅ Guardado (DEMO). Datos guardados solo en este navegador.",
+        toastSaved: "✅ Guardado (). Datos guardados solo en este navegador.",
         h1: "Formulario de Registro de Huésped",
         subHeader: "Elija el tipo de documento → use auto-relleno (opcional) → revise → acepte → guarde → PDF.",
         sec0: "0) Documento – Selección + Auto-relleno",
@@ -350,7 +350,7 @@
         btnClean: "Limpiar",
         mrzTip: "Si el OCR falla, pegar MRZ es la opción más estable.",
         photoLabel: "Subir foto del documento (frente)",
-        photoTip: "Tome una foto nítida (sin reflejos). El OCR es “mejor esfuerzo” en esta demo.",
+        photoTip: "Tome una foto nítida (sin reflejos). El OCR es “mejor esfuerzo” en esta local.",
         btnReadPhoto: "Leer foto y auto-rellenar",
         btnCleanPhoto: "Limpiar foto",
         ocrPreviewLabel: "Texto detectado (OCR) – solo para revisión",
@@ -378,7 +378,7 @@
         expiryDate: "Fecha de vencimiento",
         sec3: "3) Contacto",
         phone: "Teléfono / WhatsApp *",
-        email: "Email (opcional en demo)",
+        email: "Email (opcional en local)",
         sec4: "4) Estancia",
         checkin: "Check-in *",
         checkout: "Check-out *",
@@ -390,22 +390,22 @@
         notes: "Notas / Observaciones",
         sec5: "5) GDPR + Aceptación de reglas / anexos",
         consentText: "Acepto el tratamiento de datos (GDPR) y confirmo que acepto las normas del hostel y todos los anexos. *",
-        consentNote: "(Demo) En producción: aquí irán los enlaces a las reglas y anexos.",
+        consentNote: "(Local) En producción: aquí irán los enlaces a las reglas y anexos.",
         sec6: "6) Firma (opcional)",
         btnSigClear: "Borrar firma",
         btnSigSave: "Guardar firma",
-        sigHelp: "Móvil: dedo • PC: mouse. (Demo: firma se guarda solo localmente.)",
+        sigHelp: "Móvil: dedo • PC: mouse. (Local: firma se guarda solo localmente.)",
         errRequired: "Por favor, complete todos los campos obligatorios (*) y acepte el consentimiento.",
-        footerNote: "Demo para mostrar el flujo. En producción se conectará a email / base de datos."
+        footerNote: "Local para mostrar el flujo. En producción se conectará a email / base de datos."
       },
       en: {
-        title: "DEMO – Guest Registration",
-        subtitleTop: "No email • No database • Demo only",
+        title: " – Guest Registration",
+        subtitleTop: "No email • No database • Local only",
         btnPdf: "Print / PDF",
-        btnSave: "Save (Demo)",
+        btnSave: "Save",
         btnLoad: "Load",
         btnClear: "Clear",
-        toastSaved: "✅ Saved (DEMO). Data is stored only in this browser.",
+        toastSaved: "✅ Saved (). Data is stored only in this browser.",
         h1: "Guest Registration Form",
         subHeader: "Choose document type → optional auto-fill → review → accept → save → PDF.",
         sec0: "0) Document – Selection + Auto-fill",
@@ -430,7 +430,7 @@
         btnClean: "Clear",
         mrzTip: "If OCR fails, pasting MRZ is the most reliable option.",
         photoLabel: "Upload document photo (front)",
-        photoTip: "Take a sharp photo (no glare). OCR is best-effort in this demo.",
+        photoTip: "Take a sharp photo (no glare). OCR is best-effort in this local.",
         btnReadPhoto: "Read photo & auto-fill",
         btnCleanPhoto: "Clear photo",
         ocrPreviewLabel: "Detected text (OCR) – review only",
@@ -458,7 +458,7 @@
         expiryDate: "Expiry date",
         sec3: "3) Contact",
         phone: "Phone / WhatsApp *",
-        email: "Email (optional in demo)",
+        email: "Email (optional in local)",
         sec4: "4) Stay",
         checkin: "Check-in *",
         checkout: "Check-out *",
@@ -470,13 +470,13 @@
         notes: "Notes",
         sec5: "5) GDPR + Rules/annex acceptance",
         consentText: "I accept data processing (GDPR) and confirm I accept hostel rules and all annexes. *",
-        consentNote: "(Demo) In production: links to rules and annexes go here.",
+        consentNote: "(Local) In production: links to rules and annexes go here.",
         sec6: "6) Signature (optional)",
         btnSigClear: "Clear signature",
         btnSigSave: "Save signature",
-        sigHelp: "Mobile: finger • Desktop: mouse. (Demo: signature is stored locally.)",
+        sigHelp: "Mobile: finger • Desktop: mouse. (Local: signature is stored locally.)",
         errRequired: "Please complete all required fields (*) and accept the consent checkbox.",
-        footerNote: "Demo to show the flow. Production will connect to email / database."
+        footerNote: "Local to show the flow. Production will connect to email / database."
       }
     };
 
@@ -514,7 +514,7 @@
     }
 
     // =========================
-    // DEMO: Guardar/Cargar local
+    // : Guardar/Cargar local
     // =========================
     const KEY = "mandioca_registro_demo_working_v1";
 
@@ -588,7 +588,7 @@
       }
       const parsed = JSON.parse(raw);
       objToForm(parsed.data);
-      alert(LANG==="es" ? "Demo cargado ✅" : "Demo loaded ✅");
+      alert(LANG==="es" ? "Local cargado ✅" : "Local loaded ✅");
     }
 
     function borrarDemo(){
@@ -601,7 +601,7 @@
       cerrarCamara();
       borrarFirma();
       actualizarModo();
-      alert(LANG==="es" ? "Demo borrado." : "Demo cleared.");
+      alert(LANG==="es" ? "Local borrado." : "Local cleared.");
     }
 
     // =========================
@@ -776,8 +776,8 @@
       }catch(e){
         setEstado(LANG==="es" ? "OCR falló." : "OCR failed.");
         err.textContent = (LANG==="es")
-          ? "OCR falló (demo). Pegue MRZ manualmente."
-          : "OCR failed (demo). Please paste MRZ manually.";
+          ? "OCR falló . Pegue MRZ manualmente."
+          : "OCR failed . Please paste MRZ manually.";
         err.classList.add("show");
       }
     }
@@ -949,13 +949,13 @@
 
         setEstado(LANG==="es" ? "Auto-relleno completado (foto)." : "Auto-fill done (photo).");
         alert(LANG==="es"
-          ? "✅ Auto-relleno desde foto (demo). Revise y corrija antes de guardar."
-          : "✅ Auto-filled from photo (demo). Please review and correct before saving.");
+          ? "✅ Auto-relleno desde foto . Revise y corrija antes de guardar."
+          : "✅ Auto-filled from photo . Please review and correct before saving.");
       }catch(e){
         setEstado(LANG==="es" ? "OCR falló." : "OCR failed.");
         err.textContent = (LANG==="es")
-          ? "No se pudo leer la foto (demo). Intente otra foto o complete manualmente."
-          : "Could not read photo (demo). Try another photo or fill manually.";
+          ? "No se pudo leer la foto . Intente otra foto o complete manualmente."
+          : "Could not read photo . Try another photo or fill manually.";
         err.classList.add("show");
       }
     }
@@ -1070,7 +1070,7 @@
     function guardarFirma(){
       const data = sig.toDataURL("image/png");
       document.getElementById("sigData").value = data;
-      alert(LANG==="es" ? "Firma guardada (demo)." : "Signature saved (demo).");
+      alert(LANG==="es" ? "Firma guardada ." : "Signature saved .");
     }
 
     // =========================

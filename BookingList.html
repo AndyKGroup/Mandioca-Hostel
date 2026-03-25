@@ -1,0 +1,564 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Booking List | Lista de Reservas</title>
+
+  <link rel="stylesheet" href="site-style.css"/>
+  <script src="config.js"></script>
+  <script src="site-components.js" defer></script>
+
+  <style>
+    /* Minimal additions, keeping Mandioca UI */
+    .grid2{display:grid;gap:12px}
+    @media(min-width:980px){ .grid2{grid-template-columns:1fr 1fr;} }
+
+    .field label{display:block;font-size:12px;color:var(--mh-muted);margin:0 0 6px;}
+    .field input,.field select{
+      width:100%;
+      padding:10px 11px;
+      border-radius:12px;
+      border:1px solid var(--mh-line);
+      background:#fff;
+      outline:none;
+      font:inherit;
+    }
+    .field input:focus,.field select:focus{
+      border-color: rgba(13,90,74,.5);
+      box-shadow: 0 0 0 4px rgba(13,90,74,.12);
+    }
+
+    .tableWrap{
+      margin-top:12px;
+      border:1px solid var(--mh-line);
+      border-radius:16px;
+      background:#fff;
+      overflow:auto;
+    }
+    table{width:1700px;border-collapse:collapse;}
+    th,td{padding:10px;border-bottom:1px solid rgba(0,0,0,.06);vertical-align:top;}
+    th{position:sticky;top:0;background:rgba(0,0,0,.02);font-size:12px;text-transform:uppercase;letter-spacing:.08em;}
+    td input,td select{
+      width:100%;
+      padding:8px 9px;
+      border-radius:10px;
+      border:1px solid rgba(0,0,0,.12);
+      background:#fff;
+      outline:none;
+      font:inherit;
+      font-size:13px;
+    }
+    td input:focus,td select:focus{
+      border-color: rgba(13,90,74,.5);
+      box-shadow: 0 0 0 4px rgba(13,90,74,.10);
+    }
+    .right{text-align:right;}
+    .stats{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;}
+    .statBox{
+      border:1px solid var(--mh-line);
+      border-radius:16px;
+      background:#fff;
+      padding:10px 12px;
+      min-width:170px;
+    }
+    .statBox b{display:block;font-size:14px;}
+    .statBox span{display:block;font-size:12px;color:var(--mh-muted);margin-top:2px;}
+    .print-hide{}
+    @media print{
+      .print-hide, .actions, .topbar, .langbar{display:none !important;}
+      .tableWrap{border:none;overflow:visible !important;}
+      table{width:100% !important;}
+      th{position:static;}
+      td input,td select{border:none !important;padding:0 !important;}
+    }
+  
+/* --- Print: clean PDF, no cut-off --- */
+@page { size: A4 landscape; margin: 10mm; }
+@media print{
+  html, body{ overflow: visible !important; }
+  .tableWrap{ overflow: visible !important; }
+  table{ width:100% !important; font-size: 10px !important; }
+  th, td{ padding:6px 6px !important; }
+  td input, td select{
+    border:none !important;
+    box-shadow:none !important;
+    background: transparent !important;
+    padding:0 !important;
+    font-size:10px !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+  }
+  select::-ms-expand{ display:none; }
+}
+
+</style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="card">
+
+      <div class="topbar">
+        <div class="brand">
+          <div class="logo">MH</div>
+          <div class="meta">
+            <b id="topTitle">Booking List (Reception)</b>
+            <small id="topSub">Saved locally on this device • Export CSV for Excel</small>
+          </div>
+        </div>
+
+        <div class="actions print-hide">
+          <button class="btn" type="button" onclick="downloadPDF()" id="btnPdf">Descargar PDF</button>
+          <button class="btn" type="button" onclick="exportCSV()" id="btnCsv">Export CSV</button>
+          <button class="btn" type="button" onclick="resetFilters()" id="btnReset">Reset</button>
+          <button class="btn primary" type="button" onclick="addRow()" id="btnAdd">+ Add booking</button>
+          <button class="btn primary" type="button" onclick="toggleLang()" id="langBtn">ES / EN</button>
+        </div>
+      </div>
+
+      <header>
+        <h1 id="h1">Booking List</h1>
+        <p class="subtitle" id="sub">
+          Reception table (Excel-like). Data is stored locally. Use Export CSV to open in Excel/Sheets.
+        </p>
+
+        <div class="langbar">
+          <span class="pill" id="pillRooms">Options: Dorm 12 / Dorm 8 / Private (bathroom) / Private (no bathroom)</span>
+          <span class="pill" id="pillTotals">Totals: PYG + USD</span>
+        </div>
+
+        <div class="box print-hide" style="margin-top:12px;">
+          <div class="section-title" id="filtersTitle">Filters</div>
+          <div class="grid2" style="margin-top:10px;">
+            <div class="field">
+              <label id="lblSearch">Search (name / email / phone / notes)</label>
+              <input id="fSearch" placeholder="Type to search…" oninput="render()" />
+            </div>
+            <div class="field">
+              <label id="lblStatus">Status</label>
+              <select id="fStatus" onchange="render()">
+                <option value="" id="optAll">All</option>
+                <option>Booked</option>
+                <option>Checked-in</option>
+                <option>Checked-out</option>
+                <option>Cancelled</option>
+              </select>
+            </div>
+            <div class="field">
+              <label id="lblFrom">From (check-in)</label>
+              <input id="fFrom" type="date" onchange="render()" />
+            </div>
+            <div class="field">
+              <label id="lblTo">To (check-in)</label>
+              <input id="fTo" type="date" onchange="render()" />
+            </div>
+          </div>
+        </div>
+
+        <div class="stats print-hide" id="stats"></div>
+      </header>
+
+      <div class="content">
+        <div class="tableWrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:120px;" id="thId">Booking ID</th>
+                <th style="width:180px;" id="thName">Guest name</th>
+                <th style="width:120px;" id="thCountry">Country</th>
+                <th style="width:160px;" id="thPhone">Phone / WhatsApp</th>
+                <th style="width:220px;" id="thEmail">Email</th>
+                <th style="width:220px;" id="thRoom">Room / Bed</th>
+                <th style="width:130px;" id="thIn">Check-in</th>
+                <th style="width:130px;" id="thOut">Check-out</th>
+                <th style="width:90px;" class="right" id="thNights">Nights</th>
+                <th style="width:140px;" id="thSource">Source</th>
+                <th style="width:130px;" class="right" id="thPrice">Price/night (PYG)</th>
+                <th style="width:140px;" class="right" id="thTPYG">Total (PYG)</th>
+                <th style="width:120px;" class="right" id="thTUSD">Total (USD)</th>
+                <th style="width:110px;" id="thPaid">Paid</th>
+                <th style="width:150px;" id="thPayment">Payment</th>
+                <th style="width:160px;" id="thStatus">Status</th>
+                <th style="width:260px;" id="thNotes">Notes</th>
+                <th style="width:90px;" class="print-hide" id="thDel"></th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+
+        <p class="note" style="margin-top:10px;" id="tip">
+          Tip: Export CSV opens perfectly in Excel/Google Sheets. This page works without backend.
+        </p>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "mh_booking_list_v3";
+    const LANG_KEY = "mh_docLang";
+    const USD_RATE = 7300;
+
+    let LANG = "es";
+    try{
+      const saved = localStorage.getItem(LANG_KEY);
+      if(saved === "en" || saved === "es") LANG = saved;
+    }catch(e){}
+
+    const I18N = {
+      es:{
+        topTitle:"Lista de Reservas (Recepción)",
+        topSub:"Guardado localmente en este dispositivo • Export CSV para Excel",
+        btnPdf:"Descargar PDF",
+        btnCsv:"Export CSV",
+        btnReset:"Reset",
+        btnAdd:"+ Agregar reserva",
+        h1:"Lista de Reservas",
+        sub:"Tabla de recepción (tipo Excel). Los datos se guardan localmente. Export CSV para Excel/Sheets.",
+        pillRooms:"Opciones: Dorm 12 / Dorm 8 / Privada (con baño) / Privada (sin baño)",
+        pillTotals:"Totales: PYG + USD",
+        filtersTitle:"Filtros",
+        lblSearch:"Buscar (nombre / email / teléfono / notas)",
+        placeholderSearch:"Escriba para buscar…",
+        lblStatus:"Estado",
+        optAll:"Todos",
+        lblFrom:"Desde (check-in)",
+        lblTo:"Hasta (check-in)",
+        thId:"ID",
+        thName:"Nombre",
+        thCountry:"País",
+        thPhone:"Teléfono / WhatsApp",
+        thEmail:"Email",
+        thRoom:"Habitación / Cama",
+        thIn:"Check-in",
+        thOut:"Check-out",
+        thNights:"Noches",
+        thSource:"Origen",
+        thPrice:"Precio/noche (PYG)",
+        thTPYG:"Total (PYG)",
+        thTUSD:"Total (USD)",
+        thPaid:"Pagado",
+        thPayment:"Pago",
+        thStatus:"Estado",
+        thNotes:"Notas",
+        tip:"Tip: Export CSV abre perfecto en Excel/Google Sheets. Funciona sin backend.",
+        statBookings:"Reservas (filtrado)",
+        statNights:"Total noches",
+        statTPYG:"Total PYG",
+        statTUSD:"Total USD (tasa {rate})",
+        delete:"Borrar",
+        roomOptions:["Dorm 12 camas","Dorm 8 camas","Privada con baño","Privada sin baño"],
+        sourceOptions:["Directo","Booking.com","Hostelworld","Walk-in","Otro"],
+        paidOptions:["No","Sí","Parcial"],
+        paymentOptions:["Efectivo","Transferencia","Tarjeta"]
+      },
+      en:{
+        topTitle:"Booking List (Reception)",
+        topSub:"Saved locally on this device • Export CSV for Excel",
+        btnPdf:"Download PDF",
+        btnCsv:"Export CSV",
+        btnReset:"Reset",
+        btnAdd:"+ Add booking",
+        h1:"Booking List",
+        sub:"Reception table (Excel-like). Data is stored locally. Export CSV for Excel/Sheets.",
+        pillRooms:"Options: Dorm 12 / Dorm 8 / Private (bathroom) / Private (no bathroom)",
+        pillTotals:"Totals: PYG + USD",
+        filtersTitle:"Filters",
+        lblSearch:"Search (name / email / phone / notes)",
+        placeholderSearch:"Type to search…",
+        lblStatus:"Status",
+        optAll:"All",
+        lblFrom:"From (check-in)",
+        lblTo:"To (check-in)",
+        thId:"Booking ID",
+        thName:"Guest name",
+        thCountry:"Country",
+        thPhone:"Phone / WhatsApp",
+        thEmail:"Email",
+        thRoom:"Room / Bed",
+        thIn:"Check-in",
+        thOut:"Check-out",
+        thNights:"Nights",
+        thSource:"Source",
+        thPrice:"Price/night (PYG)",
+        thTPYG:"Total (PYG)",
+        thTUSD:"Total (USD)",
+        thPaid:"Paid",
+        thPayment:"Payment",
+        thStatus:"Status",
+        thNotes:"Notes",
+        tip:"Tip: Export CSV opens perfectly in Excel/Google Sheets. Works without backend.",
+        statBookings:"Bookings (filtered)",
+        statNights:"Total nights",
+        statTPYG:"Total PYG",
+        statTUSD:"Total USD (rate {rate})",
+        delete:"Delete",
+        roomOptions:["Dorm 12 beds","Dorm 8 beds","Private with bathroom","Private without bathroom"],
+        sourceOptions:["Direct","Booking.com","Hostelworld","Walk-in","Other"],
+        paidOptions:["No","Yes","Partial"],
+        paymentOptions:["Cash","Transfer","Card"]
+      }
+    };
+
+    const statusOptions = ["Booked","Checked-in","Checked-out","Cancelled"];
+
+    function applyLabels(){
+      const T = I18N[LANG];
+      document.documentElement.lang = LANG;
+
+      topTitle.textContent = T.topTitle;
+      topSub.textContent = T.topSub;
+      btnPdf.textContent = T.btnPdf;
+      btnCsv.textContent = T.btnCsv;
+      btnReset.textContent = T.btnReset;
+      btnAdd.textContent = T.btnAdd;
+
+      h1.textContent = T.h1;
+      sub.textContent = T.sub;
+      pillRooms.textContent = T.pillRooms;
+      pillTotals.textContent = T.pillTotals;
+
+      filtersTitle.textContent = T.filtersTitle;
+      lblSearch.textContent = T.lblSearch;
+      fSearch.placeholder = T.placeholderSearch;
+      lblStatus.textContent = T.lblStatus;
+      optAll.textContent = T.optAll;
+      lblFrom.textContent = T.lblFrom;
+      lblTo.textContent = T.lblTo;
+
+      thId.textContent = T.thId;
+      thName.textContent = T.thName;
+      thCountry.textContent = T.thCountry;
+      thPhone.textContent = T.thPhone;
+      thEmail.textContent = T.thEmail;
+      thRoom.textContent = T.thRoom;
+      thIn.textContent = T.thIn;
+      thOut.textContent = T.thOut;
+      thNights.textContent = T.thNights;
+      thSource.textContent = T.thSource;
+      thPrice.textContent = T.thPrice;
+      thTPYG.textContent = T.thTPYG;
+      thTUSD.textContent = T.thTUSD;
+      thPaid.textContent = T.thPaid;
+      thPayment.textContent = T.thPayment;
+      thStatus.textContent = T.thStatus;
+      thNotes.textContent = T.thNotes;
+      tip.textContent = T.tip;
+
+      try{ localStorage.setItem(LANG_KEY, LANG); }catch(e){}
+      render();
+    }
+
+    // IMPORTANT: site-components.js expects window.toggleLang() if present.
+    window.toggleLang = function(){
+      LANG = (LANG === "es") ? "en" : "es";
+      applyLabels();
+    };
+
+    function loadData(){
+      try{ const raw = localStorage.getItem(STORAGE_KEY); if(raw) return JSON.parse(raw); }catch(e){}
+      return { rows: [sampleRow()] };
+    }
+    function saveData(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){} }
+
+    function iso(d){ return d.toISOString().slice(0,10); }
+    function sampleRow(){
+      const today = new Date();
+      const checkout = new Date(today); checkout.setDate(today.getDate()+1);
+      return {
+        id:"BK-0001", name:"", country:"", phone:"", email:"",
+        room: I18N[LANG].roomOptions[0],
+        checkin: iso(today), checkout: iso(checkout),
+        source: I18N[LANG].sourceOptions[0],
+        priceNightPYG: 139000,
+        paid: I18N[LANG].paidOptions[0],
+        payment: I18N[LANG].paymentOptions[0],
+        status: statusOptions[0],
+        notes:""
+      };
+    }
+
+    let state = loadData();
+
+    function parseDate(s){ return s ? new Date(s+"T00:00:00") : null; }
+    function nightsBetween(ci, co){
+      const a=parseDate(ci), b=parseDate(co);
+      if(!a || !b) return 0;
+      return Math.max(0, Math.round((b-a)/(1000*60*60*24)));
+    }
+    function fmtInt(n){ const x=Math.round(Number(n)||0); return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
+    function fmtUSD(n){ const x=Number(n)||0; return (Math.round((x+Number.EPSILON)*100)/100).toFixed(2); }
+    function escapeHtml(s){
+      return String(s ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
+    }
+
+    function resetFilters(){
+      fSearch.value=""; fStatus.value=""; fFrom.value=""; fTo.value="";
+      render();
+    }
+    function addRow(){
+      state.rows.unshift({
+        id:"BK-"+String(Math.floor(Math.random()*9000)+1000),
+        name:"",country:"",phone:"",email:"",
+        room:I18N[LANG].roomOptions[0], checkin:"", checkout:"",
+        source:I18N[LANG].sourceOptions[0], priceNightPYG:0,
+        paid:I18N[LANG].paidOptions[0], payment:I18N[LANG].paymentOptions[0], status:statusOptions[0],
+        notes:""
+      });
+      saveData(); render();
+    }
+    function removeRow(idx){ state.rows.splice(idx,1); saveData(); render(); }
+    function updateField(idx,key,val){ state.rows[idx][key]=val; saveData(); renderStatsOnly(); }
+
+    function filteredRows(){
+      const q=(fSearch.value||"").trim().toLowerCase();
+      const st=fStatus.value;
+      const from=fFrom.value;
+      const to=fTo.value;
+      return state.rows.filter(r=>{
+        if(st && r.status!==st) return false;
+        if(from && r.checkin && r.checkin<from) return false;
+        if(to && r.checkin && r.checkin>to) return false;
+        if(q){
+          const blob=`${r.id} ${r.name} ${r.email} ${r.phone} ${r.notes} ${r.room} ${r.source}`.toLowerCase();
+          if(!blob.includes(q)) return false;
+        }
+        return true;
+      });
+    }
+    function selectHTML(idx,key,opts,val){
+      return `<select onchange="updateField(${idx},'${key}',this.value)">${opts.map(o=>`<option ${o===val?'selected':''}>${escapeHtml(o)}</option>`).join("")}</select>`;
+    }
+
+    function render(){
+      const rows=filteredRows();
+      tbody.innerHTML="";
+      rows.forEach(r=>{
+        const idx=state.rows.indexOf(r);
+        const nights=nightsBetween(r.checkin,r.checkout);
+        const price=Number(String(r.priceNightPYG||0).replace(/[^0-9]/g,""))||0;
+        const totalPYG=nights*price;
+        const totalUSD=totalPYG/USD_RATE;
+
+        const T = I18N[LANG];
+
+        const tr=document.createElement("tr");
+        tr.innerHTML=`
+          <td><input value="${escapeHtml(r.id)}" oninput="updateField(${idx},'id',this.value)" /></td>
+          <td><input value="${escapeHtml(r.name)}" oninput="updateField(${idx},'name',this.value)" /></td>
+          <td><input value="${escapeHtml(r.country)}" oninput="updateField(${idx},'country',this.value)" /></td>
+          <td><input value="${escapeHtml(r.phone)}" oninput="updateField(${idx},'phone',this.value)" /></td>
+          <td><input value="${escapeHtml(r.email)}" oninput="updateField(${idx},'email',this.value)" /></td>
+          <td>${selectHTML(idx,'room',T.roomOptions,r.room)}</td>
+          <td><input type="date" value="${escapeHtml(r.checkin)}" onchange="updateField(${idx},'checkin',this.value)" /></td>
+          <td><input type="date" value="${escapeHtml(r.checkout)}" onchange="updateField(${idx},'checkout',this.value)" /></td>
+          <td class="right"><input value="${nights}" disabled /></td>
+          <td>${selectHTML(idx,'source',T.sourceOptions,r.source)}</td>
+          <td class="right"><input inputmode="numeric" value="${escapeHtml(String(r.priceNightPYG??''))}" oninput="updateField(${idx},'priceNightPYG',this.value.replace(/[^0-9]/g,''))" /></td>
+          <td class="right"><input value="${fmtInt(totalPYG)}" disabled /></td>
+          <td class="right"><input value="${fmtUSD(totalUSD)}" disabled /></td>
+          <td>${selectHTML(idx,'paid',T.paidOptions,r.paid)}</td>
+          <td>${selectHTML(idx,'payment',T.paymentOptions,r.payment)}</td>
+          <td>${selectHTML(idx,'status',statusOptions,r.status)}</td>
+          <td><input value="${escapeHtml(r.notes)}" oninput="updateField(${idx},'notes',this.value)" /></td>
+          <td class="print-hide"><button class="btn" type="button" onclick="removeRow(${idx})">${T.delete}</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+      renderStatsOnly();
+    }
+
+    function renderStatsOnly(){
+      const rows=filteredRows();
+      let totalBookings=rows.length, totalNights=0, totalPYG=0;
+      rows.forEach(r=>{
+        const n=nightsBetween(r.checkin,r.checkout);
+        totalNights+=n;
+        const price=Number(String(r.priceNightPYG||0).replace(/[^0-9]/g,""))||0;
+        totalPYG+=n*price;
+      });
+      const totalUSD=totalPYG/USD_RATE;
+
+      const T = I18N[LANG];
+      stats.innerHTML=`
+        <div class="statBox"><b>${totalBookings}</b><span>${T.statBookings}</span></div>
+        <div class="statBox"><b>${totalNights}</b><span>${T.statNights}</span></div>
+        <div class="statBox"><b>${fmtInt(totalPYG)} PYG</b><span>${T.statTPYG}</span></div>
+        <div class="statBox"><b>$ ${fmtUSD(totalUSD)}</b><span>${T.statTUSD.replace("{rate}", USD_RATE)}</span></div>
+      `;
+    }
+
+    function csvEscape(v){ const s=String(v??""); return /[",\n]/.test(s) ? `"${s.replace(/"/g,'""')}"` : s; }
+    function exportCSV(){
+      const header=["BookingID","GuestName","Country","Phone","Email","RoomBed","CheckIn","CheckOut","Nights","Source","PriceNightPYG","TotalPYG","TotalUSD","Paid","Payment","Status","Notes"];
+      const lines=[header.join(",")];
+      state.rows.forEach(r=>{
+        const n=nightsBetween(r.checkin,r.checkout);
+        const price=Number(String(r.priceNightPYG||0).replace(/[^0-9]/g,""))||0;
+        const tpyg=n*price;
+        const tusd=tpyg/USD_RATE;
+        lines.push([r.id,r.name,r.country,r.phone,r.email,r.room,r.checkin,r.checkout,String(n),r.source,String(price),String(tpyg),fmtUSD(tusd),r.paid,r.payment,r.status,(r.notes||"").replace(/\n/g," ")].map(csvEscape).join(","));
+      });
+      const blob=new Blob([lines.join("\n")],{type:"text/csv;charset=utf-8"});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement("a"); a.href=url; a.download="booking_list_mandioca.csv";
+      document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    }
+
+    function downloadPDF(){
+      // uses your global PDF branded print header logic
+      window.print();
+    }
+
+    // quick ids
+    const topTitle=document.getElementById("topTitle");
+    const topSub=document.getElementById("topSub");
+    const btnPdf=document.getElementById("btnPdf");
+    const btnCsv=document.getElementById("btnCsv");
+    const btnReset=document.getElementById("btnReset");
+    const btnAdd=document.getElementById("btnAdd");
+
+    const h1=document.getElementById("h1");
+    const sub=document.getElementById("sub");
+    const pillRooms=document.getElementById("pillRooms");
+    const pillTotals=document.getElementById("pillTotals");
+
+    const filtersTitle=document.getElementById("filtersTitle");
+    const lblSearch=document.getElementById("lblSearch");
+    const fSearch=document.getElementById("fSearch");
+    const lblStatus=document.getElementById("lblStatus");
+    const fStatus=document.getElementById("fStatus");
+    const optAll=document.getElementById("optAll");
+    const lblFrom=document.getElementById("lblFrom");
+    const fFrom=document.getElementById("fFrom");
+    const lblTo=document.getElementById("lblTo");
+    const fTo=document.getElementById("fTo");
+
+    const thId=document.getElementById("thId");
+    const thName=document.getElementById("thName");
+    const thCountry=document.getElementById("thCountry");
+    const thPhone=document.getElementById("thPhone");
+    const thEmail=document.getElementById("thEmail");
+    const thRoom=document.getElementById("thRoom");
+    const thIn=document.getElementById("thIn");
+    const thOut=document.getElementById("thOut");
+    const thNights=document.getElementById("thNights");
+    const thSource=document.getElementById("thSource");
+    const thPrice=document.getElementById("thPrice");
+    const thTPYG=document.getElementById("thTPYG");
+    const thTUSD=document.getElementById("thTUSD");
+    const thPaid=document.getElementById("thPaid");
+    const thPayment=document.getElementById("thPayment");
+    const thStatus=document.getElementById("thStatus");
+    const thNotes=document.getElementById("thNotes");
+    const tip=document.getElementById("tip");
+
+    const tbody=document.getElementById("tbody");
+    const stats=document.getElementById("stats");
+
+    applyLabels();
+  </script>
+</body>
+</html>

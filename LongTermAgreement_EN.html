@@ -55,7 +55,7 @@
           <button class="btn" type="button" onclick="downloadPDF()">Descargar PDF / Download PDF</button>
           
           <button class="btn primary" type="button" onclick="toggleLang()" id="langBtn">ES / EN</button>
-          <button class="btn" type="button" onclick="saveDemo()" id="btnSave">Save (Demo)</button>
+          <button class="btn" type="button" onclick="saveDemo()" id="btnSave">Save</button>
           <button class="btn" type="button" onclick="loadDemo()" id="btnLoad">Load</button>
           <button class="btn" type="button" onclick="clearDemo()" id="btnClear">Clear</button>
         </div>
@@ -69,7 +69,7 @@
         </p>
         <div class="langbar"><span class="pill" id="langPill">Language: EN</span></div>
         <p class="note print-hide" style="margin-top:10px;">
-          Demo note: photos and signatures are stored only in this browser (localStorage).
+          Note: photos and signatures are stored only in this browser (localStorage).
         </p>
       </header>
 
@@ -167,7 +167,7 @@
               <label for="acceptAnnex" style="margin:0; color:var(--ink); font-size:13px;">
                 I confirm I have read and accept Annexes A–F (Hostel Rules).
               </label>
-              <div class="note">(Required to save demo.)</div>
+              <div class="note">(Required to save local.)</div>
             </div>
           </div>
         </div>
@@ -411,7 +411,7 @@
               <label for="acceptAll" style="margin:0; color:var(--ink); font-size:13px;">
                 I confirm I accept this Agreement and all annexes (A–H), and I consent to data processing as stated.
               </label>
-              <div class="note">Required to save demo.</div>
+              <div class="note">Required to save local.</div>
             </div>
           </div>
 
@@ -536,10 +536,10 @@
     function saveSig(which){
       if (which==="landlord"){
         document.getElementById("sigLandlordData").value = padLandlord.canvas.toDataURL("image/png");
-        alert("Landlord signature saved (demo).");
+        alert("Landlord signature saved .");
       } else {
         document.getElementById("sigTenantData").value = padTenant.canvas.toDataURL("image/png");
-        alert("Tenant signature saved (demo).");
+        alert("Tenant signature saved .");
       }
     }
 
@@ -591,7 +591,7 @@
       };
 
       localStorage.setItem(KEY, JSON.stringify(payload));
-      alert("Saved ✅ (demo)");
+      alert("Saved ✅ ");
     }
 
     function loadDemo(){
@@ -671,7 +671,7 @@
         if(pt) pt.textContent = "CONTRATO DE ALQUILER DE LARGA ESTANCIA";
         if(ps) ps.textContent = "Habitación Privada – Mandioca Hostel • Número de Contrato: MH-2026-<span class="fill tiny" contenteditable="true" data-fill="contract_no">____</span>";
         if(btnPrint) btnPrint.textContent = "Imprimir / PDF";
-        if(btnSave) btnSave.textContent = "Guardar (Demo)";
+        if(btnSave) btnSave.textContent = "Guardar";
         if(btnLoad) btnLoad.textContent = "Cargar";
         if(btnClear) btnClear.textContent = "Limpiar";
         document.documentElement.lang = "es";
@@ -685,7 +685,7 @@
         if(pt) pt.textContent = "LONG-TERM ACCOMMODATION AGREEMENT";
         if(ps) ps.textContent = "Private Room – Mandioca Hostel • Contract Number: MH-2026-<span class="fill tiny" contenteditable="true" data-fill="contract_no">____</span>";
         if(btnPrint) btnPrint.textContent = "Print / PDF";
-        if(btnSave) btnSave.textContent = "Save (Demo)";
+        if(btnSave) btnSave.textContent = "Save";
         if(btnLoad) btnLoad.textContent = "Load";
         if(btnClear) btnClear.textContent = "Clear";
         document.documentElement.lang = "en";

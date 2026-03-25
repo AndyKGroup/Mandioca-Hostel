@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Volunteer Agreement – ES/EN (Demo)</title>
+  <title>Volunteer Agreement – ES/EN (Local)</title>
 
   
 
@@ -21,7 +21,7 @@
           <div class="logo">MH</div>
           <div class="meta">
             <b id="titleTop">CONTRATO DE COLABORACIÓN VOLUNTARIA</b>
-            <small id="subTop">ES/EN • 2 firmas • Annexes + NDA • Demo</small>
+            <small id="subTop">ES/EN • 2 firmas • Annexes + NDA • Local</small>
           </div>
         </div>
 
@@ -30,7 +30,7 @@
           <button class="btn" type="button" onclick="downloadPDF()">Descargar PDF / Download PDF</button>
           
           <button class="btn primary" type="button" onclick="toggleLang()">ES / EN</button>
-          <button class="btn" type="button" onclick="saveDemo()">Guardar (Demo)</button>
+          <button class="btn" type="button" onclick="saveDemo()">Guardar</button>
           <button class="btn" type="button" onclick="loadDemo()">Cargar</button>
           <button class="btn" type="button" onclick="clearDemo()">Borrar</button>
         </div>
@@ -39,16 +39,16 @@
       <header>
         <h1 id="h1">Contrato de Colaboración Voluntaria</h1>
         <p class="subtitle" id="subtitle">
-          Incluye: Identificación + fotos de documento (demo), anexos A–F, NDA y 2 firmas (Hostel + Voluntario).
+          Incluye: Identificación + fotos de documento , anexos A–F, NDA y 2 firmas (Hostel + Voluntario).
         </p>
 
         <div class="row print-hide">
           <span class="pill" id="langPill">Idioma: ES</span>
-          <span class="pill">No email • No base de datos (demo)</span>
+          <span class="pill">No email • No base de datos </span>
         </div>
 
         <p class="note print-hide" style="margin-top:10px;">
-          Demo: imágenes y firmas se guardan solo localmente en el navegador.
+          Local: imágenes y firmas se guardan solo localmente en el navegador.
         </p>
       </header>
 
@@ -141,7 +141,7 @@
                 Acepto y me comprometo a cumplir todos los Anexos A–F (Reglas del Hostel).
               </label>
               <div class="note" id="acceptAnnexNote" style="margin-top:6px;">
-                (Demo) En producción: esto se registra con timestamp.
+                (Local) En producción: esto se registra con timestamp.
               </div>
             </div>
           </div>
@@ -156,7 +156,7 @@
           </p>
 
           <textarea id="ndaText">
-NDA (Resumen – Demo)
+NDA (Resumen – Local)
 
 1) Confidencialidad:
 El Voluntario se compromete a no divulgar información interna del Hostel, incluyendo operaciones, procedimientos, acceso, llaves/códigos, datos de huéspedes, precios, incidencias, proveedores, y cualquier información no pública.
@@ -180,7 +180,7 @@ El Hostel podrá terminar inmediatamente la colaboración y podrá ejercer accio
                 Acepto la cláusula de confidencialidad (NDA) y entiendo sus obligaciones.
               </label>
               <div class="note" id="acceptNdaNote" style="margin-top:6px;">
-                (Demo) En producción: esto se registra con timestamp.
+                (Local) En producción: esto se registra con timestamp.
               </div>
             </div>
           </div>
@@ -323,7 +323,7 @@ El Hostel podrá terminar inmediatamente la colaboración y podrá ejercer accio
                 Confirmo que acepto: (1) Contrato, (2) Anexos A–F, (3) NDA, y autorizo el tratamiento de datos según las normas aplicables.
               </label>
               <div class="note" id="acceptAllNote" style="margin-top:6px;">
-                Obligatorio para guardar (demo).
+                Obligatorio para guardar .
               </div>
             </div>
           </div>
@@ -379,8 +379,8 @@ El Hostel podrá terminar inmediatamente la colaboración y podrá ejercer accio
       document.getElementById("titleTop").textContent = (lang==="es") ? "CONTRATO DE COLABORACIÓN VOLUNTARIA" : "VOLUNTARY COLLABORATION AGREEMENT";
       document.getElementById("h1").textContent = (lang==="es") ? "Contrato de Colaboración Voluntaria" : "Voluntary Collaboration Agreement";
       document.getElementById("subtitle").textContent = (lang==="es")
-        ? "Incluye: Identificación + fotos de documento (demo), anexos A–F, NDA y 2 firmas (Hostel + Voluntario)."
-        : "Includes: ID + document photos (demo), Annexes A–F, NDA and 2 signatures (Hostel + Volunteer).";
+        ? "Incluye: Identificación + fotos de documento , anexos A–F, NDA y 2 firmas (Hostel + Voluntario)."
+        : "Includes: ID + document photos , Annexes A–F, NDA and 2 signatures (Hostel + Volunteer).";
 
       document.getElementById("secId").textContent = (lang==="es") ? "Identificación + Fotos de Documento" : "Identification + Document Photos";
       document.getElementById("docTypeLbl").textContent = (lang==="es") ? "Tipo de documento" : "Document type";
@@ -505,14 +505,14 @@ El Hostel podrá terminar inmediatamente la colaboración y podrá ejercer accio
     function saveSig(which){
       if (which === "hostel"){
         document.getElementById("sigHostelData").value = padHostel.canvas.toDataURL("image/png");
-        alert(lang==="es" ? "Firma Hostel guardada (demo)." : "Hostel signature saved (demo).");
+        alert(lang==="es" ? "Firma Hostel guardada ." : "Hostel signature saved .");
       } else {
         document.getElementById("sigVolunteerData").value = padVolunteer.canvas.toDataURL("image/png");
-        alert(lang==="es" ? "Firma Voluntario guardada (demo)." : "Volunteer signature saved (demo).");
+        alert(lang==="es" ? "Firma Voluntario guardada ." : "Volunteer signature saved .");
       }
     }
 
-    // Save/load/clear demo
+    // Save/load/clear local
     async function saveDemo(){
       const err = document.getElementById("errMsg");
       err.classList.remove("show");
@@ -547,7 +547,7 @@ El Hostel podrá terminar inmediatamente la colaboración y podrá ejercer accio
       };
 
       localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-      alert(lang==="es" ? "Guardado (demo) ✅" : "Saved (demo) ✅");
+      alert(lang==="es" ? "Guardado  ✅" : "Saved  ✅");
     }
 
     function loadDemo(){

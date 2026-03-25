@@ -196,15 +196,27 @@
       <section class="hub-hero">
         <h1 class="hub-title" data-tpl="PROPERTY_NAME">Mandioca Hostel</h1>
         <p class="hub-sub">
-          Centro de documentos (demo). Abrí un formulario o contrato, y revisá los anexos A–F.
+          Centro de documentos. Abrí un formulario o contrato, y revisá los anexos A–F.
           Cada documento tiene su propio switch ES/EN y está listo para usar con QR.
         </p>
+      <div class="box" style="margin-top:14px;">
+        <div class="section-title">ℹ️ Guía rápida (Recepción)</div>
+        <ul style="margin:10px 0 0; padding-left:18px; line-height:1.55;">
+          <li><b>Registro de Huésped:</b> usar en tablet. Al finalizar, imprimir/descargar PDF y guardar el registro en el dispositivo.</li>
+          <li><b>Anexos A–I:</b> el huésped puede leerlos en ES/EN. Para entregar, usar “Descargar PDF / Download PDF”.</li>
+          <li><b>Contratos:</b> imprimir/descargar PDF y firmar (o digital futuro). Cada contrato incluye anexos.</li>
+          <li><b>Factura:</b> completar datos + método de pago. “Descargar PDF” genera un PDF limpio con logo y datos del hostel.</li>
+          <li><b>Booking List (Reception):</b> tabla tipo Excel. Se guarda localmente. Export CSV para abrir en Excel/Sheets.</li>
+        </ul>
+      </div>
+
 
         <div class="hub-meta">
           <span class="hub-pill">UI = estilo del sitio</span>
           <span class="hub-pill">ES/EN dentro de cada documento</span>
           <span class="hub-pill">Listo para QR</span>
           <button class="hub-btn" type="button" onclick="window.print()">🖨️ Imprimir / PDF</button>
+          <button class="hub-btn" type="button" onclick="document.getElementById('quickGuide').scrollIntoView({behavior:'smooth'})">ℹ️ Guía rápida</button>
         </div>
 
         <div class="hub-grid">
@@ -227,6 +239,13 @@
                 </div>
                 <span class="tag">Generator</span>
               </a>
+              <a href="BookingList.html">
+                <div class="hub-left">
+                  <div class="title">Booking List (Reception)</div>
+                  <div class="desc">Tabla tipo Excel — noches, totales PYG/USD, export CSV (guardado local)</div>
+                </div>
+                <span class="tag">STAFF</span>
+              </a>
 
             </div>
             <p class="hub-note">
@@ -241,7 +260,7 @@
               <a href="LongTermAgreement_EN.html">
                 <div class="hub-left">
                   <div class="title">Long-Term Accommodation Agreement</div>
-                  <div class="desc">Contrato larga estancia + anexos + firma (demo)</div>
+                  <div class="desc">Contrato larga estancia + anexos + firma </div>
                 </div>
                 <span class="tag">CONTRACT</span>
               </a>
@@ -249,13 +268,13 @@
               <a href="volunteeragreement.html">
                 <div class="hub-left">
                   <div class="title">Volunteer Collaboration Agreement</div>
-                  <div class="desc">Contrato voluntario + NDA + anexos + 2 firmas (demo)</div>
+                  <div class="desc">Contrato voluntario + NDA + anexos + 2 firmas </div>
                 </div>
                 <span class="tag">CONTRACT</span>
               </a>
             </div>
             <p class="hub-note">
-              Estos contratos son “demo-ready”: se pueden imprimir en PDF y luego firmar físicamente o digitalmente (futuro).
+              Estos contratos son listos: se pueden imprimir en PDF y luego firmar físicamente o digitalmente (futuro).
             </p>
           </div>
 
@@ -277,6 +296,52 @@
           </div>
 
         </div>
+
+        <section id="quickGuide" class="hub-section" style="margin-top:14px;">
+  <h2>Guía rápida (Recepción)</h2>
+
+  <p class="hub-note" style="margin-bottom:10px;">
+    Cómo usar este Hub en recepción (sin backend): registros, contratos, anexos y facturas.
+  </p>
+
+  <div class="hub-links">
+    <a href="RegistroHostel.html">
+      <div class="hub-left">
+        <div class="title">1) Registro de Huésped</div>
+        <div class="desc">Abrir en tablet → huésped completa datos + firma → Descargar PDF</div>
+      </div>
+      <span class="tag">QR</span>
+    </a>
+
+    <a href="BookingList.html">
+      <div class="hub-left">
+        <div class="title">2) Booking List (Reception)</div>
+        <div class="desc">Tabla tipo Excel → agregar reservas → Export CSV (Excel) → Imprimir/PDF si hace falta</div>
+      </div>
+      <span class="tag">STAFF</span>
+    </a>
+
+    <a href="InvoiceGenerator.html">
+      <div class="hub-left">
+        <div class="title">3) Factura / Invoice</div>
+        <div class="desc">Precio/noche × noches + extras → Total PYG/USD → Descargar PDF</div>
+      </div>
+      <span class="tag">PAY</span>
+    </a>
+
+    <a href="ANEXOA.html">
+      <div class="hub-left">
+        <div class="title">4) Anexos (A–I)</div>
+        <div class="desc">Cada área del hostel puede tener su propio QR (cocina, piscina, CCTV, coworking…)</div>
+      </div>
+      <span class="tag">RULES</span>
+    </a>
+  </div>
+
+  <p class="hub-note" style="margin-top:10px;">
+    Recomendación: imprimir un QR para el Hub (principal) y QRs separados para cada anexo en el área correspondiente.
+  </p>
+</section>
 
         <div class="hub-footer">
           Tip: Subí este paquete a Netlify/hosting. El link del Hub puede ser el “QR principal” y cada documento puede tener su propio QR.
