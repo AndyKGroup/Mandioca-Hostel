@@ -1,555 +1,826 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Factura – Generador (PYG/USD)</title>
-
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Factura – Mandioca Hostel</title>
   <link rel="stylesheet" href="site-style.css"/>
   <script src="config.js"></script>
   <script src="site-components.js" defer></script>
-
   <style>
-    /* Only invoice-specific helpers (kept minimal to preserve global UI consistency) */
-    .gridWide{ display:grid; grid-template-columns: 1.2fr .8fr; gap:12px; }
-    @media (max-width: 920px){ .gridWide{ grid-template-columns:1fr; } }
-
-    table{ width:100%; border-collapse:separate; border-spacing:0; overflow:hidden; }
-    th,td{ padding:10px 10px; border-bottom:1px solid var(--mh-line); vertical-align:top; }
-    th{ font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:var(--mh-green); background:rgba(13,90,74,.03); }
+    /* ── Screen-only helpers ── */
+    .gridWide{ display:grid; grid-template-columns:1.2fr .8fr; gap:14px; }
+    @media(max-width:920px){ .gridWide{ grid-template-columns:1fr; } }
+    table{ width:100%; border-collapse:separate; border-spacing:0; }
+    th,td{ padding:9px 10px; border-bottom:1px solid var(--mh-line); vertical-align:top; }
+    th{ font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--mh-green);
+        background:rgba(13,90,74,.04); font-weight:800; }
     td input{ width:100%; }
     .right{ text-align:right; }
-    .muted{ color: var(--mh-muted); font-size:13px; line-height:1.45; }
+    .muted{ color:var(--mh-muted); font-size:13px; line-height:1.5; }
     .sumBox{ border:1px solid var(--mh-line); border-radius:16px; padding:14px; background:#fff; }
-    .sumLine{ display:flex; justify-content:space-between; gap:12px; margin:8px 0; }
-    .sumLine .k{ color:var(--mh-muted); font-size:13px; }
+    .sumLine{ display:flex; justify-content:space-between; gap:12px; margin:8px 0; font-size:14px; }
+    .sumLine .k{ color:var(--mh-muted); }
     .sumLine .v{ font-weight:900; }
-    .big{ font-family:var(--mh-serif); font-size:22px; font-weight:900; }
-    .pill{ margin-right:8px; }
+    .big{ font-family:var(--mh-serif); font-size:22px; font-weight:900; color:var(--mh-green); }
     .checks{ display:flex; gap:14px; flex-wrap:wrap; margin-top:10px; }
-    .check{ display:flex; align-items:center; gap:8px; }
-    .check input{ width:16px; height:16px; padding:0 !important; }
+    .check{ display:flex; align-items:center; gap:8px; cursor:pointer; }
+    .check input{ width:16px; height:16px; padding:0!important; cursor:pointer; }
     .btnRow{ display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
+    .client-toggle{ display:flex; gap:0; border:1px solid var(--mh-line); border-radius:12px; overflow:hidden; margin-bottom:10px; }
+    .client-toggle button{
+      flex:1; padding:9px 12px; border:none; background:#fff; cursor:pointer;
+      font-weight:800; font-size:13px; font-family:var(--mh-font);
+      color:var(--mh-muted); transition:background .15s, color .15s;
+    }
+    .client-toggle button.active{ background:var(--mh-green); color:#fff; }
+    .client-toggle button:first-child{ border-right:1px solid var(--mh-line); }
+    .bank-row{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:8px; }
+    @media(max-width:700px){ .bank-row{ grid-template-columns:1fr; } }
+
+    /* ── PRINT VIEW: hidden on screen, shown on print ── */
+    .inv-print{ display:none; }
 
     @media print{
-      .print-hide{ display:none !important; }
-      th{ background:#f4f6f8 !important; color:#000 !important; }
+      .form-view{ display:none!important; }
+      .inv-print{
+        display:block!important;
+        font-family:'Nunito',Arial,sans-serif;
+        color:#1a2420;
+        font-size:11pt;
+        line-height:1.55;
+      }
+      /* hide site chrome */
+      .mh-topstrip,.mh-nav,.mh-footer,
+      .topbar,.print-hide,button,.mh-doc-toolbar{ display:none!important; }
+      .wrap{ margin:0!important; padding:0!important; max-width:none!important; }
+      .card{ border:none!important; box-shadow:none!important; border-radius:0!important; }
     }
-  
-/* --- Print: prevent cut-off and keep full pages --- */
-@page { size: A4; margin: 12mm; }
-@media print{
-  html, body { width:auto !important; height:auto !important; overflow: visible !important; }
-  .wrap, .card, .content { overflow: visible !important; }
-  .grid2, .gridWide { display:block !important; }
-  .tableWrap { overflow: visible !important; border: 0 !important; }
-  table { width:100% !important; }
-  tr, td, th { break-inside: avoid; page-break-inside: avoid; }
-  .box, .sumBox { break-inside: avoid; page-break-inside: avoid; }
-}
-</style>
-</head>
+    @page{ size:A4; margin:14mm 14mm 16mm; }
 
+    /* ── INVOICE PRINT STYLES ── */
+    .inv{ max-width:100%; }
+    .inv-header{ display:flex; justify-content:space-between; align-items:flex-start; padding-bottom:14pt; border-bottom:2pt solid #0d5a4a; margin-bottom:14pt; }
+    .inv-logo img{ height:44pt; width:auto; display:block; }
+    .inv-logo .inv-hostel-name{ font-family:Georgia,serif; font-size:16pt; font-weight:700; color:#0d5a4a; }
+    .inv-logo .inv-hostel-sub{ font-size:9pt; color:#5f7268; margin-top:2pt; line-height:1.4; }
+    .inv-title-block{ text-align:right; }
+    .inv-title-block .inv-title{ font-family:Georgia,serif; font-size:22pt; font-weight:900; color:#0d5a4a; margin:0; line-height:1; }
+    .inv-title-block .inv-meta{ font-size:9pt; color:#5f7268; margin-top:6pt; line-height:1.5; }
+    .inv-bill{ display:grid; grid-template-columns:1fr 1fr; gap:14pt; margin:14pt 0; }
+    .inv-bill-box{ padding:10pt; border:1pt solid #e2ebe6; border-radius:8pt; background:#f9fbf9; }
+    .inv-bill-box .inv-label{ font-size:8pt; text-transform:uppercase; letter-spacing:.12em; color:#0d5a4a; font-weight:800; margin-bottom:5pt; }
+    .inv-bill-box .inv-val{ font-size:10.5pt; color:#1a2420; white-space:pre-line; }
+    .inv-bill-box .inv-val strong{ display:block; font-size:11.5pt; margin-bottom:2pt; }
+    .inv-dates{ display:grid; grid-template-columns:repeat(3,1fr); gap:10pt; margin-bottom:14pt; }
+    .inv-date-box{ padding:8pt 10pt; background:#f4f7f5; border-radius:8pt; border:1pt solid #e2ebe6; }
+    .inv-date-box .inv-label{ font-size:8pt; text-transform:uppercase; letter-spacing:.1em; color:#0d5a4a; font-weight:800; margin-bottom:4pt; }
+    .inv-date-box .inv-val{ font-size:11pt; font-weight:700; color:#1a2420; }
+    /* table */
+    .inv-table{ width:100%; border-collapse:collapse; margin:14pt 0; font-size:10pt; }
+    .inv-table thead tr{ background:#0d5a4a; color:#fff; }
+    .inv-table thead th{ padding:7pt 9pt; text-align:left; font-size:8.5pt; letter-spacing:.1em; text-transform:uppercase; font-weight:800; }
+    .inv-table thead th.r{ text-align:right; }
+    .inv-table tbody tr:nth-child(even){ background:#f4f7f5; }
+    .inv-table tbody td{ padding:7pt 9pt; border-bottom:1pt solid #e2ebe6; vertical-align:top; }
+    .inv-table tbody td.r{ text-align:right; font-weight:700; font-variant-numeric:tabular-nums; }
+    /* totals */
+    .inv-totals{ margin-left:auto; width:240pt; }
+    .inv-totals-row{ display:flex; justify-content:space-between; padding:5pt 0; border-bottom:1pt solid #e2ebe6; font-size:10.5pt; }
+    .inv-totals-row.total-big{ border-top:2pt solid #0d5a4a; border-bottom:none; padding-top:8pt; margin-top:4pt; }
+    .inv-totals-row.total-big .k{ font-size:12pt; font-weight:800; color:#0d5a4a; }
+    .inv-totals-row.total-big .v{ font-size:14pt; font-weight:900; color:#0d5a4a; font-family:Georgia,serif; }
+    .inv-totals-row .k{ color:#5f7268; }
+    .inv-totals-row .v{ font-weight:700; }
+    /* payment + notes */
+    .inv-bottom{ display:grid; grid-template-columns:1fr 1fr; gap:14pt; margin-top:14pt; padding-top:10pt; border-top:1pt solid #e2ebe6; }
+    .inv-bottom-box .inv-label{ font-size:8pt; text-transform:uppercase; letter-spacing:.12em; color:#0d5a4a; font-weight:800; margin-bottom:6pt; }
+    .inv-bottom-box .inv-val{ font-size:9.5pt; color:#1a2420; white-space:pre-line; }
+    .inv-footer{ margin-top:16pt; padding-top:8pt; border-top:1pt solid #e2ebe6; display:flex; justify-content:space-between; font-size:8.5pt; color:#5f7268; }
+    .inv-sig{ margin-top:24pt; display:grid; grid-template-columns:1fr 1fr; gap:30pt; }
+    .inv-sig-box{ border-top:1pt solid #1a2420; padding-top:4pt; font-size:8.5pt; color:#5f7268; text-align:center; }
+  </style>
+</head>
 <body>
+
+<!-- ══════════════════════════════════════════════
+     SCREEN FORM VIEW
+═══════════════════════════════════════════════ -->
+<div class="form-view">
   <div class="wrap">
     <div class="card">
 
-      <!-- Hidden legacy topbar kept for compatibility across docs -->
       <div class="topbar">
         <div class="brand">
           <div class="logo">MH</div>
           <div class="meta">
-            <b>Factura (PYG/USD)</b>
-            <small>Local</small>
+            <b id="t_h1">Factura</b>
+            <small id="t_sub">Generador PYG / USD</small>
           </div>
         </div>
         <div class="actions print-hide">
-          <button class="btn" type="button" onclick="window.print()" id="btnPrint">Imprimir / PDF</button>
-          <button class="btn" type="button" onclick="downloadPDF()">Descargar PDF / Download PDF</button>
-          
+          <button class="btn" type="button" onclick="buildAndPrint()">🖨️ <span id="btnPrint">Imprimir / PDF</span></button>
           <button class="btn primary" type="button" onclick="toggleLang()" id="btnLang">ES / EN</button>
         </div>
       </div>
 
       <header>
-        <h1 id="t_h1">Factura</h1>
-        <p class="subtitle" id="t_sub">Genera una factura con total automático en PYG y USD (listo para imprimir en PDF).</p>
-        <div class="row" style="margin-top:10px;">
-          <span class="pill" id="pillLang">Idioma: ES</span>
-          <span class="pill" id="pillMode">PYG ↔ USD</span>
-        </div>
+        <h1 id="t_h1b">Factura</h1>
+        <p class="subtitle" id="t_sub2">Genera una factura con total automático en PYG y USD — lista para PDF limpio.</p>
       </header>
 
       <div class="content">
         <div class="gridWide">
 
-          <!-- LEFT: FORM -->
+          <!-- ── LEFT: FORM ── -->
           <div>
+
+            <!-- HEADER -->
             <div class="box">
               <div class="section-title" id="t_head">Encabezado</div>
-
               <div class="grid" style="margin-top:10px;">
                 <div>
                   <label id="t_invno">N° de factura</label>
-                  <input id="invNo" value="MH-INV-2026-001" />
+                  <input id="invNo" value="MH-INV-2026-001"/>
                 </div>
                 <div>
                   <label id="t_date">Fecha</label>
-                  <input id="invDate" type="date" />
+                  <input id="invDate" type="date"/>
                 </div>
               </div>
-
               <div class="grid" style="margin-top:10px;">
                 <div>
                   <label id="t_due">Vence</label>
-                  <input id="invDue" type="date" />
+                  <input id="invDue" type="date"/>
                 </div>
-                <div>
-                  <label id="t_client">Cliente / Huésped</label>
-                  <input id="toName" placeholder="Nombre completo" />
-                </div>
-              </div>
-
-              <div class="hr"></div>
-
-              <div class="section-title" id="t_bill">Datos de facturación</div>
-
-              <div class="grid" style="margin-top:10px;">
-                <div>
-                  <label id="t_hostel_fixed">Hotel (fijo)</label>
-                  <textarea id="hostelBill" rows="5" disabled></textarea>
-                </div>
-                <div>
-                  <label id="t_client_bill">Cliente (editable)</label>
-                  <textarea id="clientBill" rows="5" placeholder="Dirección de facturación"></textarea>
-                </div>
-              </div>
-
-              <div class="grid" style="margin-top:10px;">
-                <div>
-                  <label id="t_doctype">Documento</label>
-                  <select id="clientDocType">
-                    <option value="passport">Pasaporte</option>
-                    <option value="id">Cédula / ID</option>
-                    <option value="other">Otro</option>
-                  </select>
-                </div>
-                <div>
-                  <label id="t_docno">N° de documento</label>
-                  <input id="clientDocNo" placeholder="Número" />
-                </div>
-              </div>
-
-              <div class="grid" style="margin-top:10px;">
                 <div>
                   <label id="t_rate">Tipo de cambio (1 USD = PYG)</label>
-                  <input id="usdRate" inputmode="decimal" value="7300" />
+                  <input id="usdRate" inputmode="decimal" value="7300"/>
                 </div>
-                <div>
-                  <label id="t_show">Mostrar</label>
-                  <select id="displayMode">
-                    <option value="both">PYG + USD</option>
-                    <option value="pyg">Solo PYG</option>
-                    <option value="usd">Solo USD</option>
-                  </select>
+              </div>
+              <div style="margin-top:10px;">
+                <label id="t_show">Mostrar totales</label>
+                <select id="displayMode">
+                  <option value="both">PYG + USD</option>
+                  <option value="pyg">Solo PYG</option>
+                  <option value="usd">Solo USD</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- BILLING -->
+            <div class="box">
+              <div class="section-title" id="t_bill">Datos de facturación</div>
+
+              <div style="margin-top:10px;">
+                <label id="t_hostel_fixed">Hostel / Emisor (fijo)</label>
+                <textarea id="hostelBill" rows="5" disabled></textarea>
+              </div>
+
+              <!-- CLIENT TYPE TOGGLE -->
+              <div style="margin-top:14px;">
+                <label id="t_clienttype">Tipo de cliente</label>
+                <div class="client-toggle">
+                  <button type="button" id="btnPerson" class="active" onclick="setClientType('person')">👤 <span id="ct_person">Persona privada</span></button>
+                  <button type="button" id="btnCompany" onclick="setClientType('company')">🏢 <span id="ct_company">Empresa</span></button>
+                </div>
+              </div>
+
+              <!-- PERSON FIELDS -->
+              <div id="fieldsPerson">
+                <div class="grid">
+                  <div>
+                    <label id="t_client">Nombre del huésped</label>
+                    <input id="toName" placeholder="Nombre completo"/>
+                  </div>
+                  <div>
+                    <label id="t_client_bill">Dirección (opcional)</label>
+                    <textarea id="clientBill" rows="3" placeholder="Dirección de facturación"></textarea>
+                  </div>
+                </div>
+                <div class="grid" style="margin-top:10px;">
+                  <div>
+                    <label id="t_doctype">Documento</label>
+                    <select id="clientDocType">
+                      <option value="passport">Pasaporte</option>
+                      <option value="id">Cédula / ID</option>
+                      <option value="other">Otro</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label id="t_docno">N° de documento</label>
+                    <input id="clientDocNo" placeholder="Número"/>
+                  </div>
+                </div>
+              </div>
+
+              <!-- COMPANY FIELDS -->
+              <div id="fieldsCompany" class="hidden">
+                <div class="grid">
+                  <div>
+                    <label id="t_company">Nombre de empresa</label>
+                    <input id="companyName" placeholder="Razón social"/>
+                  </div>
+                  <div>
+                    <label id="t_taxid">CUIT / RUC / NIT / Tax ID</label>
+                    <input id="companyTaxId" placeholder="Ej: 30-50674617-1"/>
+                  </div>
+                </div>
+                <div class="grid" style="margin-top:10px;">
+                  <div>
+                    <label id="t_company_addr">Dirección de facturación</label>
+                    <textarea id="companyAddr" rows="3" placeholder="Calle, ciudad, país"></textarea>
+                  </div>
+                  <div>
+                    <label id="t_company_contact">Contacto / Atención (opcional)</label>
+                    <input id="companyContact" placeholder="Ej: A/A: Juan García"/>
+                  </div>
                 </div>
               </div>
             </div>
 
+            <!-- STAY -->
             <div class="box">
               <div class="section-title" id="t_stay">Estadía</div>
               <div class="grid" style="margin-top:10px;">
                 <div>
                   <label id="t_price">Precio por noche (PYG)</label>
-                  <input id="nightPrice" inputmode="numeric" value="139000" />
+                  <input id="nightPrice" inputmode="numeric" value="139000"/>
                 </div>
                 <div>
                   <label id="t_nights">Noches</label>
-                  <input id="nights" inputmode="numeric" value="1" />
+                  <input id="nights" inputmode="numeric" value="1"/>
                 </div>
               </div>
               <div style="margin-top:10px;">
-                <label id="t_room">Habitación</label>
-                <input id="room" value="Private Room" />
+                <label id="t_room">Habitación / Descripción</label>
+                <input id="room" value="Private Room"/>
               </div>
-              <p class="muted" id="t_hint" style="margin:10px 0 0;">
-                La primera línea se genera automáticamente desde esta sección.
-              </p>
             </div>
 
+            <!-- ITEMS -->
             <div class="box">
-              <div class="section-title" id="t_items">Items</div>
-
+              <div class="section-title" id="t_items">Items adicionales</div>
               <table style="margin-top:10px;">
                 <thead>
                   <tr>
                     <th id="th_desc">Descripción</th>
-                    <th class="right" style="width:110px;" id="th_qty">Cant.</th>
-                    <th class="right" style="width:160px;" id="th_unit">Unit (PYG)</th>
-                    <th class="right" style="width:170px;" id="th_total">Total (PYG)</th>
-                    <th class="print-hide" style="width:54px;"></th>
+                    <th class="right" style="width:80px;" id="th_qty">Cant.</th>
+                    <th class="right" style="width:140px;" id="th_unit">Unit (PYG)</th>
+                    <th class="right" style="width:150px;" id="th_total">Total (PYG)</th>
+                    <th class="print-hide" style="width:44px;"></th>
                   </tr>
                 </thead>
                 <tbody id="itemsBody"></tbody>
               </table>
-
               <div class="btnRow print-hide">
                 <button class="btn" type="button" onclick="addItem()" id="btnAdd">+ Agregar item</button>
-                <button class="btn" type="button" onclick="copyReadyText()" id="btnCopy">Copiar texto listo</button>
+                <button class="btn" type="button" onclick="copyReadyText()" id="btnCopy">📋 Copiar resumen</button>
               </div>
             </div>
 
+            <!-- PAYMENT -->
             <div class="box">
               <div class="section-title" id="t_pay">Método de pago</div>
               <div class="checks print-hide">
-                <label class="check"><input type="checkbox" id="payCash" checked><span id="pm_cash">Efectivo</span></label>
-                <label class="check"><input type="checkbox" id="payTransfer"><span id="pm_transfer">Transferencia</span></label>
+                <label class="check"><input type="checkbox" id="payCash"><span id="pm_cash">Efectivo</span></label>
+                <label class="check"><input type="checkbox" id="payTransfer" checked><span id="pm_transfer">Transferencia bancaria</span></label>
                 <label class="check"><input type="checkbox" id="payCard"><span id="pm_card">Tarjeta</span></label>
               </div>
 
-              <div style="margin-top:10px;">
+              <!-- BANK DETAILS (shown when transfer checked) -->
+              <div id="bankSection" style="margin-top:12px;">
+                <div class="section-title" id="t_bankdata" style="margin-top:8px;">Datos bancarios del hostel</div>
+                <div class="bank-row">
+                  <div>
+                    <label id="t_bank_name">Banco</label>
+                    <input id="bankName" placeholder="Nombre del banco"/>
+                  </div>
+                  <div>
+                    <label id="t_bank_acc">N° de cuenta / CBU / IBAN</label>
+                    <input id="bankAcc" placeholder="Número de cuenta"/>
+                  </div>
+                  <div>
+                    <label id="t_bank_holder">Titular</label>
+                    <input id="bankHolder" placeholder="Titular de la cuenta"/>
+                  </div>
+                  <div>
+                    <label id="t_bank_alias">Alias / Referencia (opcional)</label>
+                    <input id="bankAlias" placeholder="Alias o código de referencia"/>
+                  </div>
+                </div>
+                <div style="margin-top:8px;">
+                  <label id="t_bank_extra">Info extra (opcional)</label>
+                  <input id="bankExtra" placeholder="Ej: Concepto: Factura MH-INV-…"/>
+                </div>
+              </div>
+
+              <div style="margin-top:12px;">
                 <label id="t_notes">Notas</label>
                 <textarea id="notes" rows="3" placeholder="Ej: Pago antes del check-in."></textarea>
               </div>
             </div>
-          </div>
 
-          <!-- RIGHT: SUMMARY -->
+          </div><!-- /LEFT -->
+
+          <!-- ── RIGHT: SUMMARY ── -->
           <div>
             <div class="box">
               <div class="section-title" id="t_sum">Resumen</div>
-
               <div class="sumBox" style="margin-top:10px;">
                 <div class="sumLine">
                   <div class="k" id="k_sub">Subtotal</div>
                   <div class="v"><span id="subPYG">0</span> PYG</div>
                 </div>
-
                 <div class="sumLine" id="rowSubUSD">
                   <div class="k" id="k_subusd">Subtotal (USD)</div>
                   <div class="v">$ <span id="subUSD">0.00</span></div>
                 </div>
-
                 <div class="hr"></div>
-
                 <div class="sumLine">
                   <div class="k" id="k_total">TOTAL</div>
                   <div class="v big"><span id="totPYG">0</span> PYG</div>
                 </div>
-
                 <div class="sumLine" id="rowTotUSD">
                   <div class="k" id="k_totalusd">TOTAL (USD)</div>
                   <div class="v big">$ <span id="totUSD">0.00</span></div>
                 </div>
-
-                <p class="muted" id="t_formula" style="margin:10px 0 0;">
-                  USD = PYG / (PYG por 1 USD)
-                </p>
               </div>
             </div>
 
             <div class="box">
-              <div class="section-title" id="t_ready">Texto listo</div>
-              <div class="muted" id="readyText" style="margin-top:10px; white-space:pre-line;"></div>
-              <div class="btnRow print-hide">
-                <button class="btn" type="button" onclick="window.print()" id="btnPrint2">Imprimir / PDF</button>
-                <button class="btn primary" type="button" onclick="toggleLang()" id="btnLang2">ES / EN</button>
+              <div class="section-title" id="t_ready">Texto listo (para WhatsApp / email)</div>
+              <div class="muted" id="readyText" style="margin-top:10px; white-space:pre-line; font-size:13px;"></div>
+              <div class="btnRow print-hide" style="margin-top:12px;">
+                <button class="btn primary" type="button" onclick="buildAndPrint()">🖨️ <span id="btnPrint3">Generar PDF limpio</span></button>
+                <button class="btn" type="button" onclick="copyReadyText()" id="btnCopy2">📋 Copiar</button>
               </div>
             </div>
 
             <div class="box">
-              <div class="section-title" id="t_payinfo">Información de pago</div>
-              <div class="muted" id="payInfo" style="margin-top:10px; white-space:pre-line;"></div>
+              <div class="section-title" id="t_payinfo">Info de pago</div>
+              <div class="muted" id="payInfoPreview" style="margin-top:10px; white-space:pre-line; font-size:13px;"></div>
             </div>
-          </div>
+          </div><!-- /RIGHT -->
 
-        </div>
-      </div>
+        </div><!-- /gridWide -->
+      </div><!-- /content -->
+    </div><!-- /card -->
+  </div><!-- /wrap -->
+</div><!-- /form-view -->
 
-    </div>
-  </div>
+<!-- ══════════════════════════════════════════════
+     PRINT VIEW (hidden on screen, shown on print)
+═══════════════════════════════════════════════ -->
+<div class="inv-print" id="invPrint">
+  <!-- populated by buildPrintView() before window.print() -->
+</div>
 
 <script>
-/* =========================================================
-   Fixed hostel info (edit once)
-   ========================================================= */
-const HOSTEL_FIXED = {
-  name: (window.HOSTEL_CONFIG && window.HOSTEL_CONFIG.PROPERTY_NAME) ? window.HOSTEL_CONFIG.PROPERTY_NAME : "Mandioca Hostel",
-  addressES: "Av. Colón 1090\nAsunción, Paraguay",
-  addressEN: "Av. Colón 1090\nAsunción, Paraguay",
-  taxLabelES: "RUC (si aplica)",
-  taxLabelEN: "Tax ID (if applicable)",
-  taxValue: "",
-  bankES: "Transferencia bancaria:\nCuenta: ____________________\nBanco: ____________________\nTitular: ____________________",
-  bankEN: "Bank transfer:\nAccount: ____________________\nBank: ____________________\nAccount holder: ____________________",
-  cashES: "Efectivo: Pago en efectivo en recepción.",
-  cashEN: "Cash: Pay at reception.",
-  cardES: "Tarjeta: Disponible según disponibilidad (recargo si aplica).",
-  cardEN: "Card: Subject to availability (surcharge may apply)."
-};
+/* ─────────────────────────────────────────────
+   Config helpers
+───────────────────────────────────────────── */
+const CFG = window.HOSTEL_CONFIG || {};
+const HOSTEL_NAME = CFG.PROPERTY_NAME || "Mandioca Hostel";
+const LOGO_URL    = CFG.LOGO_URL || "";
+
+const $ = id => document.getElementById(id);
+const fmtInt = n => Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+const fmtUSD = n => (Math.round((n + Number.EPSILON) * 100) / 100).toFixed(2);
+const num = v => { const s = String(v||"").replaceAll(",","").replaceAll(" ",""); const x = Number(s); return isFinite(x)?x:0; };
+function todayISO(){ const d=new Date(), z=n=>String(n).padStart(2,"0"); return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())}`; }
+function fmtDateDisplay(iso){ if(!iso)return""; const [y,m,d]=iso.split("-"); return `${d}/${m}/${y}`; }
 
 let lang = "es";
+let clientType = "person"; // "person" | "company"
 
-const $ = (id)=>document.getElementById(id);
-const fmtInt = (n)=>Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-const fmtUSD = (n)=> (Math.round((n+Number.EPSILON)*100)/100).toFixed(2);
-const num = (v)=> {
-  const s = String(v||"").replaceAll(",", "").replaceAll(" ", "");
-  const x = Number(s);
-  return isFinite(x)?x:0;
-};
-function todayISO(){
-  const d=new Date();
-  const z=n=>String(n).padStart(2,"0");
-  return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())}`;
+/* ─────────────────────────────────────────────
+   Client type toggle
+───────────────────────────────────────────── */
+function setClientType(type){
+  clientType = type;
+  $("btnPerson").classList.toggle("active", type==="person");
+  $("btnCompany").classList.toggle("active", type==="company");
+  $("fieldsPerson").classList.toggle("hidden", type==="company");
+  $("fieldsCompany").classList.toggle("hidden", type==="person");
+  update();
 }
 
+/* ─────────────────────────────────────────────
+   Fixed hostel billing text
+───────────────────────────────────────────── */
 function setFixed(){
-  const addr = (lang==="es") ? HOSTEL_FIXED.addressES : HOSTEL_FIXED.addressEN;
-  const taxL = (lang==="es") ? HOSTEL_FIXED.taxLabelES : HOSTEL_FIXED.taxLabelEN;
-  $("hostelBill").value = `${HOSTEL_FIXED.name}\n${addr}\n${taxL}: ${HOSTEL_FIXED.taxValue || "-"}`;
+  const ruc = CFG.RUC ? (lang==="es"?"\nRUC: ":"\nTax ID: ") + CFG.RUC : (lang==="es"?"\nRUC (si aplica): –":"\nTax ID (if applicable): –");
+  const addr = `${CFG.ADDRESS_LINE1||"Av. Colón 1090"}\n${CFG.ADDRESS_LINE2||"Asunción, Paraguay"}`;
+  $("hostelBill").value = `${HOSTEL_NAME}\n${addr}${ruc}\n${CFG.EMAIL||"info@mandiocahostel.com"}`;
 }
 
-function makeRow({auto=false, desc="", qty=1, unit=0}){
-  const tr=document.createElement("tr");
-  tr.dataset.auto = auto ? "1":"0";
+/* Pre-fill bank fields from config */
+function prefillBank(){
+  if(CFG.BANK_NAME    && !$("bankName").value)    $("bankName").value    = CFG.BANK_NAME;
+  if(CFG.BANK_ACCOUNT && !$("bankAcc").value)     $("bankAcc").value     = CFG.BANK_ACCOUNT;
+  if(CFG.BANK_HOLDER  && !$("bankHolder").value)  $("bankHolder").value  = CFG.BANK_HOLDER;
+  if(CFG.BANK_ALIAS   && !$("bankAlias").value)   $("bankAlias").value   = CFG.BANK_ALIAS;
+  if(CFG.BANK_EXTRA   && !$("bankExtra").value)   $("bankExtra").value   = CFG.BANK_EXTRA;
+}
 
+/* ─────────────────────────────────────────────
+   Items table
+───────────────────────────────────────────── */
+function makeRow({auto=false, desc="", qty=1, unit=0}){
+  const tr = document.createElement("tr");
+  tr.dataset.auto = auto?"1":"0";
   const tdD=document.createElement("td");
-  const iD=document.createElement("input");
-  iD.value=desc;
-  iD.placeholder = auto ? "" : (lang==="es" ? "Ej: Lavandería" : "e.g., Laundry");
-  iD.disabled = auto;
-  iD.addEventListener("input", update);
-  tdD.appendChild(iD);
+  const iD=document.createElement("input"); iD.value=desc; iD.disabled=auto;
+  iD.placeholder = auto ? "" : (lang==="es"?"Ej: Lavandería":"e.g., Laundry");
+  iD.addEventListener("input",update); tdD.appendChild(iD);
 
   const tdQ=document.createElement("td"); tdQ.className="right";
-  const iQ=document.createElement("input"); iQ.inputMode="numeric";
-  iQ.value=qty; iQ.disabled=auto;
-  iQ.addEventListener("input", update);
-  tdQ.appendChild(iQ);
+  const iQ=document.createElement("input"); iQ.inputMode="numeric"; iQ.value=qty; iQ.disabled=auto;
+  iQ.addEventListener("input",update); tdQ.appendChild(iQ);
 
   const tdU=document.createElement("td"); tdU.className="right";
-  const iU=document.createElement("input"); iU.inputMode="numeric";
-  iU.value=unit; iU.disabled=auto;
-  iU.addEventListener("input", update);
-  tdU.appendChild(iU);
+  const iU=document.createElement("input"); iU.inputMode="numeric"; iU.value=unit; iU.disabled=auto;
+  iU.addEventListener("input",update); tdU.appendChild(iU);
 
   const tdT=document.createElement("td"); tdT.className="right";
-  const span=document.createElement("span"); span.className="vLine"; span.textContent="0";
-  tdT.appendChild(span);
+  const sp=document.createElement("span"); sp.className="vLine"; sp.textContent="0"; tdT.appendChild(sp);
 
   const tdX=document.createElement("td"); tdX.className="right print-hide";
   const b=document.createElement("button"); b.className="btn"; b.type="button"; b.textContent="✕";
-  if(auto){ b.disabled=true; b.style.opacity=".35"; }
-  b.onclick=()=>{ tr.remove(); ensureBase(); update(); };
-  tdX.appendChild(b);
-
+  if(auto){b.disabled=true;b.style.opacity=".3";}
+  b.onclick=()=>{tr.remove();ensureBase();update();}; tdX.appendChild(b);
   tr.append(tdD,tdQ,tdU,tdT,tdX);
   return tr;
 }
 
 function ensureBase(){
   const body=$("itemsBody");
-  if(body.children.length===0){
-    body.appendChild(makeRow({auto:true, desc:"", qty:1, unit:0}));
-  }
+  if(!body.children.length) body.appendChild(makeRow({auto:true,desc:"",qty:1,unit:0}));
   body.children[0].dataset.auto="1";
 }
 
-function addItem(){
-  $("itemsBody").appendChild(makeRow({auto:false, desc:"", qty:1, unit:0}));
-  update();
-}
+function addItem(){ $("itemsBody").appendChild(makeRow({auto:false,desc:"",qty:1,unit:0})); update(); }
 
-function paymentText(){
+/* ─────────────────────────────────────────────
+   Payment info text
+───────────────────────────────────────────── */
+function buildPaymentText(forPrint){
   const lines=[];
-  if($("payCash").checked) lines.push("• " + (lang==="es"?HOSTEL_FIXED.cashES:HOSTEL_FIXED.cashEN));
-  if($("payTransfer").checked) lines.push("• " + (lang==="es"?HOSTEL_FIXED.bankES:HOSTEL_FIXED.bankEN));
-  if($("payCard").checked) lines.push("• " + (lang==="es"?HOSTEL_FIXED.cardES:HOSTEL_FIXED.cardEN));
+  const isCash     = $("payCash").checked;
+  const isTransfer = $("payTransfer").checked;
+  const isCard     = $("payCard").checked;
+  const sep        = forPrint ? "\n" : "\n";
+
+  if(isCash)     lines.push(lang==="es"?"• Efectivo – pago en recepción.":"• Cash – pay at reception.");
+  if(isTransfer){
+    const bn  = $("bankName").value.trim();
+    const ba  = $("bankAcc").value.trim();
+    const bh  = $("bankHolder").value.trim();
+    const bal = $("bankAlias").value.trim();
+    const bex = $("bankExtra").value.trim();
+    let block = lang==="es"?"• Transferencia bancaria:":"• Bank transfer:";
+    if(bh)  block += sep + (lang==="es"?"  Titular: ":"  Account holder: ") + bh;
+    if(bn)  block += sep + (lang==="es"?"  Banco: ":"  Bank: ") + bn;
+    if(ba)  block += sep + (lang==="es"?"  Cuenta: ":"  Account: ") + ba;
+    if(bal) block += sep + (lang==="es"?"  Alias / CBU: ":"  Alias / CBU: ") + bal;
+    if(bex) block += sep + "  " + bex;
+    if(!bn && !ba && !bh && !bal){
+      block += sep + (lang==="es"?"  (Complete los datos bancarios en el formulario)":"  (Fill in bank details in the form)");
+    }
+    lines.push(block);
+  }
+  if(isCard) lines.push(lang==="es"?"• Tarjeta – disponible en recepción (puede aplicar recargo).":"• Card – available at reception (surcharge may apply).");
   return lines.join("\n\n");
 }
 
+/* ─────────────────────────────────────────────
+   Main update (summary + ready text)
+───────────────────────────────────────────── */
 function update(){
   ensureBase();
   setFixed();
 
-  const rate = num($("usdRate").value);
-  const mode = $("displayMode").value;
+  // bank section visibility
+  $("bankSection").style.display = $("payTransfer").checked ? "block" : "none";
 
-  const nights = Math.max(0, Math.round(num($("nights").value)));
-  const nightPrice = Math.max(0, num($("nightPrice").value));
-  const room = ($("room").value||"").trim();
+  const rate    = num($("usdRate").value);
+  const mode    = $("displayMode").value;
+  const nights  = Math.max(0, Math.round(num($("nights").value)));
+  const nPrice  = Math.max(0, num($("nightPrice").value));
+  const room    = ($("room").value||"").trim();
 
-  // auto line
+  // Auto row (stay)
   const base = $("itemsBody").children[0];
-  const d = base.children[0].querySelector("input");
-  const q = base.children[1].querySelector("input");
-  const u = base.children[2].querySelector("input");
+  base.children[0].querySelector("input").value = lang==="es"
+    ? `Alojamiento – ${room}${nights?" ("+nights+" noche"+(nights===1?"":"s")+")" : ""}`
+    : `Accommodation – ${room}${nights?" ("+nights+" night"+(nights===1?"":"s")+")" : ""}`;
+  base.children[1].querySelector("input").value = String(nights);
+  base.children[2].querySelector("input").value = String(nPrice);
 
-  d.value = (lang==="es")
-    ? `Alojamiento (${room}) — ${nights} noche${nights===1?"":"s"}`
-    : `Accommodation (${room}) — ${nights} night${nights===1?"":"s"}`;
-  q.value = String(nights);
-  u.value = String(nightPrice);
-
-  let subtotalPYG=0;
+  // Totals
+  let total=0;
   [...$("itemsBody").children].forEach(tr=>{
     const desc = tr.children[0].querySelector("input").value.trim();
     const qty  = num(tr.children[1].querySelector("input").value);
     const unit = num(tr.children[2].querySelector("input").value);
     const line = Math.max(0,qty)*Math.max(0,unit);
     tr.querySelector(".vLine").textContent = fmtInt(line);
-    if(desc) subtotalPYG += line;
+    if(desc) total += line;
   });
 
-  const subtotalUSD = (rate>0) ? subtotalPYG / rate : 0;
+  const usd = (rate>0) ? total/rate : 0;
+  $("rowSubUSD").style.display = mode==="pyg"?"none":"flex";
+  $("rowTotUSD").style.display = mode==="pyg"?"none":"flex";
+  $("subPYG").textContent = fmtInt(total);
+  $("totPYG").textContent = fmtInt(total);
+  $("subUSD").textContent = fmtUSD(usd);
+  $("totUSD").textContent = fmtUSD(usd);
 
-  $("rowSubUSD").style.display = (mode==="pyg") ? "none" : "flex";
-  $("rowTotUSD").style.display = (mode==="pyg") ? "none" : "flex";
+  // Ready text
+  const invNo  = ($("invNo").value||"").trim();
+  const client = clientType==="company"
+    ? ($("companyName").value||"").trim()
+    : ($("toName").value||"").trim();
+  const docNo  = clientType==="company"
+    ? ($("companyTaxId").value||"").trim()
+    : ($("clientDocNo").value||"").trim();
+  const docLabel = clientType==="company"
+    ? (lang==="es"?"CUIT/RUC":"Tax ID")
+    : ($("clientDocType").value==="passport"?(lang==="es"?"Pasaporte":"Passport"):$("clientDocType").value==="id"?"ID":"Doc.");
 
-  $("subPYG").textContent = fmtInt(subtotalPYG);
-  $("totPYG").textContent = fmtInt(subtotalPYG);
-  $("subUSD").textContent = fmtUSD(subtotalUSD);
-  $("totUSD").textContent = fmtUSD(subtotalUSD);
+  const totalLine = (lang==="es"
+    ? `Factura ${invNo||"(sin número)"}\nTotal: ${fmtInt(total)} PYG${mode!=="pyg"?" / $"+fmtUSD(usd)+" USD":""}${client?"\nCliente: "+client+(docNo?" – "+docLabel+": "+docNo:""):""}${($("notes").value||"").trim()?"\n\n"+($("notes").value||"").trim():""}` 
+    : `Invoice ${invNo||"(no number)"}\nTotal: ${fmtInt(total)} PYG${mode!=="pyg"?" / $"+fmtUSD(usd)+" USD":""}${client?"\nClient: "+client+(docNo?" – "+docLabel+": "+docNo:""):""}${($("notes").value||"").trim()?"\n\n"+($("notes").value||"").trim():""}`);
 
-  // ready text
-  const invNo = ($("invNo").value||"").trim();
-  const client = ($("toName").value||"").trim();
-  const docType = $("clientDocType").value;
-  const docNo = ($("clientDocNo").value||"").trim();
-  const docLabelES = docType==="passport"?"Pasaporte":docType==="id"?"Cédula/ID":"Documento";
-  const docLabelEN = docType==="passport"?"Passport":docType==="id"?"ID":"Document";
-  const docPart = docNo ? ` — ${(lang==="es"?docLabelES:docLabelEN)}: ${docNo}` : "";
-
-  const totalLine = (lang==="es")
-    ? `Factura ${invNo || "(sin número)"}\nTotal: ${fmtInt(subtotalPYG)} PYG${mode!=="pyg" ? " / $" + fmtUSD(subtotalUSD) + " USD" : ""}${client?("\nCliente: "+client+docPart):""}`
-    : `Invoice ${invNo || "(no number)"}\nTotal: ${fmtInt(subtotalPYG)} PYG${mode!=="pyg" ? " / $" + fmtUSD(subtotalUSD) + " USD" : ""}${client?("\nClient: "+client+docPart):""}`;
-
-  $("readyText").textContent = totalLine + ($("notes").value.trim()?("\n\n" + $("notes").value.trim()):"");
-  $("payInfo").textContent = paymentText();
-
-  // pills
-  $("pillLang").textContent = (lang==="es") ? "Idioma: ES" : "Language: EN";
+  $("readyText").textContent = totalLine;
+  $("payInfoPreview").textContent = buildPaymentText(false);
 }
 
-async function copyReadyText(){
-  const txt = $("readyText").textContent || "";
-  try{ await navigator.clipboard.writeText(txt); }catch(e){ alert(txt); }
-}
+/* ─────────────────────────────────────────────
+   Build clean PRINT VIEW then trigger print
+───────────────────────────────────────────── */
+function buildPrintView(){
+  const mode   = $("displayMode").value;
+  const rate   = num($("usdRate").value);
+  const invNo  = ($("invNo").value||"").trim() || "–";
+  const invDate= fmtDateDisplay($("invDate").value);
+  const invDue = fmtDateDisplay($("invDue").value);
+  const notes  = ($("notes").value||"").trim();
 
-function setTexts(){
-  if(lang==="es"){
-    $("t_h1").textContent="Factura";
-    $("t_sub").textContent="Genera una factura con total automático en PYG y USD (listo para imprimir en PDF).";
-    $("pillMode").textContent="PYG ↔ USD";
-    $("t_head").textContent="Encabezado";
-    $("t_invno").textContent="N° de factura";
-    $("t_date").textContent="Fecha";
-    $("t_due").textContent="Vence";
-    $("t_client").textContent="Cliente / Huésped";
-    $("t_bill").textContent="Datos de facturación";
-    $("t_hostel_fixed").textContent="Hotel (fijo)";
-    $("t_client_bill").textContent="Cliente (editable)";
-    $("t_doctype").textContent="Documento";
-    $("t_docno").textContent="N° de documento";
-    $("t_rate").textContent="Tipo de cambio (1 USD = PYG)";
-    $("t_show").textContent="Mostrar";
-    $("t_stay").textContent="Estadía";
-    $("t_price").textContent="Precio por noche (PYG)";
-    $("t_nights").textContent="Noches";
-    $("t_room").textContent="Habitación";
-    $("t_hint").textContent="La primera línea se genera automáticamente desde esta sección.";
-    $("t_items").textContent="Items";
-    $("th_desc").textContent="Descripción";
-    $("th_qty").textContent="Cant.";
-    $("th_unit").textContent="Unit (PYG)";
-    $("th_total").textContent="Total (PYG)";
-    $("btnAdd").textContent="+ Agregar item";
-    $("btnCopy").textContent="Copiar texto listo";
-    $("t_pay").textContent="Método de pago";
-    $("pm_cash").textContent="Efectivo";
-    $("pm_transfer").textContent="Transferencia";
-    $("pm_card").textContent="Tarjeta";
-    $("t_notes").textContent="Notas";
-    $("t_sum").textContent="Resumen";
-    $("k_sub").textContent="Subtotal";
-    $("k_subusd").textContent="Subtotal (USD)";
-    $("k_total").textContent="TOTAL";
-    $("k_totalusd").textContent="TOTAL (USD)";
-    $("t_formula").textContent="USD = PYG / (PYG por 1 USD)";
-    $("t_ready").textContent="Texto listo";
-    $("t_payinfo").textContent="Información de pago";
-    $("btnPrint").textContent="Imprimir / PDF";
-    $("btnPrint2").textContent="Imprimir / PDF";
+  // totals (recalc)
+  let total=0;
+  const rows=[];
+  [...$("itemsBody").children].forEach(tr=>{
+    const d=tr.children[0].querySelector("input").value.trim();
+    const q=num(tr.children[1].querySelector("input").value);
+    const u=num(tr.children[2].querySelector("input").value);
+    const line=Math.max(0,q)*Math.max(0,u);
+    if(d) { total+=line; rows.push({d,q,u:fmtInt(u),line:fmtInt(line)}); }
+  });
+  const usd=(rate>0)?total/rate:0;
+
+  // Client block
+  let clientName="", clientBody="", clientDocStr="";
+  if(clientType==="company"){
+    clientName = ($("companyName").value||"").trim();
+    const addr = ($("companyAddr").value||"").trim();
+    const tax  = ($("companyTaxId").value||"").trim();
+    const cont = ($("companyContact").value||"").trim();
+    clientBody = [clientName, addr, tax?(lang==="es"?"CUIT/RUC: ":"Tax ID: ")+tax:"", cont].filter(Boolean).join("\n");
+    clientDocStr = tax ? (lang==="es"?"CUIT/RUC: ":"Tax ID: ") + tax : "";
   } else {
-    $("t_h1").textContent="Invoice";
-    $("t_sub").textContent="Generate an invoice with automatic totals in PYG and USD (PDF-ready).";
-    $("pillMode").textContent="PYG ↔ USD";
-    $("t_head").textContent="Header";
-    $("t_invno").textContent="Invoice No.";
-    $("t_date").textContent="Date";
-    $("t_due").textContent="Due";
-    $("t_client").textContent="Client / Guest";
-    $("t_bill").textContent="Billing details";
-    $("t_hostel_fixed").textContent="Hostel (fixed)";
-    $("t_client_bill").textContent="Client (editable)";
-    $("t_doctype").textContent="Document type";
-    $("t_docno").textContent="Document number";
-    $("t_rate").textContent="Exchange rate (1 USD = PYG)";
-    $("t_show").textContent="Display";
-    $("t_stay").textContent="Stay";
-    $("t_price").textContent="Price per night (PYG)";
-    $("t_nights").textContent="Nights";
-    $("t_room").textContent="Room";
-    $("t_hint").textContent="The first line is automatically generated from this section.";
-    $("t_items").textContent="Items";
-    $("th_desc").textContent="Description";
-    $("th_qty").textContent="Qty";
-    $("th_unit").textContent="Unit (PYG)";
-    $("th_total").textContent="Total (PYG)";
-    $("btnAdd").textContent="+ Add item";
-    $("btnCopy").textContent="Copy ready text";
-    $("t_pay").textContent="Payment method";
-    $("pm_cash").textContent="Cash";
-    $("pm_transfer").textContent="Bank transfer";
-    $("pm_card").textContent="Card";
-    $("t_notes").textContent="Notes";
-    $("t_sum").textContent="Summary";
-    $("k_sub").textContent="Subtotal";
-    $("k_subusd").textContent="Subtotal (USD)";
-    $("k_total").textContent="TOTAL";
-    $("k_totalusd").textContent="TOTAL (USD)";
-    $("t_formula").textContent="USD = PYG / (PYG per 1 USD)";
-    $("t_ready").textContent="Ready text";
-    $("t_payinfo").textContent="Payment information";
-    $("btnPrint").textContent="Print / PDF";
-    $("btnPrint2").textContent="Print / PDF";
+    clientName = ($("toName").value||"").trim();
+    const addr = ($("clientBill").value||"").trim();
+    const docType = $("clientDocType").value;
+    const docNo = ($("clientDocNo").value||"").trim();
+    const dtLabel = docType==="passport"?(lang==="es"?"Pasaporte":"Passport"):docType==="id"?"ID":"Doc.";
+    clientDocStr = docNo ? dtLabel+": "+docNo : "";
+    clientBody = [clientName, addr, clientDocStr].filter(Boolean).join("\n");
   }
 
-  $("pillLang").textContent = (lang==="es") ? "Idioma: ES" : "Language: EN";
+  // Table rows HTML
+  const trowsHTML = rows.map(r=>`
+    <tr>
+      <td>${esc(r.d)}</td>
+      <td class="r">${r.q}</td>
+      <td class="r">${r.u}</td>
+      <td class="r">${r.line} PYG</td>
+    </tr>`).join("");
+
+  // Totals HTML
+  let totalsHTML=`
+    <div class="inv-totals-row"><span class="k">${lang==="es"?"Subtotal":"Subtotal"}</span><span class="v">${fmtInt(total)} PYG</span></div>`;
+  if(mode!=="pyg") totalsHTML+=`
+    <div class="inv-totals-row"><span class="k">${lang==="es"?"Subtotal (USD)":"Subtotal (USD)"}</span><span class="v">$ ${fmtUSD(usd)}</span></div>`;
+  totalsHTML+=`
+    <div class="inv-totals-row total-big"><span class="k">TOTAL</span><span class="v">${fmtInt(total)} PYG${mode!=="pyg"?" / $"+fmtUSD(usd)+" USD":""}</span></div>`;
+
+  // Payment text
+  const payTxt = buildPaymentText(true);
+  const logoHTML = LOGO_URL ? `<img src="${LOGO_URL}" alt="Logo"/>` : `<div style="font-family:Georgia,serif;font-size:16pt;font-weight:700;color:#0d5a4a;">${HOSTEL_NAME}</div>`;
+
+  // Hostel billing block
+  const hostelBillRaw = $("hostelBill").value || "";
+
+  const html=`
+<div class="inv">
+  <div class="inv-header">
+    <div class="inv-logo">
+      ${logoHTML}
+      <div class="inv-hostel-sub" style="margin-top:6pt;">${esc(hostelBillRaw).replace(/\n/g,"<br/>")}</div>
+    </div>
+    <div class="inv-title-block">
+      <div class="inv-title">${lang==="es"?"FACTURA":"INVOICE"}</div>
+      <div class="inv-meta">
+        <strong style="font-size:11pt;color:#1a2420;">${esc(invNo)}</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="inv-dates">
+    <div class="inv-date-box">
+      <div class="inv-label">${lang==="es"?"Fecha":"Date"}</div>
+      <div class="inv-val">${invDate||"–"}</div>
+    </div>
+    <div class="inv-date-box">
+      <div class="inv-label">${lang==="es"?"Vencimiento":"Due date"}</div>
+      <div class="inv-val">${invDue||"–"}</div>
+    </div>
+    <div class="inv-date-box">
+      <div class="inv-label">${lang==="es"?"Tipo de cambio":"Exchange rate"}</div>
+      <div class="inv-val">1 USD = ${fmtInt(rate)} PYG</div>
+    </div>
+  </div>
+
+  <div class="inv-bill">
+    <div class="inv-bill-box">
+      <div class="inv-label">${lang==="es"?"DE (Emisor)":"FROM (Issuer)"}</div>
+      <div class="inv-val">${esc(hostelBillRaw).replace(/\n/g,"<br/>")}</div>
+    </div>
+    <div class="inv-bill-box">
+      <div class="inv-label">${lang==="es"?"PARA (Cliente)":"TO (Client)"}</div>
+      <div class="inv-val">${clientBody ? esc(clientBody).replace(/\n/g,"<br/>") : (lang==="es"?"–":"–")}</div>
+    </div>
+  </div>
+
+  <table class="inv-table">
+    <thead>
+      <tr>
+        <th>${lang==="es"?"Descripción":"Description"}</th>
+        <th class="r" style="width:50pt;">${lang==="es"?"Cant.":"Qty"}</th>
+        <th class="r" style="width:100pt;">${lang==="es"?"Precio unit. (PYG)":"Unit price (PYG)"}</th>
+        <th class="r" style="width:110pt;">${lang==="es"?"Total (PYG)":"Total (PYG)"}</th>
+      </tr>
+    </thead>
+    <tbody>${trowsHTML}</tbody>
+  </table>
+
+  <div class="inv-totals">${totalsHTML}</div>
+
+  <div class="inv-bottom">
+    <div class="inv-bottom-box">
+      <div class="inv-label">${lang==="es"?"Información de pago":"Payment information"}</div>
+      <div class="inv-val">${payTxt ? esc(payTxt).replace(/\n/g,"<br/>") : "–"}</div>
+    </div>
+    <div class="inv-bottom-box">
+      <div class="inv-label">${lang==="es"?"Notas":"Notes"}</div>
+      <div class="inv-val">${notes ? esc(notes).replace(/\n/g,"<br/>") : "–"}</div>
+    </div>
+  </div>
+
+  <div class="inv-sig">
+    <div class="inv-sig-box">${lang==="es"?"Firma y sello del emisor":"Issuer signature &amp; stamp"}</div>
+    <div class="inv-sig-box">${lang==="es"?"Firma del cliente / Recibí conforme":"Client signature / Received"}</div>
+  </div>
+
+  <div class="inv-footer">
+    <span>${HOSTEL_NAME} — ${CFG.ADDRESS_LINE1||"Av. Colón 1090"}, ${CFG.ADDRESS_LINE2||"Asunción, Paraguay"}</span>
+    <span>${CFG.EMAIL||"info@mandiocahostel.com"} — ${CFG.PHONE_DISPLAY||""}</span>
+  </div>
+</div>`;
+
+  $("invPrint").innerHTML = html;
+}
+
+function esc(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+
+function buildAndPrint(){
+  buildPrintView();
+  window.print();
+}
+
+/* ─────────────────────────────────────────────
+   Copy ready text
+───────────────────────────────────────────── */
+async function copyReadyText(){
+  const txt = $("readyText").textContent||"";
+  try{ await navigator.clipboard.writeText(txt); alert(lang==="es"?"✅ Copiado al portapapeles.":"✅ Copied to clipboard."); }
+  catch(e){ alert(txt); }
+}
+
+/* ─────────────────────────────────────────────
+   Language switch
+───────────────────────────────────────────── */
+const TEXTS = {
+  es:{
+    t_h1:"Factura", t_sub:"Generador PYG / USD", t_h1b:"Factura",
+    t_sub2:"Genera una factura con total automático en PYG y USD — lista para PDF limpio.",
+    t_head:"Encabezado", t_invno:"N° de factura", t_date:"Fecha", t_due:"Vence",
+    t_rate:"Tipo de cambio (1 USD = PYG)", t_show:"Mostrar totales",
+    t_bill:"Datos de facturación", t_hostel_fixed:"Hostel / Emisor (fijo)",
+    t_clienttype:"Tipo de cliente", ct_person:"Persona privada", ct_company:"Empresa",
+    t_client:"Nombre del huésped", t_client_bill:"Dirección (opcional)",
+    t_doctype:"Documento", t_docno:"N° de documento",
+    t_company:"Nombre de empresa", t_taxid:"CUIT / RUC / NIT / Tax ID",
+    t_company_addr:"Dirección de facturación", t_company_contact:"Contacto / Atención (opcional)",
+    t_stay:"Estadía", t_price:"Precio por noche (PYG)", t_nights:"Noches", t_room:"Habitación / Descripción",
+    t_items:"Items adicionales", th_desc:"Descripción", th_qty:"Cant.", th_unit:"Unit (PYG)", th_total:"Total (PYG)",
+    btnAdd:"+ Agregar item", btnCopy:"📋 Copiar resumen",
+    t_pay:"Método de pago", pm_cash:"Efectivo", pm_transfer:"Transferencia bancaria", pm_card:"Tarjeta",
+    t_bankdata:"Datos bancarios del hostel", t_bank_name:"Banco",
+    t_bank_acc:"N° de cuenta / CBU / IBAN", t_bank_holder:"Titular",
+    t_bank_alias:"Alias / Referencia (opcional)", t_bank_extra:"Info extra (opcional)",
+    t_notes:"Notas", t_sum:"Resumen", k_sub:"Subtotal", k_subusd:"Subtotal (USD)",
+    k_total:"TOTAL", k_totalusd:"TOTAL (USD)",
+    t_ready:"Texto listo (WhatsApp / email)", t_payinfo:"Info de pago",
+    btnPrint:"Imprimir / PDF", btnPrint3:"Generar PDF limpio", btnCopy2:"📋 Copiar",
+  },
+  en:{
+    t_h1:"Invoice", t_sub:"PYG / USD Generator", t_h1b:"Invoice",
+    t_sub2:"Generate an invoice with automatic totals in PYG and USD — clean PDF ready.",
+    t_head:"Header", t_invno:"Invoice No.", t_date:"Date", t_due:"Due date",
+    t_rate:"Exchange rate (1 USD = PYG)", t_show:"Display totals",
+    t_bill:"Billing details", t_hostel_fixed:"Hostel / Issuer (fixed)",
+    t_clienttype:"Client type", ct_person:"Private person", ct_company:"Company",
+    t_client:"Guest name", t_client_bill:"Address (optional)",
+    t_doctype:"Document type", t_docno:"Document number",
+    t_company:"Company name", t_taxid:"CUIT / RUC / NIT / Tax ID",
+    t_company_addr:"Billing address", t_company_contact:"Contact / Attention (optional)",
+    t_stay:"Stay", t_price:"Price per night (PYG)", t_nights:"Nights", t_room:"Room / Description",
+    t_items:"Additional items", th_desc:"Description", th_qty:"Qty", th_unit:"Unit (PYG)", th_total:"Total (PYG)",
+    btnAdd:"+ Add item", btnCopy:"📋 Copy summary",
+    t_pay:"Payment method", pm_cash:"Cash", pm_transfer:"Bank transfer", pm_card:"Card",
+    t_bankdata:"Hostel bank details", t_bank_name:"Bank",
+    t_bank_acc:"Account No. / CBU / IBAN", t_bank_holder:"Account holder",
+    t_bank_alias:"Alias / Reference (optional)", t_bank_extra:"Extra info (optional)",
+    t_notes:"Notes", t_sum:"Summary", k_sub:"Subtotal", k_subusd:"Subtotal (USD)",
+    k_total:"TOTAL", k_totalusd:"TOTAL (USD)",
+    t_ready:"Ready text (WhatsApp / email)", t_payinfo:"Payment info",
+    btnPrint:"Print / PDF", btnPrint3:"Generate clean PDF", btnCopy2:"📋 Copy",
+  }
+};
+
+function setTexts(){
+  const T = TEXTS[lang];
+  Object.keys(T).forEach(id=>{ const el=$(id); if(el) el.textContent=T[id]; });
+  // update table th elements separately
+  ["th_desc","th_qty","th_unit","th_total"].forEach(id=>{ const el=$(id); if(el) el.textContent=T[id]; });
+  // update select options for doctype
+  const dt=$("clientDocType");
+  if(dt){
+    dt.options[0].text = lang==="es"?"Pasaporte":"Passport";
+    dt.options[1].text = lang==="es"?"Cédula / ID":"ID Card";
+    dt.options[2].text = lang==="es"?"Otro":"Other";
+  }
+  // update displayMode options
+  const dm=$("displayMode");
+  if(dm){
+    dm.options[0].text = lang==="es"?"PYG + USD":"PYG + USD";
+    dm.options[1].text = lang==="es"?"Solo PYG":"PYG only";
+    dm.options[2].text = lang==="es"?"Solo USD":"USD only";
+  }
   update();
 }
 
 function toggleLang(){
-  lang = (lang==="es") ? "en" : "es";
+  lang = (lang==="es")?"en":"es";
   setTexts();
 }
 
-// init
+/* ─────────────────────────────────────────────
+   Init
+───────────────────────────────────────────── */
 (function(){
   $("invDate").value = todayISO();
-  ensureBase();
+  // Set due date +4 days
+  const due = new Date(); due.setDate(due.getDate()+4);
+  const z=n=>String(n).padStart(2,"0");
+  $("invDue").value = `${due.getFullYear()}-${z(due.getMonth()+1)}-${z(due.getDate())}`;
 
-  const ids = ["invNo","invDate","invDue","toName","clientBill","clientDocType","clientDocNo","usdRate","displayMode","nightPrice","nights","room","notes","payCash","payTransfer","payCard"];
-  ids.forEach(id=>{
-    const el=$(id);
-    if(!el) return;
-    el.addEventListener("input", update);
-    el.addEventListener("change", update);
-  });
+  ensureBase();
+  prefillBank();
+
+  const watchIds=["invNo","invDate","invDue","toName","clientBill","clientDocType","clientDocNo",
+    "usdRate","displayMode","nightPrice","nights","room","notes",
+    "payCash","payTransfer","payCard",
+    "companyName","companyTaxId","companyAddr","companyContact",
+    "bankName","bankAcc","bankHolder","bankAlias","bankExtra"];
+  watchIds.forEach(id=>{ const el=$(id); if(el){ el.addEventListener("input",update); el.addEventListener("change",update); } });
 
   setTexts();
 })();
 </script>
+
 </body>
 </html>

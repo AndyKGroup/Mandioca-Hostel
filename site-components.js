@@ -29,7 +29,7 @@
     <div class="mh-nav">
       <div class="mh-nav-inner">
         <div class="mh-brand">
-          ${logo ? `<img src="${logo}" alt="${cfg.PROPERTY_NAME || "Hostel"} logo" />` : `<div class="mh-badge">${cfg.PROPERTY_NAME || "Hostel"}</div>`}
+          ${logo ? `<img src="${logo}" alt="${cfg.PROPERTY_NAME || "Hostel"} logo" onerror="this.outerHTML=\'<div class=&quot;mh-badge&quot;>MH</div>\'">` : `<div class="mh-badge">${cfg.PROPERTY_NAME || "Hostel"}</div>`}
         </div>
         <a class="mh-cta" href="${ctaUrl}" target="_blank" rel="noopener">${ctaLabel}</a>
       </div>
@@ -45,7 +45,7 @@
       ph.className = "mh-printhead";
       ph.innerHTML = `
         <div class="mh-ph-left">
-          ${logo ? `<img src="${logo}" alt="${cfg.PROPERTY_NAME || "Hostel"} logo" />` : ``}
+          ${logo ? `<img src="${logo}" alt="${cfg.PROPERTY_NAME || "Hostel"} logo" onerror="this.outerHTML=\'<div class=&quot;mh-badge&quot;>MH</div>\'">` : ``}
           <div>
             <div class="mh-ph-title">${cfg.PROPERTY_NAME || "Hostel"}</div>
             <div class="mh-ph-meta">${cfg.TAGLINE || ""}</div>
@@ -66,7 +66,7 @@
   footer.innerHTML = `
     <div class="mh-footer-inner">
       <div>
-        ${logo ? `<img src="${logo}" alt="${cfg.PROPERTY_NAME || "Hostel"} logo" style="height:46px;width:auto;display:block;margin-bottom:10px;" />` : ""}
+        ${logo ? `<img src="${logo}" alt="${cfg.PROPERTY_NAME || "Hostel"} logo" style="height:46px;width:auto;display:block;margin-bottom:10px;" onerror="this.outerHTML=\'<div class=&quot;mh-badge&quot;>MH</div>\'">` : ""}
         <small>${cfg.TAGLINE || ""}</small><br/>
         <small><a href="${phoneLink}" target="_blank" rel="noopener">${phoneText}</a> &nbsp; ${email}</small><br/>
         <small><a href="${mapsUrl}" target="_blank" rel="noopener">${addr1}${addr2 ? ", " + addr2 : ""}</a></small>

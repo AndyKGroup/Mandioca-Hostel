@@ -106,7 +106,7 @@
                 </div>
                 <div class="hr"></div>
                 <label><b>Foto MRZ (recomendado en iPad)</b></label>
-                <input id="mrzFoto" type="file" accept="image/*" capture="environment" class="hidden" />
+                <input id="mrzFoto" type="file" accept="image/*" capture="environment" class="hidden" onchange="updatePassportPreview()"/>
                 <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
                   <button class="btn primary" type="button" onclick="openPassportCamera()">📷 Tomar foto MRZ</button>
                   <button class="btn" type="button" onclick="leerMRZDesdeFoto()">Leer MRZ desde foto</button>
@@ -144,7 +144,7 @@
             <div class="grid">
               <div>
                 <label data-i18n="photoLabel">Subir foto del documento (frente)</label>
-                <input id="fotoDoc" type="file" accept="image/*" capture="environment" />
+                <input id="fotoDoc" type="file" accept="image/*" capture="environment" onchange="updateDocPreview()"/>
                 <div class="previewWrap">
                   <img id="idPreviewImg" class="previewImg hidden" alt="Document preview"/>
                 </div>
@@ -1080,7 +1080,12 @@
     // FOTO OCR (ID / licencia / otro) – best effort
     // =========================
     function limpiarFoto(){
-      document.getElementById("fotoDoc").value = "";
+      const input = document.getElementById("fotoDoc");
+      const imgEl = document.getElementById("idPreviewImg");
+      if(input) input.value = "";
+      if(imgEl){ try{ URL.revokeObjectURL(imgEl.src); }catch(e){} imgEl.src=""; imgEl.classList.add("hidden"); }
+      const ocr = document.getElementById("ocrPreview");
+      if(ocr) ocr.value = "";
     }
 
     async function leerFoto(){

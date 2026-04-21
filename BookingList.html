@@ -1,564 +1,787 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Booking List | Lista de Reservas</title>
-
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Booking List | Lista de Reservas – Mandioca Hostel</title>
   <link rel="stylesheet" href="site-style.css"/>
   <script src="config.js"></script>
   <script src="site-components.js" defer></script>
-
   <style>
-    /* Minimal additions, keeping Mandioca UI */
-    .grid2{display:grid;gap:12px}
-    @media(min-width:980px){ .grid2{grid-template-columns:1fr 1fr;} }
+/* ── TOOLBAR AREA ── */
+.bl-toolbar{
+  display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+  padding:10px 16px; border-bottom:1px solid var(--mh-line);
+  background:var(--mh-paper);
+}
+.bl-brand{ display:flex; align-items:center; gap:10px; margin-right:auto; }
+.bl-brand img{ height:40px; width:auto; }
+.bl-brand-text b{ font-size:13px; display:block; }
+.bl-brand-text small{ font-size:11px; color:var(--mh-muted); }
 
-    .field label{display:block;font-size:12px;color:var(--mh-muted);margin:0 0 6px;}
-    .field input,.field select{
-      width:100%;
-      padding:10px 11px;
-      border-radius:12px;
-      border:1px solid var(--mh-line);
-      background:#fff;
-      outline:none;
-      font:inherit;
-    }
-    .field input:focus,.field select:focus{
-      border-color: rgba(13,90,74,.5);
-      box-shadow: 0 0 0 4px rgba(13,90,74,.12);
-    }
+/* ── STAT CARDS ── */
+.bl-stats{ display:flex; gap:10px; flex-wrap:wrap; padding:12px 16px 0; }
+.bl-stat{
+  flex:1; min-width:110px;
+  padding:10px 14px; border-radius:14px;
+  border:1px solid var(--mh-line); background:#fff;
+}
+.bl-stat .v{ font-size:18px; font-weight:900; color:var(--mh-green); font-family:var(--mh-serif); line-height:1; }
+.bl-stat .k{ font-size:11px; color:var(--mh-muted); margin-top:3px; text-transform:uppercase; letter-spacing:.08em; }
 
-    .tableWrap{
-      margin-top:12px;
-      border:1px solid var(--mh-line);
-      border-radius:16px;
-      background:#fff;
-      overflow:auto;
-    }
-    table{width:1700px;border-collapse:collapse;}
-    th,td{padding:10px;border-bottom:1px solid rgba(0,0,0,.06);vertical-align:top;}
-    th{position:sticky;top:0;background:rgba(0,0,0,.02);font-size:12px;text-transform:uppercase;letter-spacing:.08em;}
-    td input,td select{
-      width:100%;
-      padding:8px 9px;
-      border-radius:10px;
-      border:1px solid rgba(0,0,0,.12);
-      background:#fff;
-      outline:none;
-      font:inherit;
-      font-size:13px;
-    }
-    td input:focus,td select:focus{
-      border-color: rgba(13,90,74,.5);
-      box-shadow: 0 0 0 4px rgba(13,90,74,.10);
-    }
-    .right{text-align:right;}
-    .stats{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;}
-    .statBox{
-      border:1px solid var(--mh-line);
-      border-radius:16px;
-      background:#fff;
-      padding:10px 12px;
-      min-width:170px;
-    }
-    .statBox b{display:block;font-size:14px;}
-    .statBox span{display:block;font-size:12px;color:var(--mh-muted);margin-top:2px;}
-    .print-hide{}
-    @media print{
-      .print-hide, .actions, .topbar, .langbar{display:none !important;}
-      .tableWrap{border:none;overflow:visible !important;}
-      table{width:100% !important;}
-      th{position:static;}
-      td input,td select{border:none !important;padding:0 !important;}
-    }
-  
-/* --- Print: clean PDF, no cut-off --- */
-@page { size: A4 landscape; margin: 10mm; }
-@media print{
-  html, body{ overflow: visible !important; }
-  .tableWrap{ overflow: visible !important; }
-  table{ width:100% !important; font-size: 10px !important; }
-  th, td{ padding:6px 6px !important; }
-  td input, td select{
-    border:none !important;
-    box-shadow:none !important;
-    background: transparent !important;
-    padding:0 !important;
-    font-size:10px !important;
-    -webkit-appearance: none !important;
-    appearance: none !important;
-  }
-  select::-ms-expand{ display:none; }
+/* ── QUICK FILTER CHIPS ── */
+.bl-chips{ display:flex; gap:8px; flex-wrap:wrap; padding:10px 16px 0; }
+.bl-chip{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:6px 12px; border-radius:999px;
+  border:1px solid var(--mh-line); background:#fff;
+  font-size:12px; font-weight:800; cursor:pointer;
+  font-family:var(--mh-font); transition:all .15s;
+}
+.bl-chip:hover{ border-color:rgba(13,90,74,.3); box-shadow:0 0 0 3px rgba(13,90,74,.08); }
+.bl-chip.active{ background:var(--mh-green); color:#fff; border-color:var(--mh-green); }
+
+/* ── FILTERS BOX ── */
+.bl-filters{
+  display:grid; grid-template-columns:2fr 1fr 1fr 1fr 1fr;
+  gap:10px; padding:10px 16px;
+}
+@media(max-width:900px){ .bl-filters{ grid-template-columns:1fr 1fr; } }
+@media(max-width:600px){ .bl-filters{ grid-template-columns:1fr; } }
+.bl-filters label{ font-size:11px; color:var(--mh-muted); display:block; margin-bottom:4px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; }
+.bl-filters input, .bl-filters select{
+  width:100%; padding:9px 11px; border-radius:11px;
+  border:1px solid var(--mh-line); background:#fff;
+  font:inherit; font-size:13px; outline:none;
+}
+.bl-filters input:focus, .bl-filters select:focus{
+  border-color:rgba(13,90,74,.45); box-shadow:0 0 0 3px rgba(13,90,74,.10);
 }
 
+/* ── TABLE ── */
+.bl-table-wrap{
+  margin:10px 16px 0;
+  border:1px solid var(--mh-line);
+  border-radius:14px;
+  background:#fff;
+  overflow-x:auto;
+}
+.bl-table{ width:100%; border-collapse:collapse; font-size:13px; min-width:1500px; }
+.bl-table thead tr{ background:var(--mh-green); color:#fff; }
+.bl-table th{
+  padding:9px 10px; text-align:left; font-size:11px;
+  letter-spacing:.1em; text-transform:uppercase; font-weight:800;
+  white-space:nowrap; cursor:pointer; user-select:none;
+  position:sticky; top:0;
+}
+.bl-table th:hover{ background:rgba(255,255,255,.12); }
+.bl-table th .sort-icon{ opacity:.5; margin-left:4px; font-size:10px; }
+.bl-table th.sorted .sort-icon{ opacity:1; }
+.bl-table td{ padding:7px 9px; border-bottom:1px solid var(--mh-line); vertical-align:middle; }
+.bl-table tbody tr:hover{ background:rgba(13,90,74,.03); }
+
+/* row status colors */
+.bl-table tbody tr.status-booked   { border-left:3px solid #3b82f6; }
+.bl-table tbody tr.status-checkedin{ border-left:3px solid var(--mh-green); background:rgba(13,90,74,.02); }
+.bl-table tbody tr.status-checkedout{ border-left:3px solid #9ca3af; }
+.bl-table tbody tr.status-cancelled{ border-left:3px solid #ef4444; background:rgba(239,68,68,.03); }
+
+.bl-table td input, .bl-table td select{
+  width:100%; padding:6px 8px; border-radius:9px;
+  border:1px solid transparent; background:transparent;
+  font:inherit; font-size:13px; outline:none;
+}
+.bl-table td input:focus, .bl-table td select:focus{
+  border-color:rgba(13,90,74,.4); background:#fff;
+  box-shadow:0 0 0 3px rgba(13,90,74,.08);
+}
+.bl-table td.right{ text-align:right; }
+.bl-table td input[disabled]{ color:var(--mh-muted); cursor:default; font-weight:700; }
+
+/* status badge */
+.status-badge{
+  display:inline-block; padding:3px 9px; border-radius:999px;
+  font-size:11px; font-weight:800; white-space:nowrap;
+}
+.sb-booked   { background:rgba(59,130,246,.12); color:#1d4ed8; }
+.sb-checkedin{ background:rgba(13,90,74,.12); color:var(--mh-green); }
+.sb-checkedout{ background:rgba(156,163,175,.15); color:#4b5563; }
+.sb-cancelled{ background:rgba(239,68,68,.10); color:#dc2626; }
+
+/* ── FOOTER BAR ── */
+.bl-footer-bar{
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  padding:10px 16px 14px; border-top:1px solid var(--mh-line);
+  font-size:12px; color:var(--mh-muted);
+}
+
+/* ── MODAL (backup / import) ── */
+.bl-modal-bg{
+  display:none; position:fixed; inset:0; z-index:100;
+  background:rgba(0,0,0,.45); align-items:center; justify-content:center;
+}
+.bl-modal-bg.open{ display:flex; }
+.bl-modal{
+  background:#fff; border-radius:18px; padding:24px; max-width:520px; width:94%;
+  box-shadow:0 24px 60px rgba(0,0,0,.18);
+}
+.bl-modal h3{ margin:0 0 12px; font-family:var(--mh-serif); font-size:20px; }
+.bl-modal textarea{ width:100%; height:160px; border-radius:12px; border:1px solid var(--mh-line); padding:10px; font-family:monospace; font-size:12px; resize:vertical; }
+.bl-modal-btns{ display:flex; gap:10px; margin-top:12px; flex-wrap:wrap; }
+
+/* ── PRINT VIEW ── */
+.bl-print{ display:none; }
+
+@media print{
+  body *{ display:none !important; }
+  .bl-print, .bl-print *{ display:revert !important; }
+  .bl-print{ display:block !important; font-family:'Nunito',Arial,sans-serif; font-size:9pt; color:#000; }
+  @page{ size:A4 landscape; margin:10mm 10mm 12mm; }
+}
+
+.bl-print .p-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:10pt; padding-bottom:6pt; border-bottom:2pt solid #0d5a4a; }
+.bl-print .p-logo img{ height:32pt; }
+.bl-print .p-title{ font-size:14pt; font-weight:900; color:#0d5a4a; }
+.bl-print .p-meta{ font-size:8pt; color:#5f7268; }
+.bl-print .p-stats{ display:flex; gap:14pt; margin-bottom:8pt; }
+.bl-print .p-stat{ padding:5pt 10pt; border:1pt solid #e2ebe6; border-radius:6pt; }
+.bl-print .p-stat b{ display:block; font-size:11pt; color:#0d5a4a; }
+.bl-print .p-stat span{ font-size:8pt; color:#5f7268; }
+.bl-print table{ width:100%; border-collapse:collapse; font-size:8.5pt; }
+.bl-print thead tr{ background:#0d5a4a; color:#fff; }
+.bl-print th{ padding:5pt 6pt; text-align:left; font-size:8pt; letter-spacing:.06em; text-transform:uppercase; }
+.bl-print td{ padding:5pt 6pt; border-bottom:0.5pt solid #e2ebe6; }
+.bl-print tr:nth-child(even) td{ background:#f9fbf9; }
+.bl-print .p-footer{ margin-top:8pt; font-size:8pt; color:#5f7268; display:flex; justify-content:space-between; }
 </style>
 </head>
-
 <body>
-  <div class="wrap">
-    <div class="card">
 
-      <div class="topbar">
-        <div class="brand">
-          <div class="logo">MH</div>
-          <div class="meta">
-            <b id="topTitle">Booking List (Reception)</b>
-            <small id="topSub">Saved locally on this device • Export CSV for Excel</small>
-          </div>
-        </div>
+<!-- ══════ SCREEN UI ══════ -->
+<div class="form-view">
+<div class="wrap">
+<div class="card">
 
-        <div class="actions print-hide">
-          <button class="btn" type="button" onclick="downloadPDF()" id="btnPdf">Descargar PDF</button>
-          <button class="btn" type="button" onclick="exportCSV()" id="btnCsv">Export CSV</button>
-          <button class="btn" type="button" onclick="resetFilters()" id="btnReset">Reset</button>
-          <button class="btn primary" type="button" onclick="addRow()" id="btnAdd">+ Add booking</button>
-          <button class="btn primary" type="button" onclick="toggleLang()" id="langBtn">ES / EN</button>
-        </div>
+  <!-- LOGO + TOOLBAR -->
+  <div class="bl-toolbar print-hide">
+    <div class="bl-brand">
+      <div id="blLogoWrap"></div>
+      <div class="bl-brand-text">
+        <b id="topTitle">Lista de Reservas (Recepción)</b>
+        <small id="topSub">Guardado localmente • Export CSV / JSON</small>
       </div>
+    </div>
+    <button class="btn" type="button" onclick="buildAndPrint()" id="btnPdf">🖨️ PDF</button>
+    <button class="btn" type="button" onclick="exportCSV()" id="btnCsv">📊 CSV</button>
+    <button class="btn" type="button" onclick="openBackup()" id="btnBackup">💾 Backup</button>
+    <button class="btn" type="button" onclick="openImport()" id="btnImport">📂 Importar</button>
+    <button class="btn primary" type="button" onclick="addRow()" id="btnAdd">+ Agregar</button>
+    <button class="btn" type="button" onclick="toggleLang()" id="langBtn">ES / EN</button>
+  </div>
 
-      <header>
-        <h1 id="h1">Booking List</h1>
-        <p class="subtitle" id="sub">
-          Reception table (Excel-like). Data is stored locally. Use Export CSV to open in Excel/Sheets.
-        </p>
+  <!-- STAT CARDS -->
+  <div class="bl-stats print-hide" id="blStats"></div>
 
-        <div class="langbar">
-          <span class="pill" id="pillRooms">Options: Dorm 12 / Dorm 8 / Private (bathroom) / Private (no bathroom)</span>
-          <span class="pill" id="pillTotals">Totals: PYG + USD</span>
-        </div>
+  <!-- QUICK FILTER CHIPS -->
+  <div class="bl-chips print-hide">
+    <button class="bl-chip" id="chipAll"     onclick="setChip('all')"      >🌐 <span id="lAll">Todos</span></button>
+    <button class="bl-chip" id="chipToday"   onclick="setChip('today')"    >📅 <span id="lToday">Llegadas hoy</span></button>
+    <button class="bl-chip" id="chipInhouse" onclick="setChip('inhouse')"  >🏠 <span id="lInhouse">En el hostel</span></button>
+    <button class="bl-chip" id="chipDue"     onclick="setChip('due')"      >⚠️ <span id="lDue">Check-out hoy</span></button>
+    <button class="bl-chip" id="chipCancelled" onclick="setChip('cancelled')">✕ <span id="lCancelled">Canceladas</span></button>
+  </div>
 
-        <div class="box print-hide" style="margin-top:12px;">
-          <div class="section-title" id="filtersTitle">Filters</div>
-          <div class="grid2" style="margin-top:10px;">
-            <div class="field">
-              <label id="lblSearch">Search (name / email / phone / notes)</label>
-              <input id="fSearch" placeholder="Type to search…" oninput="render()" />
-            </div>
-            <div class="field">
-              <label id="lblStatus">Status</label>
-              <select id="fStatus" onchange="render()">
-                <option value="" id="optAll">All</option>
-                <option>Booked</option>
-                <option>Checked-in</option>
-                <option>Checked-out</option>
-                <option>Cancelled</option>
-              </select>
-            </div>
-            <div class="field">
-              <label id="lblFrom">From (check-in)</label>
-              <input id="fFrom" type="date" onchange="render()" />
-            </div>
-            <div class="field">
-              <label id="lblTo">To (check-in)</label>
-              <input id="fTo" type="date" onchange="render()" />
-            </div>
-          </div>
-        </div>
-
-        <div class="stats print-hide" id="stats"></div>
-      </header>
-
-      <div class="content">
-        <div class="tableWrap">
-          <table>
-            <thead>
-              <tr>
-                <th style="width:120px;" id="thId">Booking ID</th>
-                <th style="width:180px;" id="thName">Guest name</th>
-                <th style="width:120px;" id="thCountry">Country</th>
-                <th style="width:160px;" id="thPhone">Phone / WhatsApp</th>
-                <th style="width:220px;" id="thEmail">Email</th>
-                <th style="width:220px;" id="thRoom">Room / Bed</th>
-                <th style="width:130px;" id="thIn">Check-in</th>
-                <th style="width:130px;" id="thOut">Check-out</th>
-                <th style="width:90px;" class="right" id="thNights">Nights</th>
-                <th style="width:140px;" id="thSource">Source</th>
-                <th style="width:130px;" class="right" id="thPrice">Price/night (PYG)</th>
-                <th style="width:140px;" class="right" id="thTPYG">Total (PYG)</th>
-                <th style="width:120px;" class="right" id="thTUSD">Total (USD)</th>
-                <th style="width:110px;" id="thPaid">Paid</th>
-                <th style="width:150px;" id="thPayment">Payment</th>
-                <th style="width:160px;" id="thStatus">Status</th>
-                <th style="width:260px;" id="thNotes">Notes</th>
-                <th style="width:90px;" class="print-hide" id="thDel"></th>
-              </tr>
-            </thead>
-            <tbody id="tbody"></tbody>
-          </table>
-        </div>
-
-        <p class="note" style="margin-top:10px;" id="tip">
-          Tip: Export CSV opens perfectly in Excel/Google Sheets. This page works without backend.
-        </p>
-      </div>
-
+  <!-- FILTERS -->
+  <div class="bl-filters print-hide">
+    <div>
+      <label id="lblSearch">Buscar</label>
+      <input id="fSearch" placeholder="Nombre, ID, email, teléfono…" oninput="render()"/>
+    </div>
+    <div>
+      <label id="lblStatus">Estado</label>
+      <select id="fStatus" onchange="render()">
+        <option value="" id="optAll">Todos</option>
+        <option>Booked</option>
+        <option>Checked-in</option>
+        <option>Checked-out</option>
+        <option>Cancelled</option>
+      </select>
+    </div>
+    <div>
+      <label id="lblFrom">Desde (check-in)</label>
+      <input id="fFrom" type="date" onchange="render()"/>
+    </div>
+    <div>
+      <label id="lblTo">Hasta (check-in)</label>
+      <input id="fTo" type="date" onchange="render()"/>
+    </div>
+    <div style="display:flex;align-items:flex-end;">
+      <button class="btn" type="button" onclick="resetFilters()" id="btnReset" style="width:100%;">↺ Reset</button>
     </div>
   </div>
 
-  <script>
-    const STORAGE_KEY = "mh_booking_list_v3";
-    const LANG_KEY = "mh_docLang";
-    const USD_RATE = 7300;
+  <!-- TABLE -->
+  <div class="bl-table-wrap">
+    <table class="bl-table">
+      <thead>
+        <tr>
+          <th style="width:110px"  data-col="id"           onclick="sortBy('id')"          ><span id="thId">ID</span><span class="sort-icon">↕</span></th>
+          <th style="width:180px"  data-col="name"         onclick="sortBy('name')"        ><span id="thName">Nombre</span><span class="sort-icon">↕</span></th>
+          <th style="width:110px"  data-col="country"      onclick="sortBy('country')"     ><span id="thCountry">País</span><span class="sort-icon">↕</span></th>
+          <th style="width:150px"  data-col="phone"                                        ><span id="thPhone">Teléfono / WA</span></th>
+          <th style="width:200px"  data-col="email"                                        ><span id="thEmail">Email</span></th>
+          <th style="width:200px"  data-col="room"         onclick="sortBy('room')"        ><span id="thRoom">Habitación</span><span class="sort-icon">↕</span></th>
+          <th style="width:120px"  data-col="checkin"      onclick="sortBy('checkin')"     ><span id="thIn">Check-in</span><span class="sort-icon">↕</span></th>
+          <th style="width:120px"  data-col="checkout"     onclick="sortBy('checkout')"    ><span id="thOut">Check-out</span><span class="sort-icon">↕</span></th>
+          <th style="width:70px"   data-col="nights"       class="right"                  ><span id="thNights">N°</span></th>
+          <th style="width:130px"  data-col="source"       onclick="sortBy('source')"      ><span id="thSource">Origen</span><span class="sort-icon">↕</span></th>
+          <th style="width:130px"  data-col="priceNightPYG" onclick="sortBy('priceNightPYG')" class="right"><span id="thPrice">PYG/noche</span><span class="sort-icon">↕</span></th>
+          <th style="width:140px"  data-col="totalPYG"    class="right"                   ><span id="thTPYG">Total PYG</span></th>
+          <th style="width:110px"  data-col="totalUSD"    class="right"                   ><span id="thTUSD">Total USD</span></th>
+          <th style="width:100px"  data-col="paid"         onclick="sortBy('paid')"        ><span id="thPaid">Pagado</span><span class="sort-icon">↕</span></th>
+          <th style="width:130px"  data-col="payment"                                      ><span id="thPayment">Pago</span></th>
+          <th style="width:150px"  data-col="status"       onclick="sortBy('status')"      ><span id="thStatus">Estado</span><span class="sort-icon">↕</span></th>
+          <th style="width:240px"  data-col="notes"                                        ><span id="thNotes">Notas</span></th>
+          <th style="width:70px"   class="print-hide"                                      ></th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
 
-    let LANG = "es";
-    try{
-      const saved = localStorage.getItem(LANG_KEY);
-      if(saved === "en" || saved === "es") LANG = saved;
-    }catch(e){}
+  <!-- FOOTER BAR -->
+  <div class="bl-footer-bar print-hide">
+    <span id="blFooterCount"></span>
+    <span style="margin-left:auto;">
+      <label style="font-size:11px;color:var(--mh-muted);margin-right:6px;" id="lRate">Tasa USD:</label>
+      <input id="usdRate" value="7300" inputmode="numeric"
+        style="width:80px;padding:5px 8px;border-radius:9px;border:1px solid var(--mh-line);font:inherit;font-size:12px;outline:none;"
+        oninput="render()" title="1 USD = ? PYG"/>
+    </span>
+  </div>
 
-    const I18N = {
-      es:{
-        topTitle:"Lista de Reservas (Recepción)",
-        topSub:"Guardado localmente en este dispositivo • Export CSV para Excel",
-        btnPdf:"Descargar PDF",
-        btnCsv:"Export CSV",
-        btnReset:"Reset",
-        btnAdd:"+ Agregar reserva",
-        h1:"Lista de Reservas",
-        sub:"Tabla de recepción (tipo Excel). Los datos se guardan localmente. Export CSV para Excel/Sheets.",
-        pillRooms:"Opciones: Dorm 12 / Dorm 8 / Privada (con baño) / Privada (sin baño)",
-        pillTotals:"Totales: PYG + USD",
-        filtersTitle:"Filtros",
-        lblSearch:"Buscar (nombre / email / teléfono / notas)",
-        placeholderSearch:"Escriba para buscar…",
-        lblStatus:"Estado",
-        optAll:"Todos",
-        lblFrom:"Desde (check-in)",
-        lblTo:"Hasta (check-in)",
-        thId:"ID",
-        thName:"Nombre",
-        thCountry:"País",
-        thPhone:"Teléfono / WhatsApp",
-        thEmail:"Email",
-        thRoom:"Habitación / Cama",
-        thIn:"Check-in",
-        thOut:"Check-out",
-        thNights:"Noches",
-        thSource:"Origen",
-        thPrice:"Precio/noche (PYG)",
-        thTPYG:"Total (PYG)",
-        thTUSD:"Total (USD)",
-        thPaid:"Pagado",
-        thPayment:"Pago",
-        thStatus:"Estado",
-        thNotes:"Notas",
-        tip:"Tip: Export CSV abre perfecto en Excel/Google Sheets. Funciona sin backend.",
-        statBookings:"Reservas (filtrado)",
-        statNights:"Total noches",
-        statTPYG:"Total PYG",
-        statTUSD:"Total USD (tasa {rate})",
-        delete:"Borrar",
-        roomOptions:["Dorm 12 camas","Dorm 8 camas","Privada con baño","Privada sin baño"],
-        sourceOptions:["Directo","Booking.com","Hostelworld","Walk-in","Otro"],
-        paidOptions:["No","Sí","Parcial"],
-        paymentOptions:["Efectivo","Transferencia","Tarjeta"]
-      },
-      en:{
-        topTitle:"Booking List (Reception)",
-        topSub:"Saved locally on this device • Export CSV for Excel",
-        btnPdf:"Download PDF",
-        btnCsv:"Export CSV",
-        btnReset:"Reset",
-        btnAdd:"+ Add booking",
-        h1:"Booking List",
-        sub:"Reception table (Excel-like). Data is stored locally. Export CSV for Excel/Sheets.",
-        pillRooms:"Options: Dorm 12 / Dorm 8 / Private (bathroom) / Private (no bathroom)",
-        pillTotals:"Totals: PYG + USD",
-        filtersTitle:"Filters",
-        lblSearch:"Search (name / email / phone / notes)",
-        placeholderSearch:"Type to search…",
-        lblStatus:"Status",
-        optAll:"All",
-        lblFrom:"From (check-in)",
-        lblTo:"To (check-in)",
-        thId:"Booking ID",
-        thName:"Guest name",
-        thCountry:"Country",
-        thPhone:"Phone / WhatsApp",
-        thEmail:"Email",
-        thRoom:"Room / Bed",
-        thIn:"Check-in",
-        thOut:"Check-out",
-        thNights:"Nights",
-        thSource:"Source",
-        thPrice:"Price/night (PYG)",
-        thTPYG:"Total (PYG)",
-        thTUSD:"Total (USD)",
-        thPaid:"Paid",
-        thPayment:"Payment",
-        thStatus:"Status",
-        thNotes:"Notes",
-        tip:"Tip: Export CSV opens perfectly in Excel/Google Sheets. Works without backend.",
-        statBookings:"Bookings (filtered)",
-        statNights:"Total nights",
-        statTPYG:"Total PYG",
-        statTUSD:"Total USD (rate {rate})",
-        delete:"Delete",
-        roomOptions:["Dorm 12 beds","Dorm 8 beds","Private with bathroom","Private without bathroom"],
-        sourceOptions:["Direct","Booking.com","Hostelworld","Walk-in","Other"],
-        paidOptions:["No","Yes","Partial"],
-        paymentOptions:["Cash","Transfer","Card"]
-      }
-    };
+</div><!-- /card -->
+</div><!-- /wrap -->
+</div><!-- /form-view -->
 
-    const statusOptions = ["Booked","Checked-in","Checked-out","Cancelled"];
+<!-- ══════ PRINT VIEW ══════ -->
+<div class="bl-print" id="blPrint"></div>
 
-    function applyLabels(){
-      const T = I18N[LANG];
-      document.documentElement.lang = LANG;
+<!-- ══════ MODALS ══════ -->
+<!-- Backup -->
+<div class="bl-modal-bg" id="modalBackup">
+  <div class="bl-modal">
+    <h3 id="mBackupTitle">💾 Backup de datos</h3>
+    <p style="font-size:13px;color:var(--mh-muted);margin:0 0 8px;" id="mBackupSub">Copia este JSON y guárdalo en un lugar seguro.</p>
+    <textarea id="backupText" readonly></textarea>
+    <div class="bl-modal-btns">
+      <button class="btn primary" type="button" onclick="copyBackup()" id="mBtnCopy">📋 Copiar</button>
+      <button class="btn" type="button" onclick="downloadBackup()" id="mBtnDl">⬇️ Descargar .json</button>
+      <button class="btn" type="button" onclick="closeModal('modalBackup')">✕ Cerrar</button>
+    </div>
+  </div>
+</div>
 
-      topTitle.textContent = T.topTitle;
-      topSub.textContent = T.topSub;
-      btnPdf.textContent = T.btnPdf;
-      btnCsv.textContent = T.btnCsv;
-      btnReset.textContent = T.btnReset;
-      btnAdd.textContent = T.btnAdd;
+<!-- Import -->
+<div class="bl-modal-bg" id="modalImport">
+  <div class="bl-modal">
+    <h3 id="mImportTitle">📂 Importar backup</h3>
+    <p style="font-size:13px;color:var(--mh-muted);margin:0 0 8px;" id="mImportSub">Pega un JSON de backup. ⚠️ Reemplaza los datos actuales.</p>
+    <textarea id="importText" placeholder='{"rows":[...]}'></textarea>
+    <div id="importErr" style="color:#dc2626;font-size:12px;margin-top:6px;display:none;"></div>
+    <div class="bl-modal-btns">
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="loadImportFile()"/>
+      <button class="btn" type="button" onclick="document.getElementById('importFile').click()" id="mBtnFile">📁 Cargar archivo</button>
+      <button class="btn primary" type="button" onclick="doImport()" id="mBtnImport">✅ Importar</button>
+      <button class="btn" type="button" onclick="closeModal('modalImport')">✕ Cancelar</button>
+    </div>
+  </div>
+</div>
 
-      h1.textContent = T.h1;
-      sub.textContent = T.sub;
-      pillRooms.textContent = T.pillRooms;
-      pillTotals.textContent = T.pillTotals;
+<script>
+/* ════════════════════════════════════════════
+   CONFIG & STATE
+═══════════════════════════════════════════ */
+const CFG         = window.HOSTEL_CONFIG || {};
+const HOSTEL_NAME = CFG.PROPERTY_NAME || "Mandioca Hostel";
+const LOGO_URL    = CFG.LOGO_URL || "";
+const STORAGE_KEY = "mh_booking_list_v4";
+const LANG_KEY    = "mh_docLang";
 
-      filtersTitle.textContent = T.filtersTitle;
-      lblSearch.textContent = T.lblSearch;
-      fSearch.placeholder = T.placeholderSearch;
-      lblStatus.textContent = T.lblStatus;
-      optAll.textContent = T.optAll;
-      lblFrom.textContent = T.lblFrom;
-      lblTo.textContent = T.lblTo;
+let LANG = "es";
+let sortCol = "checkin";
+let sortAsc = true;
+let activeChip = "all";
 
-      thId.textContent = T.thId;
-      thName.textContent = T.thName;
-      thCountry.textContent = T.thCountry;
-      thPhone.textContent = T.thPhone;
-      thEmail.textContent = T.thEmail;
-      thRoom.textContent = T.thRoom;
-      thIn.textContent = T.thIn;
-      thOut.textContent = T.thOut;
-      thNights.textContent = T.thNights;
-      thSource.textContent = T.thSource;
-      thPrice.textContent = T.thPrice;
-      thTPYG.textContent = T.thTPYG;
-      thTUSD.textContent = T.thTUSD;
-      thPaid.textContent = T.thPaid;
-      thPayment.textContent = T.thPayment;
-      thStatus.textContent = T.thStatus;
-      thNotes.textContent = T.thNotes;
-      tip.textContent = T.tip;
+try{ const s = localStorage.getItem(LANG_KEY); if(s==="en"||s==="es") LANG=s; }catch(e){}
 
-      try{ localStorage.setItem(LANG_KEY, LANG); }catch(e){}
-      render();
+/* ── Inject logo into toolbar ── */
+(function(){
+  const wrap = document.getElementById("blLogoWrap");
+  if(!wrap) return;
+  if(LOGO_URL){
+    const img = document.createElement("img");
+    img.src = LOGO_URL; img.alt = HOSTEL_NAME; img.style.height="40px"; img.style.width="auto";
+    wrap.appendChild(img);
+  } else {
+    wrap.innerHTML = `<div style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:10px;background:rgba(13,90,74,.1);border:1px solid rgba(13,90,74,.2);font-weight:900;color:var(--mh-green);font-size:12px;">MH</div>`;
+  }
+})();
+
+/* ════════════════════════════════════════════
+   I18N
+═══════════════════════════════════════════ */
+const I18N = {
+  es:{
+    topTitle:"Lista de Reservas (Recepción)",
+    topSub:"Guardado localmente • Export CSV / JSON",
+    btnPdf:"🖨️ PDF", btnCsv:"📊 CSV", btnBackup:"💾 Backup", btnImport:"📂 Importar", btnAdd:"+ Agregar", btnReset:"↺ Reset",
+    lAll:"Todos", lToday:"Llegadas hoy", lInhouse:"En el hostel", lDue:"Check-out hoy", lCancelled:"Canceladas",
+    lblSearch:"Buscar", placeholderSearch:"Nombre, ID, email, teléfono…",
+    lblStatus:"Estado", optAll:"Todos", lblFrom:"Desde (check-in)", lblTo:"Hasta (check-in)",
+    thId:"ID", thName:"Nombre", thCountry:"País", thPhone:"Teléfono / WA", thEmail:"Email",
+    thRoom:"Habitación", thIn:"Check-in", thOut:"Check-out", thNights:"N°", thSource:"Origen",
+    thPrice:"PYG/noche", thTPYG:"Total PYG", thTUSD:"Total USD",
+    thPaid:"Pagado", thPayment:"Pago", thStatus:"Estado", thNotes:"Notas",
+    lRate:"Tasa USD:",
+    statBookings:"Reservas", statNights:"Noches", statPYG:"Total PYG", statUSD:"Total USD",
+    statInHouse:"En casa",
+    mBackupTitle:"💾 Backup de datos", mBackupSub:"Copia este JSON y guárdalo en un lugar seguro.",
+    mBtnCopy:"📋 Copiar", mBtnDl:"⬇️ Descargar .json",
+    mImportTitle:"📂 Importar backup", mImportSub:"Pega un JSON de backup. ⚠️ Reemplaza los datos actuales.",
+    mBtnFile:"📁 Cargar archivo", mBtnImport:"✅ Importar",
+    roomOptions:["Dorm 12 camas","Dorm 8 camas","Privada con baño","Privada sin baño","Otro"],
+    sourceOptions:["Directo","Booking.com","Hostelworld","Walk-in","Otro"],
+    paidOptions:["No","Sí","Parcial"],
+    paymentOptions:["Efectivo","Transferencia","Tarjeta","Pending"],
+    statusLabels:{"Booked":"Reservado","Checked-in":"En casa","Checked-out":"Salió","Cancelled":"Cancelado"},
+    delete:"✕",
+    footerCount:(n,t)=>`Mostrando ${n} de ${t} reservas`,
+  },
+  en:{
+    topTitle:"Booking List (Reception)",
+    topSub:"Saved locally • Export CSV / JSON",
+    btnPdf:"🖨️ PDF", btnCsv:"📊 CSV", btnBackup:"💾 Backup", btnImport:"📂 Import", btnAdd:"+ Add", btnReset:"↺ Reset",
+    lAll:"All", lToday:"Today's arrivals", lInhouse:"In house", lDue:"Check-out today", lCancelled:"Cancelled",
+    lblSearch:"Search", placeholderSearch:"Name, ID, email, phone…",
+    lblStatus:"Status", optAll:"All", lblFrom:"From (check-in)", lblTo:"To (check-in)",
+    thId:"ID", thName:"Guest name", thCountry:"Country", thPhone:"Phone / WA", thEmail:"Email",
+    thRoom:"Room / Bed", thIn:"Check-in", thOut:"Check-out", thNights:"Nts", thSource:"Source",
+    thPrice:"PYG/night", thTPYG:"Total PYG", thTUSD:"Total USD",
+    thPaid:"Paid", thPayment:"Payment", thStatus:"Status", thNotes:"Notes",
+    lRate:"USD rate:",
+    statBookings:"Bookings", statNights:"Nights", statPYG:"Total PYG", statUSD:"Total USD",
+    statInHouse:"In house",
+    mBackupTitle:"💾 Data backup", mBackupSub:"Copy this JSON and save it somewhere safe.",
+    mBtnCopy:"📋 Copy", mBtnDl:"⬇️ Download .json",
+    mImportTitle:"📂 Import backup", mImportSub:"Paste a backup JSON. ⚠️ Replaces current data.",
+    mBtnFile:"📁 Load file", mBtnImport:"✅ Import",
+    roomOptions:["Dorm 12 beds","Dorm 8 beds","Private with bathroom","Private no bathroom","Other"],
+    sourceOptions:["Direct","Booking.com","Hostelworld","Walk-in","Other"],
+    paidOptions:["No","Yes","Partial"],
+    paymentOptions:["Cash","Transfer","Card","Pending"],
+    statusLabels:{"Booked":"Booked","Checked-in":"Checked-in","Checked-out":"Checked-out","Cancelled":"Cancelled"},
+    delete:"✕",
+    footerCount:(n,t)=>`Showing ${n} of ${t} bookings`,
+  }
+};
+
+/* ════════════════════════════════════════════
+   DATA
+═══════════════════════════════════════════ */
+function todayISO(){ const d=new Date(), z=n=>String(n).padStart(2,"0"); return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())}`; }
+function isoDate(d, offset=0){ const x=new Date(d); x.setDate(x.getDate()+offset); const z=n=>String(n).padStart(2,"0"); return `${x.getFullYear()}-${z(x.getMonth()+1)}-${z(x.getDate())}`; }
+
+function loadData(){
+  try{ const r=localStorage.getItem(STORAGE_KEY); if(r){ const d=JSON.parse(r); if(d&&Array.isArray(d.rows)) return d; } }catch(e){}
+  return { rows:[] };
+}
+function saveData(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){} }
+
+let state = loadData();
+let _nextId = 1;
+function genId(){
+  const nums = state.rows.map(r=>{ const m=(r.id||"").match(/(\d+)$/); return m?parseInt(m[1]):0; });
+  _nextId = Math.max(_nextId, ...nums) + 1;
+  return `BK-${String(_nextId).padStart(4,"0")}`;
+}
+
+function nightsBetween(a,b){
+  if(!a||!b) return 0;
+  const da=new Date(a+"T00:00:00"), db=new Date(b+"T00:00:00");
+  return Math.max(0, Math.round((db-da)/(864e5)));
+}
+const fmtInt = n => Math.round(Number(n)||0).toString().replace(/\B(?=(\d{3})+(?!\d))/g,",");
+const fmtUSD = n => (Math.round(((Number(n)||0)+Number.EPSILON)*100)/100).toFixed(2);
+const esc    = s => String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+const usdRate= ()=> Math.max(1, Number((document.getElementById("usdRate")||{}).value||7300)||7300);
+
+/* ════════════════════════════════════════════
+   QUICK CHIP FILTERS
+═══════════════════════════════════════════ */
+function setChip(chip){
+  activeChip = chip;
+  ["all","today","inhouse","due","cancelled"].forEach(c=>{
+    document.getElementById("chip"+c.charAt(0).toUpperCase()+c.slice(1))
+      .classList.toggle("active", c===chip);
+  });
+  // Reset date/status filters when switching chip
+  if(chip!=="all"){
+    document.getElementById("fStatus").value="";
+    document.getElementById("fFrom").value="";
+    document.getElementById("fTo").value="";
+    document.getElementById("fSearch").value="";
+  }
+  render();
+}
+
+/* ════════════════════════════════════════════
+   FILTER + SORT
+═══════════════════════════════════════════ */
+function sortBy(col){
+  if(sortCol===col) sortAsc=!sortAsc; else { sortCol=col; sortAsc=true; }
+  document.querySelectorAll(".bl-table th").forEach(th=>{
+    th.classList.toggle("sorted", th.dataset.col===col);
+    const si=th.querySelector(".sort-icon"); if(si) si.textContent = th.dataset.col===col ? (sortAsc?"↑":"↓") : "↕";
+  });
+  render();
+}
+
+function filteredRows(){
+  const today = todayISO();
+  const q     = (document.getElementById("fSearch").value||"").trim().toLowerCase();
+  const st    = document.getElementById("fStatus").value;
+  const from  = document.getElementById("fFrom").value;
+  const to    = document.getElementById("fTo").value;
+
+  let rows = state.rows.filter(r=>{
+    // chip overrides
+    if(activeChip==="today"    && r.checkin !== today) return false;
+    if(activeChip==="inhouse"  && r.status !== "Checked-in") return false;
+    if(activeChip==="due"      && r.checkout !== today) return false;
+    if(activeChip==="cancelled"&& r.status !== "Cancelled") return false;
+    // standard filters
+    if(st && r.status!==st) return false;
+    if(from && r.checkin && r.checkin < from) return false;
+    if(to   && r.checkin && r.checkin > to)   return false;
+    if(q){
+      const blob=`${r.id} ${r.name} ${r.email} ${r.phone} ${r.notes} ${r.room} ${r.source} ${r.country}`.toLowerCase();
+      if(!blob.includes(q)) return false;
     }
+    return true;
+  });
 
-    // IMPORTANT: site-components.js expects window.toggleLang() if present.
-    window.toggleLang = function(){
-      LANG = (LANG === "es") ? "en" : "es";
-      applyLabels();
-    };
+  // sort
+  rows.sort((a,b)=>{
+    let va = a[sortCol]??"", vb = b[sortCol]??"";
+    if(sortCol==="priceNightPYG"){ va=Number(va)||0; vb=Number(vb)||0; }
+    if(va < vb) return sortAsc?-1:1;
+    if(va > vb) return sortAsc?1:-1;
+    return 0;
+  });
+  return rows;
+}
 
-    function loadData(){
-      try{ const raw = localStorage.getItem(STORAGE_KEY); if(raw) return JSON.parse(raw); }catch(e){}
-      return { rows: [sampleRow()] };
-    }
-    function saveData(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){} }
+/* ════════════════════════════════════════════
+   RENDER
+═══════════════════════════════════════════ */
+function statusClass(s){
+  const map={"Booked":"status-booked","Checked-in":"status-checkedin","Checked-out":"status-checkedout","Cancelled":"status-cancelled"};
+  return map[s]||"";
+}
+function statusBadge(s){
+  const T=I18N[LANG];
+  const cls={"Booked":"sb-booked","Checked-in":"sb-checkedin","Checked-out":"sb-checkedout","Cancelled":"sb-cancelled"};
+  const label=T.statusLabels[s]||s;
+  return `<span class="status-badge ${cls[s]||""}">${esc(label)}</span>`;
+}
 
-    function iso(d){ return d.toISOString().slice(0,10); }
-    function sampleRow(){
-      const today = new Date();
-      const checkout = new Date(today); checkout.setDate(today.getDate()+1);
-      return {
-        id:"BK-0001", name:"", country:"", phone:"", email:"",
-        room: I18N[LANG].roomOptions[0],
-        checkin: iso(today), checkout: iso(checkout),
-        source: I18N[LANG].sourceOptions[0],
-        priceNightPYG: 139000,
-        paid: I18N[LANG].paidOptions[0],
-        payment: I18N[LANG].paymentOptions[0],
-        status: statusOptions[0],
-        notes:""
-      };
-    }
+function mkSelect(idx,key,opts,val){
+  return `<select onchange="updateField(${idx},'${key}',this.value)">${opts.map(o=>`<option ${o===val?"selected":""}>${esc(o)}</option>`).join("")}</select>`;
+}
 
-    let state = loadData();
+function render(){
+  const T     = I18N[LANG];
+  const rows  = filteredRows();
+  const rate  = usdRate();
+  const tbody = document.getElementById("tbody");
 
-    function parseDate(s){ return s ? new Date(s+"T00:00:00") : null; }
-    function nightsBetween(ci, co){
-      const a=parseDate(ci), b=parseDate(co);
-      if(!a || !b) return 0;
-      return Math.max(0, Math.round((b-a)/(1000*60*60*24)));
-    }
-    function fmtInt(n){ const x=Math.round(Number(n)||0); return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
-    function fmtUSD(n){ const x=Number(n)||0; return (Math.round((x+Number.EPSILON)*100)/100).toFixed(2); }
-    function escapeHtml(s){
-      return String(s ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
-    }
+  tbody.innerHTML = "";
+  rows.forEach(r=>{
+    const idx     = state.rows.indexOf(r);
+    const nights  = nightsBetween(r.checkin, r.checkout);
+    const price   = Number(String(r.priceNightPYG||0).replace(/[^0-9]/g,""))||0;
+    const tPYG    = nights * price;
+    const tUSD    = tPYG / rate;
+    const tr      = document.createElement("tr");
+    tr.className  = statusClass(r.status);
 
-    function resetFilters(){
-      fSearch.value=""; fStatus.value=""; fFrom.value=""; fTo.value="";
-      render();
-    }
-    function addRow(){
-      state.rows.unshift({
-        id:"BK-"+String(Math.floor(Math.random()*9000)+1000),
-        name:"",country:"",phone:"",email:"",
-        room:I18N[LANG].roomOptions[0], checkin:"", checkout:"",
-        source:I18N[LANG].sourceOptions[0], priceNightPYG:0,
-        paid:I18N[LANG].paidOptions[0], payment:I18N[LANG].paymentOptions[0], status:statusOptions[0],
-        notes:""
-      });
-      saveData(); render();
-    }
-    function removeRow(idx){ state.rows.splice(idx,1); saveData(); render(); }
-    function updateField(idx,key,val){ state.rows[idx][key]=val; saveData(); renderStatsOnly(); }
+    tr.innerHTML = `
+      <td><input value="${esc(r.id)}"         oninput="updateField(${idx},'id',this.value)"/></td>
+      <td><input value="${esc(r.name)}"        oninput="updateField(${idx},'name',this.value)"/></td>
+      <td><input value="${esc(r.country)}"     oninput="updateField(${idx},'country',this.value)" style="width:80px"/></td>
+      <td><input value="${esc(r.phone)}"       oninput="updateField(${idx},'phone',this.value)"/></td>
+      <td><input value="${esc(r.email)}"       oninput="updateField(${idx},'email',this.value)"/></td>
+      <td>${mkSelect(idx,'room',T.roomOptions,r.room)}</td>
+      <td><input type="date" value="${esc(r.checkin)}"  onchange="updateField(${idx},'checkin',this.value)"/></td>
+      <td><input type="date" value="${esc(r.checkout)}" onchange="updateField(${idx},'checkout',this.value)"/></td>
+      <td class="right"><input value="${nights}" disabled/></td>
+      <td>${mkSelect(idx,'source',T.sourceOptions,r.source)}</td>
+      <td class="right"><input inputmode="numeric" value="${esc(String(r.priceNightPYG??''))}" oninput="updateField(${idx},'priceNightPYG',this.value.replace(/[^0-9]/g,''))"/></td>
+      <td class="right"><input value="${fmtInt(tPYG)}" disabled/></td>
+      <td class="right"><input value="${fmtUSD(tUSD)}" disabled/></td>
+      <td>${mkSelect(idx,'paid',T.paidOptions,r.paid)}</td>
+      <td>${mkSelect(idx,'payment',T.paymentOptions,r.payment)}</td>
+      <td>
+        <select onchange="updateField(${idx},'status',this.value);render();">
+          ${["Booked","Checked-in","Checked-out","Cancelled"].map(o=>`<option ${o===r.status?"selected":""}>${esc(o)}</option>`).join("")}
+        </select>
+      </td>
+      <td><input value="${esc(r.notes)}" oninput="updateField(${idx},'notes',this.value)"/></td>
+      <td class="print-hide" style="text-align:center;">
+        <button class="btn" type="button" style="padding:5px 8px;font-size:11px;" title="Duplicar" onclick="duplicateRow(${idx})">⧉</button>
+        <button class="btn" type="button" style="padding:5px 8px;font-size:11px;color:#dc2626;" title="Borrar" onclick="removeRow(${idx})">${T.delete}</button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
 
-    function filteredRows(){
-      const q=(fSearch.value||"").trim().toLowerCase();
-      const st=fStatus.value;
-      const from=fFrom.value;
-      const to=fTo.value;
-      return state.rows.filter(r=>{
-        if(st && r.status!==st) return false;
-        if(from && r.checkin && r.checkin<from) return false;
-        if(to && r.checkin && r.checkin>to) return false;
-        if(q){
-          const blob=`${r.id} ${r.name} ${r.email} ${r.phone} ${r.notes} ${r.room} ${r.source}`.toLowerCase();
-          if(!blob.includes(q)) return false;
-        }
-        return true;
-      });
-    }
-    function selectHTML(idx,key,opts,val){
-      return `<select onchange="updateField(${idx},'${key}',this.value)">${opts.map(o=>`<option ${o===val?'selected':''}>${escapeHtml(o)}</option>`).join("")}</select>`;
-    }
+  renderStats(rows, rate);
 
-    function render(){
-      const rows=filteredRows();
-      tbody.innerHTML="";
-      rows.forEach(r=>{
-        const idx=state.rows.indexOf(r);
-        const nights=nightsBetween(r.checkin,r.checkout);
-        const price=Number(String(r.priceNightPYG||0).replace(/[^0-9]/g,""))||0;
-        const totalPYG=nights*price;
-        const totalUSD=totalPYG/USD_RATE;
+  const footer = document.getElementById("blFooterCount");
+  if(footer) footer.textContent = T.footerCount(rows.length, state.rows.length);
+}
 
-        const T = I18N[LANG];
+function renderStats(rows, rate){
+  const T = I18N[LANG];
+  let bookings=rows.length, nights=0, pyg=0, inhouse=0;
+  rows.forEach(r=>{
+    const n=nightsBetween(r.checkin,r.checkout);
+    const p=Number(String(r.priceNightPYG||0).replace(/[^0-9]/g,""))||0;
+    nights+=n; pyg+=n*p;
+    if(r.status==="Checked-in") inhouse++;
+  });
+  const usd=pyg/rate;
+  document.getElementById("blStats").innerHTML=`
+    <div class="bl-stat"><div class="v">${bookings}</div><div class="k">${T.statBookings}</div></div>
+    <div class="bl-stat"><div class="v">${inhouse}</div><div class="k">${T.statInHouse}</div></div>
+    <div class="bl-stat"><div class="v">${nights}</div><div class="k">${T.statNights}</div></div>
+    <div class="bl-stat"><div class="v">${fmtInt(pyg)}</div><div class="k">${T.statPYG}</div></div>
+    <div class="bl-stat"><div class="v">$${fmtUSD(usd)}</div><div class="k">${T.statUSD}</div></div>
+  `;
+}
 
-        const tr=document.createElement("tr");
-        tr.innerHTML=`
-          <td><input value="${escapeHtml(r.id)}" oninput="updateField(${idx},'id',this.value)" /></td>
-          <td><input value="${escapeHtml(r.name)}" oninput="updateField(${idx},'name',this.value)" /></td>
-          <td><input value="${escapeHtml(r.country)}" oninput="updateField(${idx},'country',this.value)" /></td>
-          <td><input value="${escapeHtml(r.phone)}" oninput="updateField(${idx},'phone',this.value)" /></td>
-          <td><input value="${escapeHtml(r.email)}" oninput="updateField(${idx},'email',this.value)" /></td>
-          <td>${selectHTML(idx,'room',T.roomOptions,r.room)}</td>
-          <td><input type="date" value="${escapeHtml(r.checkin)}" onchange="updateField(${idx},'checkin',this.value)" /></td>
-          <td><input type="date" value="${escapeHtml(r.checkout)}" onchange="updateField(${idx},'checkout',this.value)" /></td>
-          <td class="right"><input value="${nights}" disabled /></td>
-          <td>${selectHTML(idx,'source',T.sourceOptions,r.source)}</td>
-          <td class="right"><input inputmode="numeric" value="${escapeHtml(String(r.priceNightPYG??''))}" oninput="updateField(${idx},'priceNightPYG',this.value.replace(/[^0-9]/g,''))" /></td>
-          <td class="right"><input value="${fmtInt(totalPYG)}" disabled /></td>
-          <td class="right"><input value="${fmtUSD(totalUSD)}" disabled /></td>
-          <td>${selectHTML(idx,'paid',T.paidOptions,r.paid)}</td>
-          <td>${selectHTML(idx,'payment',T.paymentOptions,r.payment)}</td>
-          <td>${selectHTML(idx,'status',statusOptions,r.status)}</td>
-          <td><input value="${escapeHtml(r.notes)}" oninput="updateField(${idx},'notes',this.value)" /></td>
-          <td class="print-hide"><button class="btn" type="button" onclick="removeRow(${idx})">${T.delete}</button></td>
-        `;
-        tbody.appendChild(tr);
-      });
-      renderStatsOnly();
-    }
+/* ════════════════════════════════════════════
+   DATA MUTATIONS
+═══════════════════════════════════════════ */
+function updateField(idx,key,val){ state.rows[idx][key]=val; saveData(); renderStats(filteredRows(),usdRate()); }
 
-    function renderStatsOnly(){
-      const rows=filteredRows();
-      let totalBookings=rows.length, totalNights=0, totalPYG=0;
-      rows.forEach(r=>{
-        const n=nightsBetween(r.checkin,r.checkout);
-        totalNights+=n;
-        const price=Number(String(r.priceNightPYG||0).replace(/[^0-9]/g,""))||0;
-        totalPYG+=n*price;
-      });
-      const totalUSD=totalPYG/USD_RATE;
+function addRow(){
+  const today=todayISO();
+  state.rows.unshift({
+    id:genId(), name:"", country:"", phone:"", email:"",
+    room:I18N[LANG].roomOptions[0], checkin:today, checkout:isoDate(new Date(),1),
+    source:I18N[LANG].sourceOptions[0], priceNightPYG:0,
+    paid:I18N[LANG].paidOptions[0], payment:I18N[LANG].paymentOptions[0],
+    status:"Booked", notes:""
+  });
+  saveData(); render();
+  document.querySelector(".bl-table-wrap").scrollIntoView({behavior:"smooth",block:"start"});
+}
 
-      const T = I18N[LANG];
-      stats.innerHTML=`
-        <div class="statBox"><b>${totalBookings}</b><span>${T.statBookings}</span></div>
-        <div class="statBox"><b>${totalNights}</b><span>${T.statNights}</span></div>
-        <div class="statBox"><b>${fmtInt(totalPYG)} PYG</b><span>${T.statTPYG}</span></div>
-        <div class="statBox"><b>$ ${fmtUSD(totalUSD)}</b><span>${T.statTUSD.replace("{rate}", USD_RATE)}</span></div>
-      `;
-    }
+function removeRow(idx){
+  if(!confirm(LANG==="es"?"¿Borrar esta reserva?":"Delete this booking?")) return;
+  state.rows.splice(idx,1); saveData(); render();
+}
 
-    function csvEscape(v){ const s=String(v??""); return /[",\n]/.test(s) ? `"${s.replace(/"/g,'""')}"` : s; }
-    function exportCSV(){
-      const header=["BookingID","GuestName","Country","Phone","Email","RoomBed","CheckIn","CheckOut","Nights","Source","PriceNightPYG","TotalPYG","TotalUSD","Paid","Payment","Status","Notes"];
-      const lines=[header.join(",")];
-      state.rows.forEach(r=>{
-        const n=nightsBetween(r.checkin,r.checkout);
-        const price=Number(String(r.priceNightPYG||0).replace(/[^0-9]/g,""))||0;
-        const tpyg=n*price;
-        const tusd=tpyg/USD_RATE;
-        lines.push([r.id,r.name,r.country,r.phone,r.email,r.room,r.checkin,r.checkout,String(n),r.source,String(price),String(tpyg),fmtUSD(tusd),r.paid,r.payment,r.status,(r.notes||"").replace(/\n/g," ")].map(csvEscape).join(","));
-      });
-      const blob=new Blob([lines.join("\n")],{type:"text/csv;charset=utf-8"});
-      const url=URL.createObjectURL(blob);
-      const a=document.createElement("a"); a.href=url; a.download="booking_list_mandioca.csv";
-      document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-    }
+function duplicateRow(idx){
+  const r = JSON.parse(JSON.stringify(state.rows[idx]));
+  r.id = genId();
+  state.rows.splice(idx+1,0,r);
+  saveData(); render();
+}
 
-    function downloadPDF(){
-      // uses your global PDF branded print header logic
-      window.print();
-    }
+function resetFilters(){
+  document.getElementById("fSearch").value="";
+  document.getElementById("fStatus").value="";
+  document.getElementById("fFrom").value="";
+  document.getElementById("fTo").value="";
+  setChip("all");
+}
 
-    // quick ids
-    const topTitle=document.getElementById("topTitle");
-    const topSub=document.getElementById("topSub");
-    const btnPdf=document.getElementById("btnPdf");
-    const btnCsv=document.getElementById("btnCsv");
-    const btnReset=document.getElementById("btnReset");
-    const btnAdd=document.getElementById("btnAdd");
+/* ════════════════════════════════════════════
+   EXPORT CSV
+═══════════════════════════════════════════ */
+function csvEsc(v){ const s=String(v??""); return /[",\n]/.test(s)?`"${s.replace(/"/g,'""')}"`:s; }
+function exportCSV(){
+  const header=["BookingID","GuestName","Country","Phone","Email","Room","CheckIn","CheckOut","Nights","Source","PriceNightPYG","TotalPYG","TotalUSD","Paid","Payment","Status","Notes"];
+  const rate=usdRate();
+  const lines=[header.join(",")];
+  state.rows.forEach(r=>{
+    const n=nightsBetween(r.checkin,r.checkout);
+    const p=Number(String(r.priceNightPYG||0).replace(/[^0-9]/g,""))||0;
+    const tpyg=n*p; const tusd=tpyg/rate;
+    lines.push([r.id,r.name,r.country,r.phone,r.email,r.room,r.checkin,r.checkout,n,r.source,p,tpyg,fmtUSD(tusd),r.paid,r.payment,r.status,(r.notes||"").replace(/\n/g," ")].map(csvEsc).join(","));
+  });
+  const blob=new Blob(["\uFEFF"+lines.join("\n")],{type:"text/csv;charset=utf-8"});
+  dlBlob(blob,"booking_list_mandioca.csv");
+}
 
-    const h1=document.getElementById("h1");
-    const sub=document.getElementById("sub");
-    const pillRooms=document.getElementById("pillRooms");
-    const pillTotals=document.getElementById("pillTotals");
+/* ════════════════════════════════════════════
+   BACKUP / IMPORT
+═══════════════════════════════════════════ */
+function openBackup(){
+  document.getElementById("backupText").value = JSON.stringify(state, null, 2);
+  document.getElementById("modalBackup").classList.add("open");
+}
+async function copyBackup(){
+  const txt=document.getElementById("backupText").value;
+  try{ await navigator.clipboard.writeText(txt); }catch(e){}
+  alert(LANG==="es"?"✅ JSON copiado.":"✅ JSON copied.");
+}
+function downloadBackup(){
+  const blob=new Blob([document.getElementById("backupText").value],{type:"application/json"});
+  dlBlob(blob,`mandioca_backup_${todayISO()}.json`);
+}
+function openImport(){
+  document.getElementById("importText").value="";
+  document.getElementById("importErr").style.display="none";
+  document.getElementById("modalImport").classList.add("open");
+}
+function loadImportFile(){
+  const f=document.getElementById("importFile").files?.[0]; if(!f) return;
+  const reader=new FileReader();
+  reader.onload=e=>{ document.getElementById("importText").value=e.target.result; };
+  reader.readAsText(f);
+}
+function doImport(){
+  const txt=document.getElementById("importText").value.trim();
+  const errEl=document.getElementById("importErr");
+  errEl.style.display="none";
+  try{
+    const data=JSON.parse(txt);
+    if(!data||!Array.isArray(data.rows)) throw new Error("Invalid format");
+    state=data; saveData(); render();
+    closeModal("modalImport");
+    alert(LANG==="es"?`✅ Importado: ${data.rows.length} reservas.`:`✅ Imported: ${data.rows.length} bookings.`);
+  }catch(e){
+    errEl.textContent=LANG==="es"?"❌ JSON inválido. Revise el formato.":"❌ Invalid JSON. Check format.";
+    errEl.style.display="block";
+  }
+}
+function closeModal(id){ document.getElementById(id).classList.remove("open"); }
+function dlBlob(blob,name){ const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); }
 
-    const filtersTitle=document.getElementById("filtersTitle");
-    const lblSearch=document.getElementById("lblSearch");
-    const fSearch=document.getElementById("fSearch");
-    const lblStatus=document.getElementById("lblStatus");
-    const fStatus=document.getElementById("fStatus");
-    const optAll=document.getElementById("optAll");
-    const lblFrom=document.getElementById("lblFrom");
-    const fFrom=document.getElementById("fFrom");
-    const lblTo=document.getElementById("lblTo");
-    const fTo=document.getElementById("fTo");
+/* Close modal on bg click */
+document.querySelectorAll(".bl-modal-bg").forEach(bg=>{ bg.addEventListener("click",e=>{ if(e.target===bg) bg.classList.remove("open"); }); });
 
-    const thId=document.getElementById("thId");
-    const thName=document.getElementById("thName");
-    const thCountry=document.getElementById("thCountry");
-    const thPhone=document.getElementById("thPhone");
-    const thEmail=document.getElementById("thEmail");
-    const thRoom=document.getElementById("thRoom");
-    const thIn=document.getElementById("thIn");
-    const thOut=document.getElementById("thOut");
-    const thNights=document.getElementById("thNights");
-    const thSource=document.getElementById("thSource");
-    const thPrice=document.getElementById("thPrice");
-    const thTPYG=document.getElementById("thTPYG");
-    const thTUSD=document.getElementById("thTUSD");
-    const thPaid=document.getElementById("thPaid");
-    const thPayment=document.getElementById("thPayment");
-    const thStatus=document.getElementById("thStatus");
-    const thNotes=document.getElementById("thNotes");
-    const tip=document.getElementById("tip");
+/* ════════════════════════════════════════════
+   CLEAN PRINT VIEW
+═══════════════════════════════════════════ */
+function buildAndPrint(){
+  const T    = I18N[LANG];
+  const rate = usdRate();
+  const rows = filteredRows();
+  let nights=0, pyg=0, inhouse=0;
+  rows.forEach(r=>{ const n=nightsBetween(r.checkin,r.checkout); const p=Number(String(r.priceNightPYG||0).replace(/[^0-9]/g,""))||0; nights+=n; pyg+=n*p; if(r.status==="Checked-in") inhouse++; });
+  const usd=pyg/rate;
+  const now=new Date().toLocaleString(LANG==="es"?"es-PY":"en-US");
 
-    const tbody=document.getElementById("tbody");
-    const stats=document.getElementById("stats");
+  const trows = rows.map(r=>{
+    const n=nightsBetween(r.checkin,r.checkout);
+    const p=Number(String(r.priceNightPYG||0).replace(/[^0-9]/g,""))||0;
+    const tpyg=n*p; const tusd=tpyg/rate;
+    const stLabels={"Booked":"Booked","Checked-in":"✓ IN","Checked-out":"OUT","Cancelled":"✗"};
+    return `<tr>
+      <td>${esc(r.id)}</td>
+      <td><strong>${esc(r.name)}</strong></td>
+      <td>${esc(r.country)}</td>
+      <td>${esc(r.room)}</td>
+      <td>${esc(r.checkin)}</td>
+      <td>${esc(r.checkout)}</td>
+      <td style="text-align:right;">${n}</td>
+      <td style="text-align:right;">${fmtInt(tpyg)}</td>
+      <td style="text-align:right;">${fmtUSD(tusd)}</td>
+      <td>${esc(r.paid)}</td>
+      <td>${esc(stLabels[r.status]||r.status)}</td>
+      <td>${esc(r.notes)}</td>
+    </tr>`;
+  }).join("");
 
-    applyLabels();
-  </script>
+  const logoHTML = LOGO_URL ? `<img src="${LOGO_URL}" alt="Logo" style="height:30pt;"/>` : `<strong>${HOSTEL_NAME}</strong>`;
+
+  document.getElementById("blPrint").innerHTML = `
+    <div class="p-header">
+      <div class="p-logo">${logoHTML}</div>
+      <div>
+        <div class="p-title">${T.topTitle}</div>
+        <div class="p-meta">${HOSTEL_NAME} • ${CFG.ADDRESS_LINE1||""}, ${CFG.ADDRESS_LINE2||""} • ${now}</div>
+      </div>
+    </div>
+    <div class="p-stats">
+      <div class="p-stat"><b>${rows.length}</b><span>${T.statBookings}</span></div>
+      <div class="p-stat"><b>${inhouse}</b><span>${T.statInHouse}</span></div>
+      <div class="p-stat"><b>${nights}</b><span>${T.statNights}</span></div>
+      <div class="p-stat"><b>${fmtInt(pyg)} PYG</b><span>${T.statPYG}</span></div>
+      <div class="p-stat"><b>$${fmtUSD(usd)}</b><span>${T.statUSD}</span></div>
+    </div>
+    <table>
+      <thead><tr>
+        <th>${T.thId}</th><th>${T.thName}</th><th>${T.thCountry}</th>
+        <th>${T.thRoom}</th><th>${T.thIn}</th><th>${T.thOut}</th>
+        <th style="text-align:right">${T.thNights}</th>
+        <th style="text-align:right">${T.thTPYG}</th>
+        <th style="text-align:right">${T.thTUSD}</th>
+        <th>${T.thPaid}</th><th>${T.thStatus}</th><th>${T.thNotes}</th>
+      </tr></thead>
+      <tbody>${trows}</tbody>
+    </table>
+    <div class="p-footer">
+      <span>${HOSTEL_NAME} — ${CFG.EMAIL||""}</span>
+      <span>1 USD = ${fmtInt(rate)} PYG • Total: ${fmtInt(pyg)} PYG / $${fmtUSD(usd)} USD</span>
+    </div>`;
+
+  window.print();
+}
+
+/* ════════════════════════════════════════════
+   LABELS (i18n)
+═══════════════════════════════════════════ */
+function applyLabels(){
+  const T=I18N[LANG];
+  const set=(id,val)=>{ const el=document.getElementById(id); if(el) el.textContent=val; };
+  const setph=(id,val)=>{ const el=document.getElementById(id); if(el) el.placeholder=val; };
+
+  set("topTitle",T.topTitle); set("topSub",T.topSub);
+  set("btnPdf",T.btnPdf); set("btnCsv",T.btnCsv); set("btnBackup",T.btnBackup);
+  set("btnImport",T.btnImport); set("btnAdd",T.btnAdd); set("btnReset",T.btnReset);
+  set("lAll",T.lAll); set("lToday",T.lToday); set("lInhouse",T.lInhouse);
+  set("lDue",T.lDue); set("lCancelled",T.lCancelled);
+  set("lblSearch",T.lblSearch); setph("fSearch",T.placeholderSearch);
+  set("lblStatus",T.lblStatus); set("optAll",T.optAll);
+  set("lblFrom",T.lblFrom); set("lblTo",T.lblTo);
+  set("thId",T.thId); set("thName",T.thName); set("thCountry",T.thCountry);
+  set("thPhone",T.thPhone); set("thEmail",T.thEmail); set("thRoom",T.thRoom);
+  set("thIn",T.thIn); set("thOut",T.thOut); set("thNights",T.thNights);
+  set("thSource",T.thSource); set("thPrice",T.thPrice);
+  set("thTPYG",T.thTPYG); set("thTUSD",T.thTUSD);
+  set("thPaid",T.thPaid); set("thPayment",T.thPayment);
+  set("thStatus",T.thStatus); set("thNotes",T.thNotes);
+  set("lRate",T.lRate);
+  set("mBackupTitle",T.mBackupTitle); set("mBackupSub",T.mBackupSub);
+  set("mBtnCopy",T.mBtnCopy); set("mBtnDl",T.mBtnDl);
+  set("mImportTitle",T.mImportTitle); set("mImportSub",T.mImportSub);
+  set("mBtnFile",T.mBtnFile); set("mBtnImport",T.mBtnImport);
+  try{ localStorage.setItem(LANG_KEY,LANG); }catch(e){}
+  render();
+}
+
+window.toggleLang = function(){ LANG=(LANG==="es")?"en":"es"; applyLabels(); };
+
+/* ════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════ */
+applyLabels();
+setChip("all");
+</script>
 </body>
 </html>
