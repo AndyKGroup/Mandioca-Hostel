@@ -172,6 +172,7 @@
     <div class="actions print-hide">
       <button class="btn primary" type="button" onclick="buildAndPrint()">🖨️ <span id="lbl_btnPdf">Generar PDF</span></button>
       <button class="btn" type="button" onclick="copyWhatsApp()" id="lbl_btnWA">📋 WhatsApp</button>
+      <button class="btn" type="button" style="background:rgba(13,90,74,.12);border-color:rgba(13,90,74,.3);color:var(--mh-green);font-weight:900;" onclick="createInvoice()">📄 <span id="lbl_btnInv">Crear Factura</span></button>
       <button class="btn" type="button" onclick="doToggleLang()">ES / EN</button>
     </div>
   </div>
@@ -223,10 +224,10 @@
     <!-- SALUTATION / INTRO LETTER -->
     <div class="box">
       <div class="section-title" id="lbl_salut_sec">Saludo / Carta de presentación</div>
-      <div class="grid" style="margin-top:10px;">
-        <div>
+      <div class="row" style="margin-top:10px;gap:10px;">
+        <div style="min-width:160px;">
           <label id="lbl_salut_title">Tratamiento</label>
-          <select id="salutTitle">
+          <select id="salutTitle" style="width:160px;">
             <option>Sr.</option>
             <option>Sra.</option>
             <option>Sr./Sra.</option>
@@ -234,10 +235,7 @@
             <option>Dear</option>
           </select>
         </div>
-        <div>
-          <label id="lbl_salut_name">Nombre del destinatario</label>
-          <input id="salutName" placeholder="Nombre del cliente / contacto"/>
-        </div>
+
       </div>
       <div style="margin-top:10px;">
         <label id="lbl_intro">Texto introductorio (editable)</label>
@@ -405,6 +403,7 @@
       <div class="row print-hide" style="margin-top:12px;gap:10px;">
         <button class="btn primary" type="button" onclick="buildAndPrint()">🖨️ <span id="lbl_btnPdf2">PDF</span></button>
         <button class="btn" type="button" onclick="copyWhatsApp()">📋 <span id="lbl_btnCopy">Copiar</span></button>
+        <button class="btn" type="button" style="background:rgba(13,90,74,.12);border-color:rgba(13,90,74,.3);color:var(--mh-green);font-weight:900;margin-top:4px;width:100%;" onclick="createInvoice()">📄 <span id="lbl_btnInv2">Crear Factura →</span></button>
       </div>
     </div>
 
@@ -473,11 +472,11 @@ const T = {
     lbl_title:"Presupuesto de Reservación", lbl_sub:"Generador de Propuestas",
     lbl_h1:"Presupuesto de Reservación",
     lbl_h1sub:"Genera una propuesta con descuento, depósito y condiciones — PDF tipo carta.",
-    lbl_btnPdf:"Generar PDF", lbl_btnPdf2:"PDF", lbl_btnWA:"📋 WhatsApp", lbl_btnCopy:"Copiar",
+    lbl_btnPdf:"Generar PDF", lbl_btnPdf2:"PDF", lbl_btnWA:"📋 WhatsApp", lbl_btnCopy:"Copiar", lbl_btnInv:"Crear Factura", lbl_btnInv2:"Crear Factura →",
     lbl_head:"Encabezado", lbl_propno:"N° de presupuesto", lbl_date:"Fecha",
     lbl_validuntil:"Válido hasta", lbl_rate:"Tipo de cambio (1 USD = PYG)", lbl_showmode:"Mostrar precios",
     lbl_salut_sec:"Saludo / Carta de presentación",
-    lbl_salut_title:"Tratamiento", lbl_salut_name:"Nombre del destinatario",
+    lbl_salut_title:"Tratamiento", 
     lbl_intro:"Texto introductorio (editable)",
     lbl_client_sec:"Cliente / Organización",
     lbl_ct_person:"Persona", lbl_ct_company:"Empresa / Grupo",
@@ -500,7 +499,7 @@ const T = {
     lbl_kdisc:"Descuento", lbl_kextras:"Extras", lbl_ktotal:"TOTAL FINAL", lbl_kdep:"DEPÓSITO",
     lbl_ready:"WhatsApp / Email", lbl_valid_sec:"Validez",
     defaultIntro: (name) =>
-      `En base a su solicitud, nos complace presentarle el siguiente presupuesto de reservación para ${HOSTEL_NAME}.\n\nLos precios y condiciones indicados son negociables y están sujetos a disponibilidad.`,
+      `En base a su solicitud, nos complace presentarle el siguiente presupuesto de reservación para ${HOSTEL_NAME}.\n\nLos precios y condiciones están sujetos a disponibilidad.`,
     defaultClosing: (depPct, depAmt, depDate) =>
       `La reservación queda confirmada únicamente tras el pago y recepción de la seña/depósito del ${depPct}% (${depAmt} PYG${depDate ? ", antes del " + depDate : ""}).\n\nNos complace tenerle como huésped y quedamos a su disposición para cualquier consulta.\n\nCon gusto lo/la esperamos en ${HOSTEL_NAME}.`,
     salutLabel: "Estimado/a",
@@ -530,11 +529,11 @@ const T = {
     lbl_title:"Reservation Proposal", lbl_sub:"Proposal Generator",
     lbl_h1:"Reservation Proposal",
     lbl_h1sub:"Generate a proposal with discount, deposit and conditions — PDF as a letter.",
-    lbl_btnPdf:"Generate PDF", lbl_btnPdf2:"PDF", lbl_btnWA:"📋 WhatsApp", lbl_btnCopy:"Copy",
+    lbl_btnPdf:"Generate PDF", lbl_btnPdf2:"PDF", lbl_btnWA:"📋 WhatsApp", lbl_btnCopy:"Copy", lbl_btnInv:"Create Invoice", lbl_btnInv2:"Create Invoice →",
     lbl_head:"Header", lbl_propno:"Proposal No.", lbl_date:"Date",
     lbl_validuntil:"Valid until", lbl_rate:"Exchange rate (1 USD = PYG)", lbl_showmode:"Show prices",
     lbl_salut_sec:"Salutation / Cover letter",
-    lbl_salut_title:"Title", lbl_salut_name:"Recipient name",
+    lbl_salut_title:"Title", 
     lbl_intro:"Intro text (editable)",
     lbl_client_sec:"Client / Organization",
     lbl_ct_person:"Person", lbl_ct_company:"Company / Group",
@@ -557,7 +556,7 @@ const T = {
     lbl_kdisc:"Discount", lbl_kextras:"Extras", lbl_ktotal:"TOTAL", lbl_kdep:"DEPOSIT",
     lbl_ready:"WhatsApp / Email", lbl_valid_sec:"Validity",
     defaultIntro: (name) =>
-      `Based on your request, we are pleased to present the following reservation proposal for ${HOSTEL_NAME}.\n\nPrices and conditions are negotiable and subject to availability.`,
+      `Based on your request, we are pleased to present the following reservation proposal for ${HOSTEL_NAME}.\n\nPrices and conditions are subject to availability.`,
     defaultClosing: (depPct, depAmt, depDate) =>
       `The reservation will be CONFIRMED only upon receipt of the deposit (${depPct}%, ${depAmt} PYG${depDate ? ", before " + depDate : ""}).\n\nWe would be delighted to welcome you at ${HOSTEL_NAME} and remain at your disposal for any questions.`,
     salutLabel: "Dear",
@@ -767,7 +766,7 @@ function buildAndPrint(){
   const introTxt   = ($("introText").value||"").trim();
   const closingTxt = ($("closingText").value||"").trim();
   const salutTitle = $("salutTitle").value || "Sr./Sra.";
-  const salutName  = ($("salutName").value||"").trim();
+  const salutName  = (clientType==="company" ? ($("companyName").value||"").trim() : ($("clientName").value||"").trim()) || ($("salutName") ? ($("salutName").value||"").trim() : "");
 
   /* hostel block */
   const hostelLines = [
@@ -980,7 +979,7 @@ function applyLabels(){
   if(dt){ dt.options[0].text=lang==="es"?"Pasaporte":"Passport"; dt.options[1].text=lang==="es"?"Cédula/ID":"ID Card"; dt.options[2].text=lang==="es"?"Otro":"Other"; }
   // update intro textarea default only if not manually edited
   if(!introEdited){
-    const name = ($("clientName").value||$("companyName").value||$("salutName").value||"").trim();
+    const name = ($("clientName").value||$("companyName").value||"").trim();
     $("introText").value = Tl().defaultIntro(name);
   }
   if(!closingEdited){
@@ -1010,8 +1009,7 @@ window.toggleLang = doToggleLang;
 ═══════════════════════════════════ */
 const watchIds = [
   "propNo","propDate","propValid","usdRate","displayMode",
-  "salutTitle","salutName",
-  "clientName","clientContact","clientAddr","clientDocType","clientDocNo",
+  "salutTitle",  "clientName","clientContact","clientAddr","clientDocType","clientDocNo",
   "companyName","companyTaxId","companyAddr","companyContact",
   "stayIn","stayOut","stayNote","priceDay","numDays","discPct",
   "depositPct","depositDue","cancelUntil"
@@ -1041,6 +1039,121 @@ const watchIds = [
 
   applyLabels();
 })();
+
+/* ═══════════════════════════════════
+   CREATE INVOICE → InvoiceGenerator
+═══════════════════════════════════ */
+function createInvoice(){
+  const C  = calcNumbers();
+  const IS = lang === "es";
+
+  // Client info
+  const isCompany = clientType === "company";
+  const clientName    = isCompany ? ($("companyName").value||"").trim()   : ($("clientName").value||"").trim();
+  const clientContact = isCompany ? ($("companyContact").value||"").trim(): ($("clientContact").value||"").trim();
+  const clientAddr    = isCompany ? ($("companyAddr").value||"").trim()   : ($("clientAddr").value||"").trim();
+  const clientTaxId   = isCompany ? ($("companyTaxId").value||"").trim()  : ($("clientDocNo").value||"").trim();
+  const clientDocType = isCompany ? "other" : ($("clientDocType").value||"other");
+
+  // Billing text block for invoice
+  const clientBillLines = [
+    clientName,
+    clientAddr,
+    clientTaxId ? ((IS ? (clientDocType==="passport"?"Pasaporte":clientDocType==="id"?"Cédula/ID":"CUIT/RUC/Doc."
+                        : clientDocType==="passport"?"Passport":clientDocType==="id"?"ID Card":"Tax ID")
+                  ) + ": " + clientTaxId) : "",
+    clientContact
+  ].filter(Boolean).join("
+");
+
+  // Invoice number: PP-2026-001 → MH-INV-2026-001
+  const propNo   = ($("propNo").value||"PP-2026-001").trim();
+  const invNo    = propNo.replace(/^PP-/, "MH-INV-");
+  const today    = new Date();
+  const z        = n => String(n).padStart(2,"0");
+  const todayISO = `${today.getFullYear()}-${z(today.getMonth()+1)}-${z(today.getDate())}`;
+  const depositDue = $("depositDue").value || "";
+
+  // Room/description line
+  const stIn    = $("stayIn").value  || "";
+  const stOut   = $("stayOut").value || "";
+  const days    = Math.max(0, Math.round(num($("numDays").value)));
+  const stayNote= ($("stayNote").value||"").trim();
+  const roomDesc= stayNote
+    ? stayNote
+    : (IS ? `Alojamiento – ${days} día(s)` : `Accommodation – ${days} day(s)`);
+
+  // Items: one line = total final (discounted, no further breakdown)
+  // qty=1 × unit=totalPYG
+  const items = [{
+    desc: roomDesc,
+    qty:  1,
+    unit: C.totalPYG
+  }];
+
+  // Extras: already folded into totalPYG above — but we can pass them separately
+  // Actually: show base after discount as 1 line, then extras separately
+  const baseItem = {
+    desc: IS
+      ? `Alojamiento${stIn?" ("+stIn+" → "+stOut+")":""}${stayNote?" — "+stayNote:""}`
+      : `Accommodation${stIn?" ("+stIn+" → "+stOut+")":""}${stayNote?" — "+stayNote:""}`,
+    qty: 1,
+    unit: C.afterDisc
+  };
+  const extraItems = C.extrasData.map(e => ({
+    desc: e.d, qty: e.q, unit: e.u
+  }));
+
+  // Deposit section
+  const depPct = C.depPct;
+  const depPYG = C.depPYG;
+
+  // Note for invoice
+  const invNote = IS
+    ? `Pago parcial — depósito ${depPct}% de la reservación ${propNo}.
+Reservación confirmada al recibir el depósito.`
+    : `Partial payment — ${depPct}% deposit for reservation ${propNo}.
+Reservation confirmed upon receipt of deposit.`;
+
+  // Package everything into localStorage
+  const payload = {
+    invNo,
+    invDate:      todayISO,
+    invDue:       depositDue,
+    toName:       clientName,
+    clientBill:   clientBillLines,
+    clientDocType,
+    clientDocNo:  clientTaxId,
+    isCompany,
+    companyName:  isCompany ? clientName : "",
+    companyTaxId: isCompany ? clientTaxId : "",
+    usdRate:      String($("usdRate").value||"7300"),
+    displayMode:  $("displayMode").value,
+    roomDesc,
+    baseItem,
+    extraItems,
+    totalPYG:     C.totalPYG,
+    depPct,
+    depPYG,
+    depositDue,
+    cancelUntil:  $("cancelUntil").value || "",
+    propNo,
+    notes:        invNote,
+    payTransfer:  true,
+    lang
+  };
+
+  try{
+    localStorage.setItem("mh_proposal_prefill", JSON.stringify(payload));
+  } catch(e){
+    alert(IS?"Error al guardar datos. Abrir InvoiceGenerator manualmente.":"Error saving data. Please open InvoiceGenerator manually.");
+    return;
+  }
+
+  // Open InvoiceGenerator in new tab (or same tab)
+  window.open("InvoiceGenerator.html?from=proposal", "_blank");
+}
+
 </script>
 </body>
 </html>

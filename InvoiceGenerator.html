@@ -319,6 +319,26 @@
                 <label id="t_notes">Notas</label>
                 <textarea id="notes" rows="3" placeholder="Ej: Pago antes del check-in."></textarea>
               </div>
+
+              <!-- DEPOSIT SECTION (shown when coming from Proposal, or toggled manually) -->
+              <div id="depositSection" style="margin-top:14px;padding:12px 14px;border-radius:14px;border:1.5px solid rgba(13,90,74,.25);background:rgba(13,90,74,.06);">
+                <div class="section-title" id="t_dep_sec" style="margin-bottom:10px;">Depósito / Seña</div>
+                <div class="grid">
+                  <div>
+                    <label id="t_dep_pct">Depósito (%)</label>
+                    <input id="depPct" inputmode="decimal" value="0" style="font-weight:800;color:var(--mh-green);"/>
+                  </div>
+                  <div>
+                    <label id="t_dep_due">Vence / Due date</label>
+                    <input id="depDue" type="date"/>
+                  </div>
+                </div>
+                <div id="depCalcDisplay" style="margin-top:10px;padding:8px 12px;border-radius:11px;background:rgba(13,90,74,.1);font-weight:800;color:var(--mh-green);font-size:14px;display:none;"></div>
+                <div style="margin-top:8px;">
+                  <label id="t_dep_ref">Referencia de reserva (opcional)</label>
+                  <input id="depRef" placeholder="Ej: PP-2026-001"/>
+                </div>
+              </div>
             </div>
 
           </div><!-- /LEFT -->
@@ -678,6 +698,7 @@ function buildPrintView(){
 
   <div class="inv-totals">${totalsHTML}</div>
 
+  <!-- DEP_BOX -->
   <div class="inv-bottom">
     <div class="inv-bottom-box">
       <div class="inv-label">${lang==="es"?"Información de pago":"Payment information"}</div>
@@ -699,6 +720,29 @@ function buildPrintView(){
     <span>${CFG.EMAIL||"info@mandiocahostel.com"} — ${CFG.PHONE_DISPLAY||""}</span>
   </div>
 </div>`;
+
+  // Deposit box for print
+  const depPctPrint = Math.min(100,Math.max(0,num($("depPct").value)));
+  const depAmtPrint = Math.round(subtotalPYG * depPctPrint / 100);
+  const depDuePrint = $("depDue").value;
+  const depRefPrint = ($("depRef").value||"").trim();
+  const depUSDPrint = (rate>0) ? depAmtPrint/rate : 0;
+
+  let depBoxHTML = "";
+  if(depPctPrint > 0){
+    depBoxHTML = `
+      <div class="dep-invoice-box">
+        <div>
+          <div class="dib-label">${lang==="es"?"DEPÓSITO / SEÑA":"DEPOSIT / DOWN PAYMENT"} (${depPctPrint}%)</div>
+          ${depDuePrint ? `<div class="dib-sub">${lang==="es"?"Vence:":"Due:"} ${depDuePrint.split("-").reverse().join("/")}</div>` : ""}
+          ${depRefPrint ? `<div class="dib-sub">${lang==="es"?"Ref. reserva:":"Booking ref:"} ${esc(depRefPrint)}</div>` : ""}
+        </div>
+        <div class="dib-amount">${fmtInt(depAmtPrint)} PYG${mode!=="pyg"?"<br/><span style='font-size:10pt;'>$"+fmtUSD(depUSDPrint)+" USD</span>":""}</div>
+      </div>`;
+  }
+
+  // inject depBoxHTML before the bottom (conditions/notes) section
+  html = html.replace("<!-- DEP_BOX -->", depBoxHTML);
 
   $("invPrint").innerHTML = html;
 }
@@ -741,6 +785,7 @@ const TEXTS = {
     t_bankdata:"Datos bancarios del hostel", t_bank_name:"Banco",
     t_bank_acc:"N° de cuenta / CBU / IBAN", t_bank_holder:"Titular",
     t_bank_alias:"Alias / Referencia (opcional)", t_bank_extra:"Info extra (opcional)",
+    t_dep_sec:"Depósito / Seña", t_dep_pct:"Depósito (%)", t_dep_due:"Vence / Due date", t_dep_ref:"Ref. de reserva (opcional)",
     t_notes:"Notas", t_sum:"Resumen", k_sub:"Subtotal", k_subusd:"Subtotal (USD)",
     k_total:"TOTAL", k_totalusd:"TOTAL (USD)",
     t_ready:"Texto listo (WhatsApp / email)", t_payinfo:"Info de pago",
@@ -764,6 +809,7 @@ const TEXTS = {
     t_bankdata:"Hostel bank details", t_bank_name:"Bank",
     t_bank_acc:"Account No. / CBU / IBAN", t_bank_holder:"Account holder",
     t_bank_alias:"Alias / Reference (optional)", t_bank_extra:"Extra info (optional)",
+    t_dep_sec:"Deposit / Down payment", t_dep_pct:"Deposit (%)", t_dep_due:"Due date", t_dep_ref:"Booking reference (optional)",
     t_notes:"Notes", t_sum:"Summary", k_sub:"Subtotal", k_subusd:"Subtotal (USD)",
     k_total:"TOTAL", k_totalusd:"TOTAL (USD)",
     t_ready:"Ready text (WhatsApp / email)", t_payinfo:"Payment info",
@@ -815,8 +861,64 @@ function toggleLang(){
     "usdRate","displayMode","nightPrice","nights","room","notes",
     "payCash","payTransfer","payCard",
     "companyName","companyTaxId","companyAddr","companyContact",
+    "depPct","depDue","depRef",
     "bankName","bankAcc","bankHolder","bankAlias","bankExtra"];
   watchIds.forEach(id=>{ const el=$(id); if(el){ el.addEventListener("input",update); el.addEventListener("change",update); } });
+
+  // Pre-fill from Proposal (if opened via "Crear Factura")
+  try{
+    const raw = localStorage.getItem("mh_proposal_prefill");
+    if(raw && window.location.search.includes("from=proposal")){
+      const P = JSON.parse(raw);
+      localStorage.removeItem("mh_proposal_prefill");
+
+      if(P.invNo)       $("invNo").value       = P.invNo;
+      if(P.invDate)     $("invDate").value      = P.invDate;
+      if(P.invDue)      $("invDue").value       = P.invDue;
+      if(P.usdRate)     $("usdRate").value      = P.usdRate;
+      if(P.displayMode) $("displayMode").value  = P.displayMode;
+      if(P.notes)       $("notes").value        = P.notes;
+      if(P.depPct)      $("depPct").value       = P.depPct;
+      if(P.depositDue)  $("depDue").value       = P.depositDue;
+      if(P.propNo)      $("depRef").value       = P.propNo;
+      if(P.payTransfer){ $("payTransfer").checked=true; $("payCash").checked=false; }
+
+      // Client type
+      if(P.isCompany){
+        setClientType("company");
+        if(P.companyName)  $("companyName").value  = P.companyName;
+        if(P.companyTaxId) $("companyTaxId").value = P.companyTaxId;
+        if(P.clientBill)   $("companyAddr").value  = P.clientBill.split("\n").slice(1).join("\n");
+      } else {
+        setClientType("person");
+        if(P.toName)     $("toName").value       = P.toName;
+        if(P.clientBill) $("clientBill").value   = P.clientBill;
+        if(P.clientDocType) $("clientDocType").value = P.clientDocType;
+        if(P.clientDocNo)   $("clientDocNo").value   = P.clientDocNo;
+      }
+
+      // Items: clear auto row and set from proposal
+      const body = $("itemsBody");
+      body.innerHTML = "";
+      // Base item
+      if(P.baseItem){
+        const row = makeRow({auto:false, desc:P.baseItem.desc, qty:P.baseItem.qty||1, unit:P.baseItem.unit||0});
+        body.appendChild(row);
+      }
+      // Extra items
+      if(P.extraItems && P.extraItems.length){
+        P.extraItems.forEach(e=>{
+          const row = makeRow({auto:false, desc:e.desc, qty:e.qty||1, unit:e.unit||0});
+          body.appendChild(row);
+        });
+      }
+      ensureBase();
+
+      // Prefill bank from config
+      prefillBank();
+      update();
+    }
+  }catch(e){ console.warn("Prefill error:", e); }
 
   setTexts();
 })();
